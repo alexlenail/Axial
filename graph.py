@@ -230,7 +230,7 @@ def output_networkx_graph_as_interactive_html(nxgraph, attribute_metadata=dict()
     path.mkdir(exist_ok=True, parents=True)
     path = path / filename
 
-    html_output = templateEnv.get_template('viz.jinja').render(
+    html_output = templateEnv.get_template('graph.html.j2').render(
             graph_json=graph_json,
             nodes=nxgraph.nodes(),
             attributes=attribute_metadata)
