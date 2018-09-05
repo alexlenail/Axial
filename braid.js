@@ -270,8 +270,11 @@ function Braid(samples_by_genes_matrix, gene_sets, classes) {
         // Order Genes
         if (reordering && ordered_gene_wise.length > 1) {
 
-            if (sorting === 'complete') { permutation_order = reorder.optimal_leaf_order()(ordered_gene_wise.map(value_accessor)).reverse(); } // get dendogram out?
-            else if (sorting === 'pc1') { permutation_order = reorder.sort_order(genes_pc1); }
+            if (sorting === 'pc1') {
+                permutation_order = reorder.sort_order(genes_pc1);
+            } else if (sorting === 'complete') {
+                permutation_order = reorder.optimal_leaf_order()(ordered_gene_wise.map(value_accessor)).reverse();  // get dendogram out?
+            } else { console.log(' this should never happen '); }
 
             ordered_gene_wise = reorder.stablepermute(ordered_gene_wise, permutation_order);
 
@@ -743,11 +746,7 @@ function Braid(samples_by_genes_matrix, gene_sets, classes) {
 
     function wheeled() {
         current_transform = d3.zoomTransform(g);
-        if (d3.event.ctrlKey) {
-            current_transform.k = clamp(0.1, 5)(current_transform.k - d3.event.deltaY * 0.01);
-        } else {
-            current_transform.y = clamp(-(ordered_gene_ids.length*rect_height-100), h)(current_transform.y - d3.event.deltaY);
-        }
+        current_transform.y = clamp(-(axis_spacing*ordered_gene_wise.length-100) , 100)(current_transform.y - d3.event.deltaY);
         g.attr("transform", current_transform);
     }
 
