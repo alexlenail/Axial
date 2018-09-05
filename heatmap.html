@@ -1,0 +1,244 @@
+<!doctype html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta name="viewport" content="width=device-width, user-scalable=no">
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/awesomplete/1.1.2/awesomplete.css" />
+
+    <link rel="stylesheet" href="axial.css">
+
+    <style type="text/css">
+
+    </style>
+
+    <title>ABCD1-knockout transcriptome</title>
+
+</head>
+<body>
+
+    <div class="container-fluid">
+
+        <div class="row flex-nowrap">
+            <div class="col-md-4 col-12 menu">
+                <div class="card">
+                    <div class="card-header">
+                        <a class="pull-right" role="button"><i class="fa" id="hide-show"></i></a>
+                        <h1><a href="index.html" class="link-unstyled">Heatmap</a></h1>
+                        <p><a id="download" href="#">Download SVG</a></p>
+
+                        <nav>
+                            <div class="nav nav-tabs card-header-tabs" role="tablist">
+                                <a data-toggle="tab" role="tab" class="nav-item nav-link active" href="#geneset">Gene Sets</a>
+                                <a data-toggle="tab" role="tab" class="nav-item nav-link" href="#genes">Genes</a>
+                                <a data-toggle="tab" role="tab" class="nav-item nav-link" href="#structure">Structure</a>
+                                <a data-toggle="tab" role="tab" class="nav-item nav-link" href="#style">Style</a>
+                            </div>
+                        </nav>
+
+                    </div>
+                    <div class="tab-content">
+                        <div class="tab-pane card-body fade show active" id="geneset" role="tabpanel">
+                            <textarea class="form-control" id="chooseGeneSet" placeholder="Choose Gene Sets..."></textarea>
+                        </div>
+
+
+                        <div class="tab-pane card-body fade" id="genes" role="tabpanel">
+                            <div contenteditable="true" class="form-control" id="chooseGenes" placeholder="Choose Genes..."></div>
+                        </div>
+
+
+                        <div class="tab-pane card-body fade" id="structure" role="tabpanel">
+                            <div><input type="checkbox" id="reordering" value="reordering" checked><label> Reset Gene Order on each change. </label></div>
+
+                            <br>
+                            <div>
+                                <label style="display: inline" for="minimum_nonzero">Only Show a Gene if at least <span id="X">0</span> samples have a non-zero value.</label>
+                                <input type="range" id="minimum_nonzero" name="" min="0" max="10" step="1" value="0" style="position: relative; top: 3px; display: inline" onchange="$('#X').text(this.value)">
+                            </div>
+
+                            <br>
+                            <div id="values">
+                                <label>Show Gene Values of</label>
+                                <div class="form-check"><input class="form-check-input" type="radio" name="values" value="counts" checked> Normalized Counts</div>
+                                <div class="form-check"><input class="form-check-input" type="radio" name="values" value="zscore_stddev"> Z-Scores (Standard Deviations)</div>
+                                <div class="form-check"><input class="form-check-input" type="radio" name="values" value="zscore_mad"> Z-Scores (Mean Absolute Deviation)</div>
+                            </div>
+
+                            <br>
+                            <div id="sorting">
+                                <label>Sort Genes by</label>
+                                <div class="form-check"><input class="form-check-input" type="radio" name="sorting" value="complete" checked> Complete-Linkage Hierarchical Clustering and Optimal Leaf Ordering</div>
+                                <div class="form-check"><input class="form-check-input" type="radio" name="sorting" value="pc1"> Principal Component 1 of genes in sample space</div>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane card-body fade" id="style" role="tabpanel">
+                            <div><input type="checkbox" id="show_legends" value="show_legends"><label> Show legends </label></div>
+
+                            <br>
+                            Along <input type="color" value="#0000cc" id="negative_color"> <input type="color" value="#c0c0c0" id="middle_color"> <input type="color" value="#cc0000" id="positive_color">
+
+                            <br>
+                            <div id="sampleLabels">
+                                <label>Sample Labels</label>
+                                <div class="form-check form-check-inline"><input class="form-check-input" type="radio" name="sampleLabels" id="before" value="before"> before</div>
+                                <div class="form-check form-check-inline"><input class="form-check-input" type="radio" name="sampleLabels" id="after" value="after" checked> after</div>
+                            </div>
+
+                            <br>
+                            <div id="geneLabels">
+                                <label>Gene Labels</label>
+                                <div class="form-check form-check-inline"><input class="form-check-input" type="radio" name="geneLabels" id="before" value="before" checked> before</div>
+                                <div class="form-check form-check-inline"><input class="form-check-input" type="radio" name="geneLabels" id="after" value="after"> after</div>
+                            </div>
+
+                            <div>
+                                <b><label for="cell_width">Cell Width</label></b>
+                                <input type="range" id="cell_width" name="" min="1" max="60" step="0.1" value="16">
+                            </div>
+
+                            <div>
+                                <b><label for="cell_height">Cell Height</label></b>
+                                <input type="range" id="cell_height" name="" min="1" max="60" step="0.1" value="16">
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <div id="graph-container" class="col-md col-12"></div>
+
+        </div>
+    </div>
+
+
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+    <script type="text/javascript" src="https://d3js.org/d3.v5.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.25.6/d3-legend.min.js"></script>
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/awesomplete/1.1.2/awesomplete.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.9.1/underscore-min.js"></script>
+
+    <script type="text/javascript" src="reorder.js"></script>
+    <script type="text/javascript" src="heatmap.js"></script>
+    <script type="text/javascript" src="data/mouse_human_lee_merged_counts.js"></script>
+    <script type="text/javascript" src="data/human_gene_sets.js"></script>
+    <script type="text/javascript" src="data/mouse_human_lee_merged_classes.js"></script>
+
+    <script type="text/javascript">
+
+class_categories = _.uniq(_.flatten(Object.values(mouse_human_lee_merged_classes).map(obj => Object.keys(obj))));
+if (class_categories.length === 0) { $(".form-check-input[value='class']").remove(); }
+else {
+    class_categories.forEach(function(key) {
+        $(".category").append($("<option></option>").attr("value", key.toString().replace(/\W/g,'')).text(key.toString()));
+    });
+}
+
+$("#minimum_nonzero").attr('max', Object.keys(mouse_human_lee_merged_counts).length);
+
+separate_by = ['system'];
+
+
+heatmap = Heatmap(mouse_human_lee_merged_counts, human_gene_sets, mouse_human_lee_merged_classes, separate_by);
+
+
+let equal = (a1, a2) => a1.length === a2.length && a1.every((value, i) => value === a2[i]);
+
+
+/////////////////////////////////////////////////////////////////////////////
+             ///////    Select Gene Set / Genes   ///////
+/////////////////////////////////////////////////////////////////////////////
+
+var chooseGeneSet = document.getElementById("chooseGeneSet");
+var chooseGeneSetform = new Awesomplete(chooseGeneSet, {
+    list: Object.entries(human_gene_sets),
+    maxItems: 30,
+    filter: function(text, input) { return Awesomplete.FILTER_CONTAINS(text, input.match(/[^,]*$/)[0]); },
+    item: function(text, input) { return Awesomplete.ITEM(text, input.match(/[^,]*$/)[0]); },
+    replace: function(text) {
+        var before = this.input.value.match(/^.+,\s*|/)[0];
+        this.input.value = before + text + ", ";
+    }
+
+});
+
+chooseGenes = $('#chooseGenes');
+function refresh_genes() { chooseGenes.text(heatmap.get_sorted_gene_list().join(", ")); }
+
+selected_gene_sets = {'selected_gene_sets':[], 'other_genes':[]}
+
+chooseGeneSet.addEventListener('awesomplete-selectcomplete', function(e) {
+    selected_gene_set_name = e.text.label;
+    selected_genes = e.text.value;
+    selected_gene_set = {'gene_set_name':selected_gene_set_name, 'genes':selected_genes};
+    selected_gene_sets['selected_gene_sets'].push(selected_gene_set);
+    heatmap.restart({'selected_gene_sets_':selected_gene_sets});
+    refresh_genes();
+});
+
+$('#chooseGeneSet').change(function () {
+    keys = this.value.split(',').map(s => s.trim()).filter(s => s);
+    selected_gene_sets['selected_gene_sets'] = selected_gene_sets['selected_gene_sets'].filter(gs => keys.includes(gs['gene_set_name']));
+    heatmap.restart({'selected_gene_sets_':selected_gene_sets});
+});
+
+function manual_gene_list_edit(e) {
+    new_list = $(this).text().split(/[\s,;\t\n]+/).filter(n => n);
+    if (!equal(new_list, heatmap.get_sorted_gene_list())) {
+
+        // selected_gene_sets {'selected_gene_sets':[{'gene_set_name': 'Genes', 'genes': new_list}]}  // some sort of arithmetic goes here
+
+        heatmap.restart({'selected_gene_sets_':selected_gene_sets});
+        refresh_genes();
+    }
+}
+manual_gene_list_edit_debounced = _.debounce(manual_gene_list_edit, 1000)
+chooseGenes.on('input', manual_gene_list_edit_debounced);
+
+// d3.on("drag", refresh_genes());
+
+/////////////////////////////////////////////////////////////////////////////
+                 ///////    Style Figure    ///////
+/////////////////////////////////////////////////////////////////////////////
+
+$("#reordering").change(                        function () { heatmap.set_reordering(this.checked) });
+$("#minimum_nonzero").change(                   function () { heatmap.order({'minimum_nonzero_': parseInt(this.value)}); heatmap.render(); refresh_genes(); });
+$("#values input:radio").change(                function () { heatmap.order({'values_': this.value}); heatmap.render(); refresh_genes(); });
+$("#sorting input:radio").change(               function () { heatmap.order({'sorting_': this.value}); heatmap.render(); refresh_genes(); });
+
+$("#show_legends").change(                      function () { heatmap.style({'show_legends_': this.checked}) });
+$("#negative_color").change(                    function () { heatmap.style({'negative_color_': this.value}) });
+$("#middle_color").change(                      function () { heatmap.style({'middle_color_': this.value}) });
+$("#positive_color").change(                    function () { heatmap.style({'positive_color_': this.value}) });
+
+
+/////////////////////////////////////////////////////////////////////////////
+                 ///////    Download SVG    ///////
+/////////////////////////////////////////////////////////////////////////////
+
+d3.select("#download").on("click", function() {
+
+    d3.select(this)
+      .attr("href", 'data:application/octet-stream;base64,' + btoa(unescape(encodeURIComponent(d3.select("#graph-container").html()))))
+      .attr("download", "plot.svg")
+})
+
+$('#hide-show').click(function(e) { $('.go-picker').toggleClass('hidden'); });
+
+
+    </script>
+
+</body>
+
+</html>

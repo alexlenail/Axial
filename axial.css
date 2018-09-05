@@ -1,0 +1,86 @@
+
+
+h1 { font-weight: 100; }
+#graph-container {
+    transition: 0.4s transform ease-out;
+}
+.dark { background-color: #d8d8d8; }
+.invert { filter: invert(100%); }
+
+.menu {
+    max-width: 390px;
+    min-width: 390px;
+    transition: 0.4s transform ease-out;
+
+}
+.col-12 {
+    margin: 0px;
+    padding: 0px;
+}
+.card {
+    min-height: 100vh;
+    border-radius: 0;
+}
+
+.menu.hidden {
+    transform: translate(-330px);
+}
+.menu.hidden + #graph-container {
+    transform: translate(-330px);
+}
+
+.fa:before {
+    font-size: 2rem;
+    color: black;
+    content: "\f104";
+    position: relative;
+    transform: rotate(90deg);
+}
+.fa {
+    padding: 0.8rem;
+    transition: 0.4s transform ease-in-out;
+}
+.hidden .fa {
+    transform: rotate(180deg);
+}
+
+.awesomplete {
+    display: block !important;
+}
+.link-unstyled, .link-unstyled:link {
+    color: inherit;
+    text-decoration: inherit;
+}
+.link-unstyled:hover {
+    text-decoration: inherit;
+}
+label {
+    margin-bottom: 0px;
+}
+b {
+    font-weight: 600;
+}
+input[type="checkbox"] {
+    margin-right: 5px;
+    position: relative;
+    top: -2px;
+}
+
+input[type="range"] {
+    position: relative;
+    top: 3px;
+}
+input[type="radio"][disabled] + label {
+    opacity: 0.3;
+
+}
+[contenteditable=true]:empty:before {
+    content: attr(placeholder);
+    display: block; /* For Firefox */
+}
+
+.axis line, .grid line {
+    shape-rendering: crispEdges;
+}
+
+

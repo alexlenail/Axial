@@ -1,0 +1,1 @@
+var human_classes = {"Human_ABCD1_1": {"condition": "ABCD1"}, "Human_ABCD1_2": {"condition": "ABCD1"}, "Human_ABCD1_3": {"condition": "ABCD1"}, "Human_NT_1": {"condition": "NT"}, "Human_NT_2": {"condition": "NT"}, "Human_NT_3": {"condition": "NT"}};
