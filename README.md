@@ -58,3 +58,10 @@ pip install axial
 ### AxialR
 
 Unstarted.
+
+
+## Develop
+
+```
+python -m http.server
+```
