@@ -1,205 +1,182 @@
-<!doctype html>
-<html xmlns="http://www.w3.org/1999/xhtml">
+{% extends 'base.html.j2' %}
 
-<head>
-    <meta name="viewport" content="width=device-width, user-scalable=no">
-    <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+{% block head %}
+<title>Axial Heatmap</title>
+{% endblock %}
 
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/awesomplete/1.1.2/awesomplete.css" />
+{% block content %}
 
-    <link rel="stylesheet" href="../../css/axial.css">
+<div class="row flex-nowrap">
+    <div class="col-md-4 col-12 menu">
+        <div class="card">
+            <div class="card-header">
+                <a class="pull-right" role="button"><i class="fa" id="hide-show"></i></a>
+                <h1><a href="index.html" class="link-unstyled">Heatmap</a></h1>
+                <p><a id="download" href="#">Download SVG</a></p>
 
-    <style type="text/css">
-
-    </style>
-
-    <title>ABCD1-knockout transcriptome</title>
-
-</head>
-<body>
-
-    <div class="container-fluid">
-
-        <div class="row flex-nowrap">
-            <div class="col-md-4 col-12 menu">
-                <div class="card">
-                    <div class="card-header">
-                        <a class="pull-right" role="button"><i class="fa" id="hide-show"></i></a>
-                        <h1><a href="index.html" class="link-unstyled">Heatmap</a></h1>
-                        <p><a id="download" href="#">Download SVG</a></p>
-
-                        <nav>
-                            <div class="nav nav-tabs card-header-tabs" role="tablist">
-                                <a data-toggle="tab" role="tab" class="nav-item nav-link active" href="#geneset">Gene Sets</a>
-                                <a data-toggle="tab" role="tab" class="nav-item nav-link" href="#genes">Genes</a>
-                                <a data-toggle="tab" role="tab" class="nav-item nav-link" href="#structure">Structure</a>
-                                <a data-toggle="tab" role="tab" class="nav-item nav-link" href="#style">Style</a>
-                            </div>
-                        </nav>
-
+                <nav>
+                    <div class="nav nav-tabs card-header-tabs" role="tablist">
+                        <a data-toggle="tab" role="tab" class="nav-item nav-link active" href="#geneset">Gene Sets</a>
+                        <a data-toggle="tab" role="tab" class="nav-item nav-link" href="#genes">Genes</a>
+                        <a data-toggle="tab" role="tab" class="nav-item nav-link" href="#structure">Structure</a>
+                        <a data-toggle="tab" role="tab" class="nav-item nav-link" href="#style">Style</a>
                     </div>
-                    <div class="tab-content">
-                        <div class="tab-pane card-body fade show active" id="geneset" role="tabpanel">
-                            <textarea class="form-control" id="chooseGeneSets" placeholder="Choose Gene Sets..."></textarea>
-                        </div>
+                </nav>
 
-
-                        <div class="tab-pane card-body fade" id="genes" role="tabpanel">
-                            <div contenteditable="true" class="form-control" id="chooseGenes" placeholder="Choose Genes..."></div>
-                        </div>
-
-
-                        <div class="tab-pane card-body fade" id="structure" role="tabpanel">
-                            <div><input type="checkbox" id="reordering" value="reordering" checked><label for="reordering"> Reset Gene Order on each change. </label></div>
-
-                            <br>
-                            <div id="values">
-                                <b><label>Show Gene Values of</label></b>
-                                <div class="form-check"><input class="form-check-input" type="radio" name="values" value="logcount">log₁₀ Original Counts</div>
-                                <div class="form-check"><input class="form-check-input" type="radio" name="values" value="zscore_stddev" checked> Z-Scores (Standard Deviations)</div>
-                                <div class="form-check"><input class="form-check-input" type="radio" name="values" value="zscore_mad"> Z-Scores (Mean Absolute Deviation)</div>
-                            </div>
-
-                            <br>
-                            <div id="sorting">
-                                <b><label>Sort Genes by</label></b>
-                                <div class="form-check"><input class="form-check-input" type="radio" name="sorting" value="complete" checked> Complete-Linkage Hierarchical Clustering and Optimal Leaf Ordering</div>
-                                <div id="distance" class="ml-3">
-                                    <label>Measure distance by</label>
-                                    <div class="form-check"><input class="form-check-input" type="radio" name="distance" value="euclidian" id="euclidian" checked><label>Euclidian</label></div>
-                                    <div class="form-check"><input class="form-check-input" type="radio" name="distance" value="pearson" disabled><label>Pearson</label></div>
-                                    <div class="form-check"><input class="form-check-input" type="radio" name="distance" value="spearman_rank" disabled><label>Spearman Rank</label></div>
-                                    <div class="form-check"><input class="form-check-input" type="radio" name="distance" value="kendall_tau" disabled><label>Kendall's tau</label></div>
-                                    <div class="form-check"><input class="form-check-input" type="radio" name="distance" value="manhattan" disabled><label>Manhattan</label></div>
-                                </div>
-                                <div class="form-check"><input class="form-check-input" type="radio" name="sorting" value="pc1"> Principal Component 1 of genes in sample space</div>
-                            </div>
-
-                            <br>
-                            <label>Use the Backspace key to remove samples, groups, genes, and gene sets.</label>
-                            <br>
-                            <label>Press ⌘ and click a gene symbol to open GeneCards.</label>
-
-
-                        </div>
-
-                        <div class="tab-pane card-body fade" id="style" role="tabpanel">
-                            <b><label>Legends</label></b>
-                            <div><input type="checkbox" id="show_sample_metadata" value="show_sample_metadata" checked><label> Show Sample Metadata Text </label></div>
-                            <div><input type="checkbox" id="show_legends" value="show_legends"><label> Show legends </label></div>
-                            <div id="leg_pos">
-                                <label>Legends Position</label><br>
-                                <div class="form-check" style="display: inline; margin-right: 5px;"><input class="form-check-input" type="radio" name="legends_position" id="legend_left" value="left" disabled><label>Left</label></div>
-                                <div class="form-check" style="display: inline; margin-right: 5px;"><input class="form-check-input" type="radio" name="legends_position" id="legend_right" value="right" checked disabled><label>Right</label></div>
-                                <div class="form-check" style="display: inline; margin-right: 5px;"><input class="form-check-input" type="radio" name="legends_position" id="legend_above" value="above" disabled><label>Above</label></div>
-                                <div class="form-check" style="display: inline; margin-right: 5px;"><input class="form-check-input" type="radio" name="legends_position" id="legend_below" value="below" disabled><label>Below</label></div>
-                            </div>
-                            <div><input type="checkbox" id="darker_legends" value="darker_legends" disabled><label> Boldface Legends </label></div>
-
-
-                            <br>
-                            <div id="colors">
-                                <b><label>Cell Colors</label></b>
-                                <div class="form-check"><input class="form-check-input" type="radio" name="colors" id="Triplet" value="interpolateTriplet" checked> along <input type="color" value="#0000cc" id="negative_color"> <input type="color" value="#c0c0c0" id="middle_color"> <input type="color" value="#cc0000" id="positive_color"></div>
-                                <div class="form-check"><input class="form-check-input" type="radio" name="colors" id="Viridis" value="interpolateViridis"> Viridis</div>
-                                <div class="form-check"><input class="form-check-input" type="radio" name="colors" id="Magma" value="interpolateMagma"> Magma</div>
-                            </div>
-
-                            <br>
-                            <b><label>Spacing</label></b>
-                            <div>
-                                <label for="cell_spacing">Cell Spacing</label>
-                                <input type="range" id="cell_spacing" name="cell_spacing" min="0" max="2" step="0.01" value="1" style="position: relative; top: 3px; display: inline">
-                            </div>
-                            <div>
-                                <label for="gene_set_spacing">Gene Set Spacing</label>
-                                <input type="range" id="gene_set_spacing" name="gene_set_spacing" min="0" max="40" step="1" value="10" style="position: relative; top: 3px; display: inline">
-                            </div>
-                            <div>
-                                <label for="metadata_spacing">Metadata Spacing</label><br>
-                                <select class="category" id="category_spacing" onchange="$('#metadata_spacing').val(metadata_spacing[this.value])"></select>
-                                <input type="range" id="metadata_spacing" name="metadata_spacing" min="0" max="40" step="1" value="0" style="position: relative; top: 3px; display: inline">
-                            </div>
-
-                            <br>
-                            <b><label>Positions</label></b>
-                            <div id="x_labels">
-                                <label>X-Axis Labels</label>
-                                <div class="form-check form-check-inline"><input class="form-check-input" type="radio" name="x_labels" id="before" value="before"> before</div>
-                                <div class="form-check form-check-inline"><input class="form-check-input" type="radio" name="x_labels" id="after" value="after" checked> after</div>
-                            </div>
-                            <div id="x_meta">
-                                <label>X-Axis Metadata</label>
-                                <div class="form-check form-check-inline"><input class="form-check-input" type="radio" name="x_meta" id="before" value="before" checked> before</div>
-                                <div class="form-check form-check-inline"><input class="form-check-input" type="radio" name="x_meta" id="after" value="after"> after</div>
-                            </div>
-                            <div id="x_style">
-                                <label>X-Axis Style</label>
-                                <div class="form-check form-check-inline"><input class="form-check-input" type="radio" name="x_style" id="genes" value="genes"> Meta > Label</div>
-                                <div class="form-check form-check-inline"><input class="form-check-input" type="radio" name="x_style" id="samples" value="samples" checked> Label > Meta</div>
-                            </div>
-                            <div>
-                                <input type="checkbox" id="show_x_level_names" value="show_x_level_names" checked><label> Show X-Axis level names </label>
-                            </div>
-                            <div>
-                                <label style="display: inline" for="rotation">X-Axis Label rotation  60</label>
-                                <input type="range" id="rotation" name="rotation" min="60" max="90" step="1" value="60" style="position: relative; top: 3px; display: inline">
-                                <label style="display: inline">90</label>
-                            </div>
-
-
-                            <br>
-                            <div id="y_labels">
-                                <label>Y-Axis Labels</label>
-                                <div class="form-check form-check-inline"><input class="form-check-input" type="radio" name="y_labels" id="before" value="before" checked> before</div>
-                                <div class="form-check form-check-inline"><input class="form-check-input" type="radio" name="y_labels" id="after" value="after"> after</div>
-                            </div>
-                            <div id="y_meta">
-                                <label>Y-Axis Metadata</label>
-                                <div class="form-check form-check-inline"><input class="form-check-input" type="radio" name="y_meta" id="before" value="before" checked> before</div>
-                                <div class="form-check form-check-inline"><input class="form-check-input" type="radio" name="y_meta" id="after" value="after"> after</div>
-                            </div>
-                            <div id="y_style">
-                                <label>Y-Axis Style</label>
-                                <div class="form-check form-check-inline"><input class="form-check-input" type="radio" name="y_style" id="genes" value="genes" checked> Meta > Label</div>
-                                <div class="form-check form-check-inline"><input class="form-check-input" type="radio" name="y_style" id="samples" value="samples"> Label > Meta</div>
-                            </div>
-                            <div><input type="checkbox" id="show_y_level_names" value="show_y_level_names" checked><label> Show Y-Axis level names </label></div>
-
-                            <br>
-                            <button type="button" class="btn btn-outline-secondary btn-sm" id="transpose">Transpose</button>
-
-                            <br>
-                            <br>
-                            <label>Drag the corners of the heatmap to resize.</label>
-                            <br>
-                            <label>Drag items to change their order.</label>
-                            <br>
-                            <label>Pinch or scroll with the control key to zoom.</label>
-
-                        </div>
-
-                    </div>
-                </div>
             </div>
+            <div class="tab-content">
+                <div class="tab-pane card-body fade show active" id="geneset" role="tabpanel">
+                    <textarea class="form-control" id="chooseGeneSets" placeholder="Choose Gene Sets..."></textarea>
+                </div>
 
-            <div id="graph-container" class="col-md col-12"></div>
 
+                <div class="tab-pane card-body fade" id="genes" role="tabpanel">
+                    <div contenteditable="true" class="form-control" id="chooseGenes" placeholder="Choose Genes..."></div>
+                </div>
+
+
+                <div class="tab-pane card-body fade" id="structure" role="tabpanel">
+                    <div><input type="checkbox" id="reordering" value="reordering" checked><label for="reordering"> Reset Gene Order on each change. </label></div>
+
+                    <br>
+                    <div id="values">
+                        <b><label>Show Gene Values of</label></b>
+                        <div class="form-check"><input class="form-check-input" type="radio" name="values" value="logcount">log₁₀ Original Counts</div>
+                        <div class="form-check"><input class="form-check-input" type="radio" name="values" value="zscore_stddev" checked> Z-Scores (Standard Deviations)</div>
+                        <div class="form-check"><input class="form-check-input" type="radio" name="values" value="zscore_mad"> Z-Scores (Mean Absolute Deviation)</div>
+                    </div>
+
+                    <br>
+                    <div id="sorting">
+                        <b><label>Sort Genes by</label></b>
+                        <div class="form-check"><input class="form-check-input" type="radio" name="sorting" value="complete" checked> Complete-Linkage Hierarchical Clustering and Optimal Leaf Ordering</div>
+                        <div id="distance" class="ml-3">
+                            <label>Measure distance by</label>
+                            <div class="form-check"><input class="form-check-input" type="radio" name="distance" value="euclidian" id="euclidian" checked><label>Euclidian</label></div>
+                            <div class="form-check"><input class="form-check-input" type="radio" name="distance" value="pearson" disabled><label>Pearson</label></div>
+                            <div class="form-check"><input class="form-check-input" type="radio" name="distance" value="spearman_rank" disabled><label>Spearman Rank</label></div>
+                            <div class="form-check"><input class="form-check-input" type="radio" name="distance" value="kendall_tau" disabled><label>Kendall's tau</label></div>
+                            <div class="form-check"><input class="form-check-input" type="radio" name="distance" value="manhattan" disabled><label>Manhattan</label></div>
+                        </div>
+                        <div class="form-check"><input class="form-check-input" type="radio" name="sorting" value="pc1"> Principal Component 1 of genes in sample space</div>
+                    </div>
+
+                    <br>
+                    <label>Use the Backspace key to remove samples, groups, genes, and gene sets.</label>
+                    <br>
+                    <label>Press ⌘ and click a gene symbol to open GeneCards.</label>
+
+
+                </div>
+
+                <div class="tab-pane card-body fade" id="style" role="tabpanel">
+                    <b><label>Legends</label></b>
+                    <div><input type="checkbox" id="show_sample_metadata" value="show_sample_metadata" checked><label> Show Sample Metadata Text </label></div>
+                    <div><input type="checkbox" id="show_legends" value="show_legends"><label> Show legends </label></div>
+                    <div id="leg_pos">
+                        <label>Legends Position</label><br>
+                        <div class="form-check" style="display: inline; margin-right: 5px;"><input class="form-check-input" type="radio" name="legends_position" id="legend_left" value="left" disabled><label>Left</label></div>
+                        <div class="form-check" style="display: inline; margin-right: 5px;"><input class="form-check-input" type="radio" name="legends_position" id="legend_right" value="right" checked disabled><label>Right</label></div>
+                        <div class="form-check" style="display: inline; margin-right: 5px;"><input class="form-check-input" type="radio" name="legends_position" id="legend_above" value="above" disabled><label>Above</label></div>
+                        <div class="form-check" style="display: inline; margin-right: 5px;"><input class="form-check-input" type="radio" name="legends_position" id="legend_below" value="below" disabled><label>Below</label></div>
+                    </div>
+                    <div><input type="checkbox" id="darker_legends" value="darker_legends" disabled><label> Boldface Legends </label></div>
+
+
+                    <br>
+                    <div id="colors">
+                        <b><label>Cell Colors</label></b>
+                        <div class="form-check"><input class="form-check-input" type="radio" name="colors" id="Triplet" value="interpolateTriplet" checked> along <input type="color" value="#0000cc" id="negative_color"> <input type="color" value="#c0c0c0" id="middle_color"> <input type="color" value="#cc0000" id="positive_color"></div>
+                        <div class="form-check"><input class="form-check-input" type="radio" name="colors" id="Viridis" value="interpolateViridis"> Viridis</div>
+                        <div class="form-check"><input class="form-check-input" type="radio" name="colors" id="Magma" value="interpolateMagma"> Magma</div>
+                    </div>
+
+                    <br>
+                    <b><label>Spacing</label></b>
+                    <div>
+                        <label for="cell_spacing">Cell Spacing</label>
+                        <input type="range" id="cell_spacing" name="cell_spacing" min="0" max="2" step="0.01" value="1" style="position: relative; top: 3px; display: inline">
+                    </div>
+                    <div>
+                        <label for="gene_set_spacing">Gene Set Spacing</label>
+                        <input type="range" id="gene_set_spacing" name="gene_set_spacing" min="0" max="40" step="1" value="10" style="position: relative; top: 3px; display: inline">
+                    </div>
+                    <div>
+                        <label for="metadata_spacing">Metadata Spacing</label><br>
+                        <select class="category" id="category_spacing" onchange="$('#metadata_spacing').val(metadata_spacing[this.value])"></select>
+                        <input type="range" id="metadata_spacing" name="metadata_spacing" min="0" max="40" step="1" value="0" style="position: relative; top: 3px; display: inline">
+                    </div>
+
+                    <br>
+                    <b><label>Positions</label></b>
+                    <div id="x_labels">
+                        <label>X-Axis Labels</label>
+                        <div class="form-check form-check-inline"><input class="form-check-input" type="radio" name="x_labels" id="before" value="before"> before</div>
+                        <div class="form-check form-check-inline"><input class="form-check-input" type="radio" name="x_labels" id="after" value="after" checked> after</div>
+                    </div>
+                    <div id="x_meta">
+                        <label>X-Axis Metadata</label>
+                        <div class="form-check form-check-inline"><input class="form-check-input" type="radio" name="x_meta" id="before" value="before" checked> before</div>
+                        <div class="form-check form-check-inline"><input class="form-check-input" type="radio" name="x_meta" id="after" value="after"> after</div>
+                    </div>
+                    <div id="x_style">
+                        <label>X-Axis Style</label>
+                        <div class="form-check form-check-inline"><input class="form-check-input" type="radio" name="x_style" id="genes" value="genes"> Meta > Label</div>
+                        <div class="form-check form-check-inline"><input class="form-check-input" type="radio" name="x_style" id="samples" value="samples" checked> Label > Meta</div>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="show_x_level_names" value="show_x_level_names" checked><label> Show X-Axis level names </label>
+                    </div>
+                    <div>
+                        <label style="display: inline" for="rotation">X-Axis Label rotation  60</label>
+                        <input type="range" id="rotation" name="rotation" min="60" max="90" step="1" value="60" style="position: relative; top: 3px; display: inline">
+                        <label style="display: inline">90</label>
+                    </div>
+
+
+                    <br>
+                    <div id="y_labels">
+                        <label>Y-Axis Labels</label>
+                        <div class="form-check form-check-inline"><input class="form-check-input" type="radio" name="y_labels" id="before" value="before" checked> before</div>
+                        <div class="form-check form-check-inline"><input class="form-check-input" type="radio" name="y_labels" id="after" value="after"> after</div>
+                    </div>
+                    <div id="y_meta">
+                        <label>Y-Axis Metadata</label>
+                        <div class="form-check form-check-inline"><input class="form-check-input" type="radio" name="y_meta" id="before" value="before" checked> before</div>
+                        <div class="form-check form-check-inline"><input class="form-check-input" type="radio" name="y_meta" id="after" value="after"> after</div>
+                    </div>
+                    <div id="y_style">
+                        <label>Y-Axis Style</label>
+                        <div class="form-check form-check-inline"><input class="form-check-input" type="radio" name="y_style" id="genes" value="genes" checked> Meta > Label</div>
+                        <div class="form-check form-check-inline"><input class="form-check-input" type="radio" name="y_style" id="samples" value="samples"> Label > Meta</div>
+                    </div>
+                    <div><input type="checkbox" id="show_y_level_names" value="show_y_level_names" checked><label> Show Y-Axis level names </label></div>
+
+                    <br>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" id="transpose">Transpose</button>
+
+                    <br>
+                    <br>
+                    <label>Drag the corners of the heatmap to resize.</label>
+                    <br>
+                    <label>Drag items to change their order.</label>
+                    <br>
+                    <label>Pinch or scroll with the control key to zoom.</label>
+
+                </div>
+
+            </div>
         </div>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <div id="graph-container" class="col-md col-12"></div>
 
-    <script type="text/javascript" src="https://d3js.org/d3.v5.min.js"></script>
-    <script type="text/javascript" src="https://d3js.org/d3-selection-multi.v1.min.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.25.6/d3-legend.min.js"></script>
+</div>
 
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/awesomplete/1.1.2/awesomplete.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.9.1/underscore-min.js"></script>
+{% endblock %}
+
+{% block scripts %}
+
 
     <script type="text/javascript" src="reorder.js"></script>
 
@@ -433,6 +410,6 @@ $('#hide-show').click(function(e) { $('.go-picker').toggleClass('hidden'); });
 
     </script>
 
-</body>
 
-</html>
+{% endblock %}
+

@@ -1,200 +1,175 @@
-<!doctype html>
-<html xmlns="http://www.w3.org/1999/xhtml">
+{% extends 'base.html.j2' %}
 
-<head>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+{% block head %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.1/css/bootstrap-select.min.css" />
+<title>Axial Braid Plot</title>
+{% endblock %}
 
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/awesomplete/1.1.2/awesomplete.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.1/css/bootstrap-select.min.css" />
+{% block content %}
 
-    <link rel="stylesheet" href="axial.css" />
+<div class="row flex-nowrap">
+    <div class="col-md-4 col-12 menu">
+        <div class="card">
+            <div class="card-header">
+                <a class="pull-right" role="button"><i class="fa" id="hide-show"></i></a>
+                <h1><a href="index.html" class="link-unstyled">Braid Plot</a></h1>
+                <p><a id="download" href="#">Download SVG</a></p>
 
-    <style type="text/css">
-
-
-    </style>
-
-    <title>ABCD1-knockout transcriptome</title>
-
-</head>
-<body>
-
-    <div class="container-fluid">
-
-        <div class="row flex-nowrap">
-            <div class="col-md-4 col-12 menu">
-                <div class="card">
-                    <div class="card-header">
-                        <a class="pull-right" role="button"><i class="fa" id="hide-show"></i></a>
-                        <h1><a href="index.html" class="link-unstyled">Braid Plot</a></h1>
-                        <p><a id="download" href="#">Download SVG</a></p>
-
-                        <nav>
-                            <div class="nav nav-tabs card-header-tabs" role="tablist">
-                                <a data-toggle="tab" role="tab" class="nav-item nav-link active" href="#geneset">Gene Set</a>
-                                <a data-toggle="tab" role="tab" class="nav-item nav-link" href="#genes">Genes</a>
-                                <a data-toggle="tab" role="tab" class="nav-item nav-link" href="#structure">Structure</a>
-                                <a data-toggle="tab" role="tab" class="nav-item nav-link" href="#style">Style</a>
-                            </div>
-                        </nav>
-
+                <nav>
+                    <div class="nav nav-tabs card-header-tabs" role="tablist">
+                        <a data-toggle="tab" role="tab" class="nav-item nav-link active" href="#geneset">Gene Set</a>
+                        <a data-toggle="tab" role="tab" class="nav-item nav-link" href="#genes">Genes</a>
+                        <a data-toggle="tab" role="tab" class="nav-item nav-link" href="#structure">Structure</a>
+                        <a data-toggle="tab" role="tab" class="nav-item nav-link" href="#style">Style</a>
                     </div>
-                    <div class="tab-content">
-                        <div class="tab-pane card-body fade show active" id="geneset" role="tabpanel">
-                            <input class="form-control" id="chooseGeneSet" placeholder="Choose a Gene Set..." />
-                        </div>
+                </nav>
 
-
-                        <div class="tab-pane card-body fade" id="genes" role="tabpanel">
-                            <div contenteditable="true" class="form-control" id="chooseGenes" placeholder="Choose Genes..."></div>
-                        </div>
-
-
-                        <div class="tab-pane card-body fade" id="structure" role="tabpanel">
-                            <div><input type="checkbox" id="reordering" value="reordering" checked><b><label for="reordering"> Reset Gene Order on each change. </label></b></div>
-
-                            <br>
-                            <div>
-                                <b><label style="display: inline" for="minimum_nonzero">Only Show a Gene if at least <span id="X">0</span> samples have a non-zero value.</label></b>
-                                <input type="range" id="minimum_nonzero" name="" min="0" max="10" step="1" value="0" style="position: relative; top: 3px; display: inline" onchange="$('#X').text(this.value)">
-                            </div>
-
-                            <br>
-                            <div id="values">
-                                <b><label>Show Gene Values of</label></b>
-                                <div class="form-check"><input class="form-check-input" type="radio" name="values" value="counts" checked><label> Normalized Counts</label></div>
-                                <div class="form-check"><input class="form-check-input" type="radio" name="values" value="zscore_stddev"><label> Z-Scores (Standard Deviations)</label></div>
-                                <div class="form-check"><input class="form-check-input" type="radio" name="values" value="zscore_mad"><label> Z-Scores (Mean Absolute Deviation)</label></div>
-                            </div>
-                            <br>
-                            <div id="scaling">
-                                <b><label>Show Axis Scale Preset</label></b>
-                                <div class="form-check"><input class="form-check-input" type="radio" name="scaling" value="absolute"><label> Absolute (no) Scaling</label></div>
-                                <div class="form-check"><input class="form-check-input" type="radio" name="scaling" value="mean" checked><label> 2x Gene-wise mean</label></div>
-                                <div class="form-check"><input class="form-check-input" type="radio" name="scaling" value="log"><label> log base 10 units</label></div>
-                            </div>
-
-                            <br>
-                            <div id="sorting">
-                                <b><label>Sort Genes by</label></b>
-                                <div class="form-check"><input class="form-check-input" type="radio" name="sorting" value="complete" checked><label> Complete-Linkage Hierarchical Clustering and Optimal Leaf Ordering</label></div>
-                                <div class="form-check"><input class="form-check-input" type="radio" name="sorting" value="pc1"><label> Principal Component 1 of genes in sample space</label></div>
-                            </div>
-
-                            <!-- <br>
-                            <div><input type="checkbox" id="show_averages" value="show_averages"> Show <select class="category"></select> averages</div>
-
-                            <br>
-                            <div><input type="checkbox" id="only_show" value="only_show"> Only show certain <select class="category"></select></div>
-                            <br>
-                            <div><select id="only_show" class="selectpicker" multiple></select></div> -->
-                        </div>
-
-                        <div class="tab-pane card-body fade" id="style" role="tabpanel">
-                            <div>
-                                <b><label for="radius">Axis Spacing</label></b>
-                                <input type="range" id="axis_spacing" name="" min="30" max="250" step="1" value="50">
-                            </div>
-
-                            <br>
-                            <div><input type="checkbox" id="show_legends" value="show_legends"><b><label for="show_legends"> Show legends </label></b></div>
-
-                            <hr>
-                            <div><input type="checkbox" id="show_points" value="show_points" checked><b><label for="show_points"> Show Points </label></b></div>
-
-                            <br>
-                            <div>
-                                <b><label for="radius">Point Radius</label></b>
-                                <input type="range" id="radius" name="" min="2" max="20" step="0.1" value="2">
-                            </div>
-                            <div>
-                                <b><label for="point_opacity">Point Opacity</label></b>
-                                <input type="range" id="point_opacity" name="" min="0.1" max="10" step="0.1" value="1">
-                            </div>
-
-                            <br>
-                            <div id="point_coloring_system">
-                                <b><label>Color points</label></b>
-                                <div class="form-check"><input class="form-check-input" type="radio" name="point_coloring_system" value="uniform"><label> Uniformly <input type="color" value="#333333" id="default_point_color"></label></div>
-                                <div class="form-check"><input class="form-check-input" type="radio" name="point_coloring_system" value="identity" checked><label> by Identity</label></div>
-                                <div class="form-check"><input class="form-check-input" type="radio" name="point_coloring_system" value="class"><label> by <select class="category"></select></label></div>
-                            </div>
-
-                            <hr>
-                            <div><input type="checkbox" id="show_lines" value="show_lines" checked><b><label for="show_lines"> Show Lines </label></b></div>
-                            <div><input type="checkbox" id="show_halos" value="show_halos" checked><b><label for="show_halos"> Show Halos </label></b></div>
-
-                            <br>
-                            <div id="curve">
-                                <b><label>Interpolate points by</label></b>
-                                <div class="form-check"><input class="form-check-input" type="radio" name="curve" value="linear" checked><label> Straight Lines</label></div>
-                                <div class="form-check"><input class="form-check-input" type="radio" name="curve" value="natural"><label> Natural Curve</label></div>
-                                <div class="form-check"><input class="form-check-input" type="radio" name="curve" value="catmull"><label> CatmullRom Curve</label></div>
-                                <div class="form-check"><input class="form-check-input" type="radio" name="curve" value="monotone"><label> MonotoneY Curve</label></div>
-                                <div class="form-check"><input class="form-check-input" type="radio" name="curve" value="cardinal"><label> Cardinal Curve</label></div>
-                            </div>
-
-                            <br>
-                            <div id="line_coloring_system">
-                                <b><label>Color lines</label></b>
-                                <div class="form-check"><input class="form-check-input" type="radio" name="line_coloring_system" value="uniform"><label> Uniformly <input type="color" value="#333333" id="default_line_color"></label></div>
-                                <div class="form-check"><input class="form-check-input" type="radio" name="line_coloring_system" value="identity" checked><label> by Identity</label></div>
-                                <div class="form-check"><input class="form-check-input" type="radio" name="line_coloring_system" value="class"><label> by <select class="category"></select></label></div>
-                                <div class="form-check"><input class="form-check-input" type="radio" name="line_coloring_system" value="zscore_stddev"><label> by Z-Score (stddev) on a single gene...</label></div>
-                                <div class="form-check"><input class="form-check-input" type="radio" name="line_coloring_system" value="zscore_mad"><label> by Z-Score (MAD) on a single gene...</label></div>
-                                <div class="form-check"><input class="form-check-input" type="radio" name="line_coloring_system" value="pc1"><label> by Principal Component 1 of samples in gene space...</label></div>
-                            </div>
-
-                            &nbsp;&nbsp;&nbsp;&nbsp; ...along <input type="color" value="#0000cc" id="negative_color"> <input type="color" value="#c0c0c0" id="middle_color"> <input type="color" value="#cc0000" id="positive_color">
-
-
-                            <br>
-                            <br>
-                            <div>
-                                <b><label for="line_width">Line Width</label></b>
-                                <input type="range" id="line_width" name="" min="0.1" max="10" step="0.1" value="1">
-                            </div>
-                            <div>
-                                <b><label for="line_opacity">Line Opacity</label></b>
-                                <input type="range" id="line_opacity" name="" min="0.01" max="1" step="0.01" value="1">
-                            </div>
-                            <div>
-                                <b><label for="halo_width">Halo Width</label></b>
-                                <input type="range" id="halo_width" name="" min="3" max="40" step="1" value="20">
-                            </div>
-                            <div>
-                                <b><label for="halo_opacity">Halo Opacity</label></b>
-                                <input type="range" id="halo_opacity" name="" min="0" max="0.6" step="0.01" value="0.1">
-                            </div>
-
-                            <br>
-                            <div><input type="checkbox" id="dark_mode" value="dark_mode"><b><label for="dark_mode"> Dark Mode </label></b></div>
-                        </div>
-
-                    </div>
-                </div>
             </div>
+            <div class="tab-content">
+                <div class="tab-pane card-body fade show active" id="geneset" role="tabpanel">
+                    <input class="form-control" id="chooseGeneSet" placeholder="Choose a Gene Set..." />
+                </div>
 
-            <div id="graph-container" class="col-md col-12"></div>
 
+                <div class="tab-pane card-body fade" id="genes" role="tabpanel">
+                    <div contenteditable="true" class="form-control" id="chooseGenes" placeholder="Choose Genes..."></div>
+                </div>
+
+
+                <div class="tab-pane card-body fade" id="structure" role="tabpanel">
+                    <div><input type="checkbox" id="reordering" value="reordering" checked><b><label for="reordering"> Reset Gene Order on each change. </label></b></div>
+
+                    <br>
+                    <div>
+                        <b><label style="display: inline" for="minimum_nonzero">Only Show a Gene if at least <span id="X">0</span> samples have a non-zero value.</label></b>
+                        <input type="range" id="minimum_nonzero" name="" min="0" max="10" step="1" value="0" style="position: relative; top: 3px; display: inline" onchange="$('#X').text(this.value)">
+                    </div>
+
+                    <br>
+                    <div id="values">
+                        <b><label>Show Gene Values of</label></b>
+                        <div class="form-check"><input class="form-check-input" type="radio" name="values" value="counts" checked><label> Normalized Counts</label></div>
+                        <div class="form-check"><input class="form-check-input" type="radio" name="values" value="zscore_stddev"><label> Z-Scores (Standard Deviations)</label></div>
+                        <div class="form-check"><input class="form-check-input" type="radio" name="values" value="zscore_mad"><label> Z-Scores (Mean Absolute Deviation)</label></div>
+                    </div>
+                    <br>
+                    <div id="scaling">
+                        <b><label>Show Axis Scale Preset</label></b>
+                        <div class="form-check"><input class="form-check-input" type="radio" name="scaling" value="absolute"><label> Absolute (no) Scaling</label></div>
+                        <div class="form-check"><input class="form-check-input" type="radio" name="scaling" value="mean" checked><label> 2x Gene-wise mean</label></div>
+                        <div class="form-check"><input class="form-check-input" type="radio" name="scaling" value="log"><label> log base 10 units</label></div>
+                    </div>
+
+                    <br>
+                    <div id="sorting">
+                        <b><label>Sort Genes by</label></b>
+                        <div class="form-check"><input class="form-check-input" type="radio" name="sorting" value="complete" checked><label> Complete-Linkage Hierarchical Clustering and Optimal Leaf Ordering</label></div>
+                        <div class="form-check"><input class="form-check-input" type="radio" name="sorting" value="pc1"><label> Principal Component 1 of genes in sample space</label></div>
+                    </div>
+
+                    <!-- <br>
+                    <div><input type="checkbox" id="show_averages" value="show_averages"> Show <select class="category"></select> averages</div>
+
+                    <br>
+                    <div><input type="checkbox" id="only_show" value="only_show"> Only show certain <select class="category"></select></div>
+                    <br>
+                    <div><select id="only_show" class="selectpicker" multiple></select></div> -->
+                </div>
+
+                <div class="tab-pane card-body fade" id="style" role="tabpanel">
+                    <div>
+                        <b><label for="radius">Axis Spacing</label></b>
+                        <input type="range" id="axis_spacing" name="" min="30" max="250" step="1" value="50">
+                    </div>
+
+                    <br>
+                    <div><input type="checkbox" id="show_legends" value="show_legends"><b><label for="show_legends"> Show legends </label></b></div>
+
+                    <hr>
+                    <div><input type="checkbox" id="show_points" value="show_points" checked><b><label for="show_points"> Show Points </label></b></div>
+
+                    <br>
+                    <div>
+                        <b><label for="radius">Point Radius</label></b>
+                        <input type="range" id="radius" name="" min="2" max="20" step="0.1" value="2">
+                    </div>
+                    <div>
+                        <b><label for="point_opacity">Point Opacity</label></b>
+                        <input type="range" id="point_opacity" name="" min="0.1" max="10" step="0.1" value="1">
+                    </div>
+
+                    <br>
+                    <div id="point_coloring_system">
+                        <b><label>Color points</label></b>
+                        <div class="form-check"><input class="form-check-input" type="radio" name="point_coloring_system" value="uniform"><label> Uniformly <input type="color" value="#333333" id="default_point_color"></label></div>
+                        <div class="form-check"><input class="form-check-input" type="radio" name="point_coloring_system" value="identity" checked><label> by Identity</label></div>
+                        <div class="form-check"><input class="form-check-input" type="radio" name="point_coloring_system" value="class"><label> by <select class="category"></select></label></div>
+                    </div>
+
+                    <hr>
+                    <div><input type="checkbox" id="show_lines" value="show_lines" checked><b><label for="show_lines"> Show Lines </label></b></div>
+                    <div><input type="checkbox" id="show_halos" value="show_halos" checked><b><label for="show_halos"> Show Halos </label></b></div>
+
+                    <br>
+                    <div id="curve">
+                        <b><label>Interpolate points by</label></b>
+                        <div class="form-check"><input class="form-check-input" type="radio" name="curve" value="linear" checked><label> Straight Lines</label></div>
+                        <div class="form-check"><input class="form-check-input" type="radio" name="curve" value="natural"><label> Natural Curve</label></div>
+                        <div class="form-check"><input class="form-check-input" type="radio" name="curve" value="catmull"><label> CatmullRom Curve</label></div>
+                        <div class="form-check"><input class="form-check-input" type="radio" name="curve" value="monotone"><label> MonotoneY Curve</label></div>
+                        <div class="form-check"><input class="form-check-input" type="radio" name="curve" value="cardinal"><label> Cardinal Curve</label></div>
+                    </div>
+
+                    <br>
+                    <div id="line_coloring_system">
+                        <b><label>Color lines</label></b>
+                        <div class="form-check"><input class="form-check-input" type="radio" name="line_coloring_system" value="uniform"><label> Uniformly <input type="color" value="#333333" id="default_line_color"></label></div>
+                        <div class="form-check"><input class="form-check-input" type="radio" name="line_coloring_system" value="identity" checked><label> by Identity</label></div>
+                        <div class="form-check"><input class="form-check-input" type="radio" name="line_coloring_system" value="class"><label> by <select class="category"></select></label></div>
+                        <div class="form-check"><input class="form-check-input" type="radio" name="line_coloring_system" value="zscore_stddev"><label> by Z-Score (stddev) on a single gene...</label></div>
+                        <div class="form-check"><input class="form-check-input" type="radio" name="line_coloring_system" value="zscore_mad"><label> by Z-Score (MAD) on a single gene...</label></div>
+                        <div class="form-check"><input class="form-check-input" type="radio" name="line_coloring_system" value="pc1"><label> by Principal Component 1 of samples in gene space...</label></div>
+                    </div>
+
+                    &nbsp;&nbsp;&nbsp;&nbsp; ...along <input type="color" value="#0000cc" id="negative_color"> <input type="color" value="#c0c0c0" id="middle_color"> <input type="color" value="#cc0000" id="positive_color">
+
+
+                    <br>
+                    <br>
+                    <div>
+                        <b><label for="line_width">Line Width</label></b>
+                        <input type="range" id="line_width" name="" min="0.1" max="10" step="0.1" value="1">
+                    </div>
+                    <div>
+                        <b><label for="line_opacity">Line Opacity</label></b>
+                        <input type="range" id="line_opacity" name="" min="0.01" max="1" step="0.01" value="1">
+                    </div>
+                    <div>
+                        <b><label for="halo_width">Halo Width</label></b>
+                        <input type="range" id="halo_width" name="" min="3" max="40" step="1" value="20">
+                    </div>
+                    <div>
+                        <b><label for="halo_opacity">Halo Opacity</label></b>
+                        <input type="range" id="halo_opacity" name="" min="0" max="0.6" step="0.01" value="0.1">
+                    </div>
+
+                    <br>
+                    <div><input type="checkbox" id="dark_mode" value="dark_mode"><b><label for="dark_mode"> Dark Mode </label></b></div>
+                </div>
+
+            </div>
         </div>
     </div>
 
+    <div id="graph-container" class="col-md col-12"></div>
+
+</div>
 
 
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.9.1/underscore-min.js"></script>
+{% endblock %}
 
-    <script type="text/javascript" src="https://d3js.org/d3.v5.min.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.25.6/d3-legend.min.js"></script>
+{% block scripts %}
 
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/awesomplete/1.1.2/awesomplete.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.1/js/bootstrap-select.min.js"></script>
 
     <script type="text/javascript" src="reorder.js"></script>
     <script type="text/javascript" src="braid.js"></script>
@@ -327,6 +302,5 @@ $('#hide-show').click(function(e) { $('.menu').toggleClass('hidden'); });
 
     </script>
 
-</body>
 
-</html>
+{% endblock %}
