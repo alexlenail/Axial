@@ -1,11 +1,4 @@
 
-
-let range = n => [...Array(n).keys()];
-let round_to_power_of_10 = v => Math.pow(10, Math.ceil(Math.log10(Math.abs(v)))) * Math.pow(-1, v < 0);
-let powerOfTen = (d) => d / Math.pow(10, Math.ceil(Math.log(d) / Math.LN10 - 1e-12)) === 1;
-let clamp = (min, max) => ((x) => Math.min(Math.max(x, min), max));
-
-
 function Braid(samples_by_genes_matrix, gene_sets, classes) {
 
     // samples_by_genes_matrix: {'sample_id': {'gene1': float, 'gene2': float}};
