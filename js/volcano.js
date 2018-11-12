@@ -307,31 +307,44 @@ function Volcano(differential) {
     /////////////////////////////////////////////////////////////////////////////
 
 
-    svg.call(d3.zoom().scaleExtent([1 / 2, 16]).on("zoom", zoomed));
+    svg.call(d3.zoom().on('zoom', zoomed)).on('wheel.zoom', wheeled);
 
-    transform = d3.zoomTransform(g);
+    var transform = d3.zoomTransform(g);
     transform.x += margin.left;
     transform.y += margin.top;
-    g.attr("transform", transform);
+    g.attr('transform', transform);
 
     function zoomed() {
-        current_transform = d3.zoomTransform(g);
+        var current_transform = d3.zoomTransform(g);
         current_transform.x += d3.event.sourceEvent.movementX;
         current_transform.y += d3.event.sourceEvent.movementY;
-        current_transform.k = d3.event.transform.k;
-        g.attr("transform", current_transform);
-        tipExit()
+        g.attr('transform', current_transform);
+    }
+
+    function wheeled() {
+        var current_transform = d3.zoomTransform(g);
+        if (d3.event.ctrlKey) {
+            current_transform.k = clamp(0.1, 5)(current_transform.k - d3.event.deltaY * 0.01);
+        } else {
+            if (t) {
+                current_transform.x = clamp(-w*current_transform.k, w)(current_transform.x - d3.event.deltaY);
+            } else {
+                current_transform.y = clamp(-w*current_transform.k, h)(current_transform.y - d3.event.deltaY);
+            }
+        }
+        g.attr('transform', current_transform);
     }
 
     function resize() {
-        svg.attr("width", $("#graph-container").innerWidth()).attr("height", $("#graph-container").innerHeight());
-        w = $("#graph-container").innerWidth() - (margin.left + margin.right);
-        h = $("#graph-container").innerHeight() - (margin.top + margin.bottom);
+        svg.attr('width', $('#graph-container').innerWidth()).attr('height', $('#graph-container').innerHeight());
+        w = $('#graph-container').innerWidth() - (margin.left + margin.right);
+        h = $('#graph-container').innerHeight() - (margin.top + margin.bottom);
     }
 
-    d3.select(window).on("resize", resize)
+    d3.select(window).on('resize', resize)
 
     resize();
+
 
     return {
         'restart': restart,

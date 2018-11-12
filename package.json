@@ -1,0 +1,42 @@
+{
+  "name": "axialjs",
+  "version": "0.0.2",
+  "description": "Interactive Visualizations for High Dimensional Data",
+  "main": "distjs/axial.min.js",
+  "files": [
+    "js/*",
+    "css/*"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zfrenchee/Axial.git"
+  },
+  "keywords": [
+    "visualization"
+  ],
+  "author": {
+    "name": "Alex LeNail",
+    "email": "alex@lenail.org"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/zfrenchee/Axial/issues"
+  },
+  "homepage": "https://github.com/zfrenchee/Axial#readme",
+  "dependencies": {
+    "npm": "^6.4.1",
+    "d3": "^5.0.0"
+  },
+  "devDependencies": {
+    "json2module": "0.0",
+    "rimraf": "2",
+    "rollup": "0.64",
+    "rollup-plugin-ascii": "0.0",
+    "rollup-plugin-node-resolve": "3",
+    "rollup-plugin-terser": "1",
+    "tape": "4"
+  }
+}
