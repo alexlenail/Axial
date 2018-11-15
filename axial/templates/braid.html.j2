@@ -2,7 +2,7 @@
 
 {% block head %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.1/css/bootstrap-select.min.css" />
-<title>Axial Braid Plot</title>
+<title>{{ title }}</title>
 {% endblock %}
 
 {% block content %}
@@ -174,7 +174,7 @@
 
     <script type="text/javascript">
 
-class_categories = _.uniq(_.flatten(Object.values(human_classes).map(obj => Object.keys(obj))));
+class_categories = _.uniq(_.flatten(Object.values(classes).map(obj => Object.keys(obj))));
 if (class_categories.length === 0) { $(".form-check-input[value='class']").remove(); }
 else {
     class_categories.forEach(function(key) {
@@ -182,9 +182,9 @@ else {
     });
 }
 
-$("#minimum_nonzero").attr('max', Object.keys(human_counts).length);
+$("#minimum_nonzero").attr('max', Object.keys(matrix).length);
 
-braid = Braid(human_counts, human_gene_sets, human_classes);
+braid = Braid(matrix, gene_sets, classes);
 
 
 let equal = (a1, a2) => a1.length === a2.length && a1.every((value, i) => value === a2[i]);
@@ -196,7 +196,7 @@ let equal = (a1, a2) => a1.length === a2.length && a1.every((value, i) => value 
 
 var chooseGeneSet = document.getElementById("chooseGeneSet");
 var chooseGeneSetform = new Awesomplete(chooseGeneSet, {
-    list: Object.entries(human_gene_sets),
+    list: Object.entries(gene_sets),
     maxItems: 30,
     replace: function (text) { this.input.value = text.label; }
 });

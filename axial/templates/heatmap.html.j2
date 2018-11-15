@@ -1,7 +1,7 @@
 {% extends 'base.html.j2' %}
 
 {% block head %}
-<title>Axial Heatmap</title>
+<title>{{ title }}</title>
 {% endblock %}
 
 {% block content %}
@@ -231,7 +231,7 @@ let uniqs = (a, b) => uniques(a, 0, b, 0).reduce((acc, [from_a1, from_a2]) => [O
 /////////////////////////////////////////////////////////////////////////////
 
 
-var class_categories = _.uniq(_.flatten(Object.values(mouse_human_lee_merged_classes).map(obj => Object.keys(obj))));
+var class_categories = _.uniq(_.flatten(Object.values(classes).map(obj => Object.keys(obj))));
 if (class_categories.length === 0) { $(".form-check-input[value='class']").remove(); }
 else {
     class_categories.forEach(function(key) {
@@ -244,10 +244,10 @@ metadata_spacing['system'] = 10;
 $('#metadata_spacing').val(metadata_spacing[$('#category_spacing').val()]);
 
 
-var separate_zscore_by = ['system'];
+var separate_zscore_by = {{ separate_zscore_by }};
 
 
-var heatmap = Heatmap(mouse_human_lee_merged_counts, human_gene_sets, mouse_human_lee_merged_classes, separate_zscore_by, refresh_genes);
+var heatmap = Heatmap(matrix, gene_sets, classes, separate_zscore_by, refresh_genes);
 
 
 
@@ -261,7 +261,7 @@ var selected_gene_sets = [];
 
 var chooseGeneSets = document.getElementById("chooseGeneSets");
 var chooseGeneSetsform = new Awesomplete(chooseGeneSets, {
-    list: Object.entries(human_gene_sets),
+    list: Object.entries(gene_sets),
     maxItems: 30,
     filter: function(text, input) { return Awesomplete.FILTER_CONTAINS(text, input.match(/[^,]*$/)[0]); },
     item: function(text, input) { return Awesomplete.ITEM(text, input.match(/[^,]*$/)[0]); },

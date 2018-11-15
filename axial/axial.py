@@ -52,16 +52,9 @@ third_party_scripts = [
     "https://d3js.org/d3-selection-multi.v1.min.js",
     "https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.25.6/d3-legend.min.js",
 
-    "https://cdnjs.cloudflare.com/ajax/libs/awesomplete/1.1.2/awesomplete.js",
+    "https://cdnjs.cloudflare.com/ajax/libs/awesomplete/1.1.3/awesomplete.min.js",
     "https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.9.1/underscore-min.js",
 ]
-
-
-# "/bar.js"
-# "/util.js"
-# "/reorder.js"
-# "/braid.js"
-# "/heatmap.js"
 
 
 templateEnv = jinja2.Environment(loader=jinja2.FileSystemLoader( "/Users/alex/Documents/Axial/axial/templates" ))
@@ -75,7 +68,8 @@ templateEnv = jinja2.Environment(loader=jinja2.FileSystemLoader( "/Users/alex/Do
 
 
 def _scripts_block(scripts, mode, output_dir):
-
+    """
+    """
     if mode == "directory":
 
         (output_dir / "scripts").mkdir(exist_ok=True, parents=True)
@@ -98,11 +92,68 @@ def _scripts_block(scripts, mode, output_dir):
     return script_block
 
 
+def _data_block(mode, names_and_jsons, include_gene_sets=True, organism="human"):
+    """
+    """
+    data_block = []
+
+    if mode == "directory":
+
+        (output_dir / "data").mkdir(exist_ok=True, parents=True)
+
+        for name, json in names_and_jsons:
+            (output_dir / "data" / f"{name}.js").write_text(json)
+            data_block.append(f"<script type='text/javascript' src='data/{name}.js'></script>")
+
+        if include_gene_sets:
+            copyfile(gene_ontology[organism], output_dir / "data" / "gene_sets.js")
+            data_block.append(f"<script type='text/javascript' src='data/gene_sets.js'></script>")
+
+    elif mode == "inline":
+
+        for name, json in names_and_jsons:
+            data_block.append(f"<script type='text/javascript'>{json}</script>")
+
+        if include_gene_sets:
+            data_block.append(f"<script type='text/javascript'>{Path(gene_ontology[organism]).read_text()}</script>")
+
+
+    else: raise ValueError('data_mode must be one of ["directory", "inline"]')
+
+    data_block = '\n'.join(data_block)+'\n'
+    return data_block
+
+
+
+def _verify_differential_df(df):
+    """
+    """
+    # make sure all q values are positive
+    # make sure it looks like the -log transform has been taken.
+    # make sure the logFCs sum to zero, are all less than 5ish
+
+    pass
+
+
+def _verify_sample_by_genes_matrix(df):
+    """
+    """
+
+    pass
+
+
+
+def _verify_sample_attributes(matrix, attributes):
+    """
+    """
+
+    pass
+
 
 ###############################################################################
 ##   Public  Methods
 
-def volcano(differential_df, title='Volcano Plot', scripts_mode="CDN", data_mode="directory",
+def volcano(differential_df, title='Axial Volcano Plot', scripts_mode="CDN", data_mode="directory",
             organism="human", q_value_column_name="q", log2FC_column_name="logFC",
             output_dir=".", filename="volcano.html"):
     """
@@ -130,30 +181,11 @@ def volcano(differential_df, title='Volcano Plot', scripts_mode="CDN", data_mode
 
     df = differential_df[[q_value_column_name, log2FC_column_name]]
     df.columns = ['q', 'logFC']
-    # make sure all q values are positive
-    # make sure it looks like the -log transform has been taken.
-    # make sure the logFCs sum to zero, are all less than 5ish
+    _verify_differential_df(df)
 
     json = f"var differential = {df.to_json(orient='index')};"
 
-    if data_mode == "directory":
-
-        (output_dir / "data").mkdir(exist_ok=True, parents=True)
-        (output_dir / "data" / "differential.js").write_text(json)
-        copyfile(gene_ontology[organism], output_dir / "data" / f"{organism}_gene_sets.js")
-
-        data_block = f"""
-        <script type='text/javascript' src='data/differential.js'></script>
-        """
-
-    elif data_mode == "inline":
-
-        data_block = f"""
-        <script type='text/javascript'>{json}</script>
-        """
-
-    else: raise ValueError('data_mode must be one of ["directory", "inline"]')
-
+    data_block = _data_block(data_mode, [('differential', json)], include_gene_sets=False, organism=organism)
 
     # Scripts =======================
 
@@ -167,12 +199,14 @@ def volcano(differential_df, title='Volcano Plot', scripts_mode="CDN", data_mode
     (output_dir / filename).write_text(html)
 
 
-    return output_dir.absolute()
+    return (output_dir / filename).absolute()
 
 
 
 
-def bar(differential_df, page_title='Bar Plot', compilation="CDN", organism="human", output_dir=".", filename="bar.html"):
+def bar(differential_df, title='Axial Pathway Bar Plot', scripts_mode="CDN", data_mode="directory",
+        organism="human", q_value_column_name="q", log2FC_column_name="logFC",
+        output_dir=".", filename="bar.html"):
     """
     Arguments:
         differential_df (pandas.DataFrame): a dataframe indexed by gene symbols which must have columns named log2FC and qval.
@@ -198,54 +232,34 @@ def bar(differential_df, page_title='Bar Plot', compilation="CDN", organism="hum
 
     df = differential_df[[q_value_column_name, log2FC_column_name]]
     df.columns = ['q', 'logFC']
-    # make sure all q values are positive
-    # make sure it looks like the -log transform has been taken.
-    # make sure the logFCs sum to zero, are all less than 5ish
+    _verify_differential_df(df)
 
-    json = f"var differential = {df.to_json(orient='columns')};"
+    json = f"var differential = {df.to_json(orient='index')};"
 
-    if data_mode == "directory":
-
-        (output_dir / "data").mkdir(exist_ok=True, parents=True)
-        (output_dir / "data" / "differential.js").write_text(json)
-        copyfile(gene_ontology[organism], output_dir / "data" / f"{organism}_gene_sets.js")
-
-        data_block = f"""
-        <script type='text/javascript' src='data/differential.js'></script>
-        <script type='text/javascript' src='data/{organism}_gene_sets.js'></script>
-        """
-
-    elif data_mode == "inline":
-
-        data_block = f"""
-        <script type='text/javascript'>{json}</script>
-        <script type='text/javascript'>{Path(gene_ontology[organism]).read_text()}</script>
-        """
-
-    else: raise ValueError('data_mode must be one of ["directory", "inline"]')
-
+    data_block = _data_block(data_mode, [('differential', json)], organism=organism)
 
     # Scripts =======================
 
-    scripts = third_party_scripts + [CDN_url+"js/volcano.js", CDN_url+"js/GOrilla.js"]
+    scripts = third_party_scripts + [CDN_url+"js/bar.js"]
 
     scripts_block = _scripts_block(scripts, scripts_mode, output_dir)
 
 
-    html = templateEnv.get_template('volcano.html.j2').render(title=title, scripts_block=scripts_block+data_block)
+    html = templateEnv.get_template('bar.html.j2').render(title=title, scripts_block=scripts_block+data_block)
 
     (output_dir / filename).write_text(html)
 
 
-    return output_dir.absolute()
+    return (output_dir / filename).absolute()
 
 
 
-def braid(samples_by_genes_matrix, sample_classes, page_title='Braid Plot', compilation="CDN", organism="human", output_dir=".", filename="braid.html"):
+def braid(genes_by_samples_matrix, sample_attributes, title='Axial Braid Plot', scripts_mode="CDN", data_mode="directory",
+          organism="human", output_dir=".", filename="braid.html"):
     """
     Arguments:
-        samples_by_genes_matrix (pandas.DataFrame): dataframe indexed by genes, columns are samples
-        sample_classes (pandas.DataFrame): dataframe indexed by samples, columns are attributes (e.g. classes)
+        genes_by_samples_matrix (pandas.DataFrame): dataframe indexed by genes, columns are samples
+        sample_attributes (pandas.DataFrame): dataframe indexed by samples, columns are sample attributes (e.g. classes)
         scripts_mode (str): Choose from ["CDN", "directory", "inline"]:
                 "CDN" compiles a single HTML page with links to scripts hosted on a CDN,
                 "directory" compiles a directory with all scripts locally cached,
@@ -261,25 +275,41 @@ def braid(samples_by_genes_matrix, sample_classes, page_title='Braid Plot', comp
         Path: the filepath which was outputted to
     """
 
-    path = Path(output_dir)
-    path.mkdir(exist_ok=True, parents=True)
-    path = path / filename
+    output_dir = Path(output_dir)
+    output_dir.mkdir(exist_ok=True, parents=True)
 
-    html_output = templateEnv.get_template('braid.html.j2').render(
-            graph_json=graph_json,
-            nodes=networkx_graph.nodes(),
-            attributes=attribute_metadata)
+    # Data   =======================
 
-    path.write_text(html_output)
+    _verify_sample_by_genes_matrix(genes_by_samples_matrix)
+    _verify_sample_attributes(genes_by_samples_matrix, sample_attributes)
 
-    return path.absolute()
+    matrix = f"var matrix = {genes_by_samples_matrix.to_json(orient='columns')};"
+    classes = f"var classes = {sample_attributes.to_json(orient='index')};"
+
+    data_block = _data_block(data_mode, [('matrix', matrix), ('classes', classes)], organism=organism)
+
+    # Scripts =======================
+
+    scripts = third_party_scripts + [CDN_url+"js/util.js", CDN_url+"js/reorder.js", CDN_url+"js/braid.js"]
+
+    scripts_block = _scripts_block(scripts, scripts_mode, output_dir)
 
 
-def heatmap(samples_by_genes_matrix, sample_classes, page_title='Heatmap', compilation="CDN", organism="human", output_dir=".", filename="heatmap.html"):
+    html = templateEnv.get_template('braid.html.j2').render(title=title, scripts_block=scripts_block+data_block)
+
+    (output_dir / filename).write_text(html)
+
+
+    return (output_dir / filename).absolute()
+
+
+def heatmap(genes_by_samples_matrix, sample_attributes, title='Axial Heatmap', scripts_mode="CDN", data_mode="directory",
+            organism="human", separate_zscore_by=["system"],
+            output_dir=".", filename="heatmap.html"):
     """
     Arguments:
-        samples_by_genes_matrix (pandas.DataFrame): dataframe indexed by genes, columns are samples
-        sample_classes (pandas.DataFrame): dataframe indexed by samples, columns are attributes (e.g. classes)
+        genes_by_samples_matrix (pandas.DataFrame): dataframe indexed by genes, columns are samples
+        sample_attributes (pandas.DataFrame): dataframe indexed by samples, columns are sample attributes (e.g. classes)
         scripts_mode (str): Choose from ["CDN", "directory", "inline"]:
                 "CDN" compiles a single HTML page with links to scripts hosted on a CDN,
                 "directory" compiles a directory with all scripts locally cached,
@@ -295,24 +325,39 @@ def heatmap(samples_by_genes_matrix, sample_classes, page_title='Heatmap', compi
         Path: the filepath which was outputted to
     """
 
-    path = Path(output_dir)
-    path.mkdir(exist_ok=True, parents=True)
-    path = path / filename
 
-    html_output = templateEnv.get_template('heatmap.html.j2').render(
-            graph_json=graph_json,
-            nodes=networkx_graph.nodes(),
-            attributes=attribute_metadata)
+    output_dir = Path(output_dir)
+    output_dir.mkdir(exist_ok=True, parents=True)
 
-    path.write_text(html_output)
+    # Data   =======================
 
-    return path.absolute()
+    _verify_sample_by_genes_matrix(genes_by_samples_matrix)
+    _verify_sample_attributes(genes_by_samples_matrix, sample_attributes)
+
+    matrix = f"var matrix = {genes_by_samples_matrix.to_json(orient='columns')};"
+    classes = f"var classes = {sample_attributes.to_json(orient='index')};"
+
+    data_block = _data_block(data_mode, [('matrix', matrix), ('classes', classes)], organism=organism)
+
+    # Scripts =======================
+
+    scripts = third_party_scripts + [CDN_url+"js/util.js", CDN_url+"js/reorder.js", CDN_url+"js/heatmap.js"]
+
+    scripts_block = _scripts_block(scripts, scripts_mode, output_dir)
+
+
+    html = templateEnv.get_template('heatmap.html.j2').render(title=title, scripts_block=scripts_block+data_block, separate_zscore_by=separate_zscore_by)
+
+    (output_dir / filename).write_text(html)
+
+
+    return (output_dir / filename).absolute()
 
 
 
 
-
-def graph(networkx_graph, page_title='Graph Visualization', compilation="CDN", attribute_metadata=dict(), output_dir=".", filename="graph.html"):
+def graph(networkx_graph, title='Axial Graph Visualization', scripts_mode="CDN", data_mode="directory",
+          attribute_metadata=dict(), output_dir=".", filename="graph.html"):
     """
     Arguments:
         networkx_graph (networkx.Graph): any instance of networkx.Graph
@@ -331,36 +376,11 @@ def graph(networkx_graph, page_title='Graph Visualization', compilation="CDN", a
         Path: the filepath which was outputted to
     """
 
-    templateLoader = jinja2.FileSystemLoader(os.path.dirname(os.path.abspath(__file__)))
-    templateEnv = jinja2.Environment(loader=templateLoader)
-
     graph_json = nx_json.node_link_data(networkx_graph, attrs=dict(source='source_name', target='target_name', name='id', key='key', link='links'))
     def indexOf(node_id): return [i for (i,node) in enumerate(graph_json['nodes']) if node['id'] == node_id][0]
     graph_json["links"] = [{**link, **{"source":indexOf(link['source_name']), "target":indexOf(link['target_name'])}} for link in graph_json["links"]]
     graph_json = json.dumps(graph_json)
 
-    # TODO comment
-    max_prize = max(list(nx.get_node_attributes(networkx_graph, 'prize').values()), default=0)
-    max_degree = max(list(nx.get_node_attributes(networkx_graph, 'degree').values()), default=0)
-    max_betweenness = max(list(nx.get_node_attributes(networkx_graph, 'betweenness').values()), default=0)
-    # TODO cast terminal attr as string or int
-    # TODO safe string every attr?
-
-    # construct default attribute metadata
-    default_attribute_metadata = {
-        'prize'             : {'display': 'color_scale', 'domain': f'[0, {1e-10}, {max_prize}]', 'range': '["lightgrey", "white", "red"]'},
-        'degree'            : {'display': 'color_scale', 'domain': f'[0, {max_degree}]', 'range': '["lightblue", "red"]'},
-        'betweenness'       : {'display': 'color_scale', 'domain': f'[0, {max_betweenness}]', 'range': '["purple", "orange"]'},
-        'terminal'          : {'display': 'color_scale', 'domain':  '[false, true]', 'range': '["grey", "orange"]'},
-
-        'type'              : {'display': 'shape' },
-        'louvain_clusters'  : {'display': 'box' },
-        'location'          : {'display': 'box' },
-        'general_function'  : {'display': 'color_category' },
-        'specific_function' : {'display': 'color_category' },
-        'general_process'   : {'display': 'box' },
-        'specific_process'  : {'display': 'box' },
-    }
 
     # TODO comment
     all_graph_attribute_keys = set(flatten([attrs.keys() for node_id, attrs in networkx_graph.nodes(data=True)]))
@@ -399,10 +419,7 @@ def graph(networkx_graph, page_title='Graph Visualization', compilation="CDN", a
     path.mkdir(exist_ok=True, parents=True)
     path = path / filename
 
-    html_output = templateEnv.get_template('graph.html.j2').render(
-            graph_json=graph_json,
-            nodes=networkx_graph.nodes(),
-            attributes=attribute_metadata)
+    html_output = templateEnv.get_template('graph.html.j2').render(graph_json=graph_json, nodes=networkx_graph.nodes(), attributes=attribute_metadata)
 
     path.write_text(html_output)
 
