@@ -3,7 +3,7 @@ from setuptools import setup
 setup(
     name='axial',
     packages=['axial'],
-    package_data={'axial': []},
+    package_data={'axial': ['axial/templates/*', 'axial/go/*']},
     version='0.0.1',
     url='https://github.com/zfrenchee/axial',
     classifiers=[
