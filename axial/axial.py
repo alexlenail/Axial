@@ -11,7 +11,7 @@ import math
 
 # Peripheral python modules
 from pathlib import Path
-# import json
+import json
 import pkg_resources
 import requests
 
@@ -41,7 +41,7 @@ gene_ontology = {
 #     'mouse': pkg_resources.resource_filename('axial', 'go/mouse_gene_sets.js'),
 # }
 
-CDN_url = 'https://unpkg.com/axialjs@0.0.2/'
+CDN_url = 'https://unpkg.com/axialjs@latest/'
 
 third_party_scripts = [
     "https://code.jquery.com/jquery-3.2.1.slim.min.js",
@@ -60,7 +60,6 @@ third_party_scripts = [
 templateEnv = jinja2.Environment(loader=jinja2.FileSystemLoader( "/Users/alex/Documents/Axial/axial/templates" ))
 
 # templateEnv = jinja2.Environment(loader=jinja2.PackageLoader('axial', 'templates'))
-
 
 
 ###############################################################################
@@ -149,6 +148,13 @@ def _verify_sample_attributes(matrix, attributes):
 
     pass
 
+def _verify_attribute_metadata(attribute_metadata):
+
+    pass
+
+
+def _flatten(list_of_lists): return [item for sublist in list_of_lists for item in sublist]
+
 
 ###############################################################################
 ##   Public  Methods
@@ -167,7 +173,8 @@ def volcano(differential_df, title='Axial Volcano Plot', scripts_mode="CDN", dat
                 "directory" compiles a directory with all data locally cached,
                 "inline" compiles a single HTML file with all data inlined.
         organism (str): "human" or "mouse"
-        attribute_metadata (dict):
+        q_value_column_name (str):
+        log2FC_column_name (str):
         output_dir (str): the directory in which to output the file
         filename (str): the filename of the output file
     Returns:
@@ -183,9 +190,9 @@ def volcano(differential_df, title='Axial Volcano Plot', scripts_mode="CDN", dat
     df.columns = ['q', 'logFC']
     _verify_differential_df(df)
 
-    json = f"var differential = {df.to_json(orient='index')};"
+    differential = f"var differential = {df.to_json(orient='index')};"
 
-    data_block = _data_block(data_mode, [('differential', json)], include_gene_sets=False, organism=organism)
+    data_block = _data_block(data_mode, [('differential', differential)], include_gene_sets=False, organism=organism)
 
     # Scripts =======================
 
@@ -218,7 +225,8 @@ def bar(differential_df, title='Axial Pathway Bar Plot', scripts_mode="CDN", dat
                 "directory" compiles a directory with all data locally cached,
                 "inline" compiles a single HTML file with all data inlined.
         organism (str): "human" or "mouse"
-        attribute_metadata (dict):
+        q_value_column_name (str):
+        log2FC_column_name (str):
         output_dir (str): the directory in which to output the file
         filename (str): the filename of the output file
     Returns:
@@ -234,9 +242,9 @@ def bar(differential_df, title='Axial Pathway Bar Plot', scripts_mode="CDN", dat
     df.columns = ['q', 'logFC']
     _verify_differential_df(df)
 
-    json = f"var differential = {df.to_json(orient='index')};"
+    differential = f"var differential = {df.to_json(orient='index')};"
 
-    data_block = _data_block(data_mode, [('differential', json)], organism=organism)
+    data_block = _data_block(data_mode, [('differential', differential)], organism=organism)
 
     # Scripts =======================
 
@@ -268,7 +276,6 @@ def braid(genes_by_samples_matrix, sample_attributes, title='Axial Braid Plot', 
                 "directory" compiles a directory with all data locally cached,
                 "inline" compiles a single HTML file with all data inlined.
         organism (str): "human" or "mouse"
-        attribute_metadata (dict):
         output_dir (str): the directory in which to output the file
         filename (str): the filename of the output file
     Returns:
@@ -318,7 +325,7 @@ def heatmap(genes_by_samples_matrix, sample_attributes, title='Axial Heatmap', s
                 "directory" compiles a directory with all data locally cached,
                 "inline" compiles a single HTML file with all data inlined.
         organism (str): "human" or "mouse"
-        attribute_metadata (dict):
+        separate_zscore_by (list):
         output_dir (str): the directory in which to output the file
         filename (str): the filename of the output file
     Returns:
@@ -376,16 +383,32 @@ def graph(networkx_graph, title='Axial Graph Visualization', scripts_mode="CDN",
         Path: the filepath which was outputted to
     """
 
+    # TODO comment
+    output_dir = Path(output_dir)
+    output_dir.mkdir(exist_ok=True, parents=True)
+
+    # Scripts =======================
+
+    scripts = third_party_scripts + [CDN_url+"js/graph.js"]
+
+    scripts_block = _scripts_block(scripts, scripts_mode, output_dir)
+
+    # Data    =======================
+
     graph_json = nx_json.node_link_data(networkx_graph, attrs=dict(source='source_name', target='target_name', name='id', key='key', link='links'))
+    # unfortunately CoLa still uses the D3V3 graph format, requiring the following two lines.
     def indexOf(node_id): return [i for (i,node) in enumerate(graph_json['nodes']) if node['id'] == node_id][0]
     graph_json["links"] = [{**link, **{"source":indexOf(link['source_name']), "target":indexOf(link['target_name'])}} for link in graph_json["links"]]
     graph_json = json.dumps(graph_json)
 
+    data_block = _data_block(data_mode, [('graph', graph_json)])
+
+    # Other   =======================
+
+    _verify_attribute_metadata(attribute_metadata)
 
     # TODO comment
-    all_graph_attribute_keys = set(flatten([attrs.keys() for node_id, attrs in networkx_graph.nodes(data=True)]))
-    default_attribute_metadata = {attr: metadata for attr,metadata in default_attribute_metadata.items() if attr in all_graph_attribute_keys}
-    unaccounted_for_attributes = all_graph_attribute_keys - (set(default_attribute_metadata.keys()) | set(attribute_metadata.keys()))
+    unaccounted_for_attributes = set(_flatten([attrs.keys() for node_id, attrs in networkx_graph.nodes(data=True)])) - set(attribute_metadata.keys())
     inferred_attribute_metadata = {}
 
     for attr in unaccounted_for_attributes:
@@ -401,27 +424,19 @@ def graph(networkx_graph, title='Axial Graph Visualization', scripts_mode="CDN",
                 inferred_attribute_metadata[attr] = {'display': 'color_scale', 'domain': f'[{min(values)},{max(values)}]', 'range':'["purple","orange"]'}
 
         else:
-            if '_clusters' in attr:
-                inferred_attribute_metadata[attr] = {'display': 'box' }
-            else:
-                inferred_attribute_metadata[attr] = {'display': 'color_category' }
+            inferred_attribute_metadata[attr] = {'display': 'color_category' }
 
     # TODO comment
-    attribute_metadata = {**default_attribute_metadata, **inferred_attribute_metadata, **attribute_metadata}
+    attribute_metadata = {**inferred_attribute_metadata, **attribute_metadata}
 
     logger.info('Final display parameters:')
     logger.info('\n'+json.dumps(attribute_metadata, indent=4))
 
     # TODO cast attribute_metadata to list?
 
-    # TODO comment
-    path = Path(output_dir)
-    path.mkdir(exist_ok=True, parents=True)
-    path = path / filename
+    html = templateEnv.get_template('graph.html.j2').render(title=title, scripts_block=scripts_block+data_block, nodes=networkx_graph.nodes(), attributes=attribute_metadata)
 
-    html_output = templateEnv.get_template('graph.html.j2').render(graph_json=graph_json, nodes=networkx_graph.nodes(), attributes=attribute_metadata)
+    (output_dir / filename).write_text(html)
 
-    path.write_text(html_output)
-
-    return path.absolute()
+    return (output_dir / filename).absolute()
 

@@ -1,6 +1,7 @@
 
 
-pull graph js into its own script.
+give the graph.js code a makeover
+
 
 
 finish docs homepage
