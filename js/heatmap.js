@@ -43,8 +43,7 @@ function Heatmap(samples_by_genes_matrix, gene_sets, classes, separate_zscore_by
     var focused_node = null;
     var unfocused_opacity = 0.2;
 
-    // var category_colors = _.object(categories.map((category) => [category, d3.scaleOrdinal(d3.schemeCategory10)]))
-    var category_colors = {'system': d3.scaleOrdinal(d3.schemeCategory10), 'condition': d3.scaleOrdinal(d3.schemeSet2)};
+    var category_colors = _.object(categories.map((category) => [category, d3.scaleOrdinal(d3.schemeCategory10)]))
 
     var color_style = 'interpolateTriplet'
     var colors = null;

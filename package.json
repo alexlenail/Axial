@@ -1,6 +1,6 @@
 {
   "name": "axialjs",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Interactive Visualizations for High Dimensional Data",
   "main": "distjs/axial.min.js",
   "files": [
@@ -27,8 +27,8 @@
   },
   "homepage": "https://github.com/zfrenchee/Axial#readme",
   "dependencies": {
-    "npm": "^6.4.1",
-    "d3": "^5.0.0"
+    "d3": "^5.0.0",
+    "npm": "^6.4.1"
   },
   "devDependencies": {
     "json2module": "0.0",

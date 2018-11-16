@@ -26,7 +26,7 @@
 
 </style>
 
-<title>ABCD1-knockout transcriptome</title>
+<title>{{ title }}</title>
 {% endblock %}
 
 {% block content %}
@@ -36,20 +36,12 @@
         <div class="card">
             <div class="card-header">
                 <a class="pull-right" role="button"><i class="fa" id="hide-show"></i></a>
-                <h1><a href="index.html" class="link-unstyled">ABCD1-knockout transcriptome</a></h1>
+                <h1><a href="index.html" class="link-unstyled">{{ title }}</a></h1>
                 <p><a id="enrich" href="#">Enrich DE genes</a> | <a id="degenes" href="#">Download DE genes</a></p>
-
-                <nav>
-                    <div class="nav nav-tabs card-header-tabs" role="tablist">
-                        <a class="nav-item nav-link active">hBMEC</a>
-                        <a class="nav-item nav-link" href="mouse_volcano.html">mBMEC</a>
-                        <a class="nav-item nav-link" href="lee_volcano.html">Lee et. al. 2018 iPS</a>
-                    </div>
-                </nav>
 
             </div>
             <div class="tab-content collapse show" id="collapsable">
-                <div class="tab-pane fade show active card-body" id="hBMEC" role="tabpanel">
+                <div class="tab-pane fade show active card-body" id="" role="tabpanel">
 
                     <label for="point_size">Point Size</label>
                     <input type="range" id="point_size" name="" min="0.5" max="4" step="0.1" value="2.0" style="position: relative; top: 3px;">
@@ -83,14 +75,11 @@
 
 {% block scripts %}
 
-<script type="text/javascript" src="data/human_differential.js"></script>
-
-{# <script type="text/javascript" src="volcano.js"></script> #}
-{# <script type="text/javascript" src="GOrilla.js"></script> #}
+{{ scripts_block }}
 
 <script type="text/javascript">
 
-volcano = Volcano(human_differential);
+volcano = Volcano(differential);
 volcano.restart();
 
 /////////////////////////////////////////////////////////////////////////////
@@ -131,7 +120,7 @@ document.addEventListener('awesomplete-selectcomplete', function(e) { volcano.sh
 //     d3.select(this).attr("href", 'data:application/octet-stream;base64,' + btoa(unescape(encodeURIComponent(d3.select("#graph-container").html())))).attr("download", "plot.svg");
 // })
 
-$("#enrich").click(function(e) { GOrilla(volcano.DEgenes(), "HOMO_SAPIENS"); });
+$("#enrich").click(function(e) { GOrilla(volcano.DEgenes(), "{{ organism }}"); });
 
 $("#degenes").click(function() { d3.select(this).attr("href", 'data:application/octet-stream;base64,' + btoa(volcano.DEgenes().join("\n"))).attr("download", "DE_Genes.txt") });
 

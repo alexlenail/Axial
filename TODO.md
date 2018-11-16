@@ -1,14 +1,7 @@
 
-python to generate plots
-- bar
-- volcano
 
+give the graph.js code a makeover
 
-
-variables -- inline scripts or depend on UNPKG
-
-
-pull graph js into its own script.
 
 
 finish docs homepage

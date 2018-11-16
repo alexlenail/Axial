@@ -7,3 +7,10 @@ Axial
 For more information about the scientific uses of Axial,
 please see the Readme_. To report an issue, please refer to the Issues_.
 
+
+.. automodule:: axial
+	:members:
+	:member-order: bysource
+
+
+

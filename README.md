@@ -1,4 +1,6 @@
-# Axial: Interactive Visualizations for High Dimensional Data
+# Axial
+
+### Interactive Visualizations for High Dimensional Genomics Data
 
 ## Motivation
 
@@ -13,7 +15,7 @@ This repo is divided into three parts:
 - An R library named `axial` compiles jinja templates with your data into html pages with visualizations provided by `axialjs`. (unstarted)
 
 
-### Axialjs
+## Axial.js
 
 #### [Docs](http://alexlenail.me/Axial/index.html)
 
@@ -44,7 +46,7 @@ Everything depends on
 ```
 
 
-### Axialpy
+## Axial.py
 
 #### [Docs](http://alexlenail.me/Axial/html/index.html)
 
@@ -55,7 +57,7 @@ pip install axial
 ```
 
 
-### AxialR
+## Axial.R
 
 Unstarted.
 

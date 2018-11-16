@@ -1,7 +1,7 @@
 {% extends 'base.html.j2' %}
 
 {% block head %}
-<title>Axial Bar Plot</title>
+<title>{{ title }}</title>
 {% endblock %}
 
 {% block content %}
@@ -11,20 +11,12 @@
         <div class="card">
             <div class="card-header">
                 <a class="pull-right" role="button"><i class="fa" id="hide-show"></i></a>
-                <h1><a href="index.html" class="link-unstyled">ABCD1-knockout transcriptome</a></h1>
+                <h1><a href="index.html" class="link-unstyled">{{ title }}</a></h1>
                 <p><a id="download" href="#">Download SVG</a> | <a id="degenes" href="#">Download shown gene list</a></p>
-
-                <nav>
-                    <div class="nav nav-tabs card-header-tabs" role="tablist">
-                        <a class="nav-item nav-link active">hBMEC</a>
-                        <a class="nav-item nav-link" href="mouse_bar.html">mBMEC</a>
-                        <a class="nav-item nav-link" href="lee_bar.html">Lee et. al. 2018 iPS</a>
-                    </div>
-                </nav>
 
             </div>
             <div class="tab-content collapse show" id="collapsable">
-                <div class="tab-pane fade show active card-body" id="hBMEC" role="tabpanel">
+                <div class="tab-pane fade show active card-body" id="" role="tabpanel">
 
                     <div class="row">
                         <div class="form-group col-6">
@@ -53,13 +45,11 @@
 
 {% block scripts %}
 
-<script type="text/javascript" src="data/human_differential.js"></script>
-<script type="text/javascript" src="data/human_gene_sets.js"></script>
-{# <script type="text/javascript" src="bar.js"></script> #}
+{{ scripts_block }}
 
 <script type="text/javascript">
 
-var bar = Bar(human_differential);
+var bar = Bar(differential);
 
 /////////////////////////////////////////////////////////////////////////////
              ///////    Select Gene Set / Thresholds   ///////
