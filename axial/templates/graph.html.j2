@@ -59,6 +59,27 @@
 
 <script>
 
+var color = {
+    {% for attribute_name, metadata in attributes.items() if metadata['display'] in ['color_scale'] %}
+        '{{attribute_name}}':d3.scaleLinear().domain({{ metadata['domain'] }}).range({{ metadata['range'] }}).nice(),
+    {% endfor %}
+    {% for attribute_name, metadata in attributes.items() if metadata['display'] in ['box'] %}
+        '{{attribute_name}}': d3.scaleOrdinal(d3.schemePastel1),
+    {% endfor %}
+    {% for attribute_name, metadata in attributes.items() if metadata['display'] in ['color_category'] %}
+        '{{attribute_name}}': d3.scaleOrdinal(colors20),
+    {% endfor %}
+};
+
+var groups = {
+    {% for attribute_name, metadata in attributes.items() if metadata['display'] in ['box'] %}'{{attribute_name}}': {},{% endfor %}
+};
+
+g = Graph(graph, color, groups);
+
+g.render();
+g.style();
+
 /////////////////////////////////////////////////////////////////////////////
                 ///////    Additional Features    ///////
 /////////////////////////////////////////////////////////////////////////////
