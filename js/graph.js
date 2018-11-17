@@ -12,18 +12,30 @@ function Graph(graph) {
         else { categorical[attr] = _.uniq(array); }
     });
 
-    colors = Object.entries(continuous).map(([key, val]) => )
+    colors = _.object(Object.entries(continuous).map(([key, val]) => [key, d3.scaleLinear().domain().range(val)])
+              .concat(Object.keys(categorical).map(key => [key, d3.scaleOrdinal(d3.schemeSet2)])));
+
+    groups = ;
 
 
-    the names of the continuous and categorical attributes must be outside the closure.
 
-    // construct a groups object for each categorical attribute in graph's nodes
+    graph.nodes.forEach(function (v, i) {
+        Object.keys(groups).forEach(function (key) {
+            if (key in v) {
+                if (!(v[key] in groups[key])) { groups[key][v[key]] = {'id':v[key], 'leaves':[], 'groups':[], 'padding':group_padding}; }
+                groups[key][v[key]]['leaves'].push(i);
+            }
+        });
+    });
 
-    // construct a color scaleOrdinal for each categorical attribute in graph's nodes
+    Object.keys(groups).forEach(function (key) {
+        groups[key] = Object.values(groups[key])
+    });
 
-    // construct a color scaleOrdinal for each categorical attribute in graph's nodes
+    graph.nodes.forEach(function (n) {
+        n.height = n.width = group_boundary_margin;
+    });
 
-    // construct a scaleLinear for each continuous attribute in graph's nodes
 
 
     var colors20 = ['#3366cc', '#dc3912', '#ff9900', '#109618', '#990099', '#0099c6', '#dd4477',
@@ -31,6 +43,7 @@ function Graph(graph) {
                     '#e67300', '#8b0707', '#651067', '#329262', '#5574a6', '#3b3eac'];
 
 
+    shape = d3.scaleOrdinal(d3.symbols);
 
 
     /////////////////////////////////////////////////////////////////////////////
@@ -49,8 +62,8 @@ function Graph(graph) {
 
     var show_only_solution_edges = false;
     var repulsion_strength = 100;
-    var colorBy = 'prize';
-    var groupBy = null;
+    var color_by = 'prize';
+    var group_by = null;
     var turnForceOff = false;
 
     var text_center = false;
@@ -74,7 +87,7 @@ function Graph(graph) {
     var max_confidence = 1;
     var edge_width = d3.scaleLinear().domain([0, 1]).range([0.3, 3]).clamp(true);
 
-    var display_type = d3.scaleOrdinal(d3.symbols);
+
 
     var size = d3.scalePow().exponent(1).domain([1, 100]).range([8, 24]);
 
@@ -100,22 +113,7 @@ function Graph(graph) {
 
 
 
-    graph.nodes.forEach(function (v, i) {
-        Object.keys(groups).forEach(function (key) {
-            if (key in v) {
-                if (!(v[key] in groups[key])) { groups[key][v[key]] = {'id':v[key], 'leaves':[], 'groups':[], 'padding':group_padding}; }
-                groups[key][v[key]]['leaves'].push(i);
-            }
-        });
-    });
 
-    Object.keys(groups).forEach(function (key) {
-        groups[key] = Object.values(groups[key])
-    });
-
-    graph.nodes.forEach(function (n) {
-        n.height = n.width = group_boundary_margin;
-    });
 
     /////////////////////////////////////////////////////////////////////////////
                           ///////    Legends    ///////
@@ -123,8 +121,8 @@ function Graph(graph) {
 
     var legends = g.append('g').attr('class', 'legends');
 
-    var shape_legend = legends.append('g').styles(text_styles).call(d3.legendSymbol().scale(display_type).orient('vertical').title('Node Type'));
-    var color_legend = legends.append('g').styles(text_styles).call(d3.legendColor().shapeWidth(30).orient('vertical').scale(color[colorBy]).title(colorBy));
+    var shape_legend = legends.append('g').styles(text_styles).call(d3.legendSymbol().scale(shape).orient('vertical').title('Node Type'));
+    var color_legend = legends.append('g').styles(text_styles).call(d3.legendColor().shapeWidth(30).orient('vertical').scale(color[color_by]).title(color_by));
     var width_legend = legends.append('g').styles(text_styles).call(d3.legendSize().scale(edge_width).shape('line').orient('vertical').shapeWidth(40).labelAlign('start').shapePadding(10).title('Confidence'));
 
 
@@ -132,30 +130,30 @@ function Graph(graph) {
                           ///////    Setup Graph    ///////
     /////////////////////////////////////////////////////////////////////////////
 
-    function render({groupBy_=groupBy,
+    function render({group_by_=group_by,
                      show_only_solution_edges_=show_only_solution_edges,
                      turnForceOff_=turnForceOff,
                      repulsion_strength_=repulsion_strength,
-                     groupBy_=groupBy,
-                     shapeBy_=shapeBy}={}) {
+                     group_by_=group_by,
+                     shape_by_=shape_by}={}) {
 
 
-        groupBy = groupBy_;
+        group_by = group_by_;
         show_only_solution_edges = show_only_solution_edges_;
         turnForceOff = turnForceOff_;
         repulsion_strength = repulsion_strength_;
-        groupBy = groupBy_;
-        shapeBy = shapeBy_;
+        group_by = group_by_;
+        shape_by = shape_by_;
 
 
-        links = show_only_solution_edges ? graph.links.filter(function (l) {return l.in_solution}) : graph.links;
+        links = show_only_solution_edges ? graph.links.filter(link => link.in_solution) : graph.links;
 
 
         var node = g.selectAll('.node').data(graph.nodes);
         var text = g.selectAll('.text').data(graph.nodes);
         var link = g.selectAll('.link').data(links);
-        var group = g.selectAll('.group').data(groups[groupBy]);
-        var label = g.selectAll('.label').data(groups[groupBy]);
+        var group = g.selectAll('.group').data(groups[group_by]);
+        var label = g.selectAll('.label').data(groups[group_by]);
 
         //
         link.exit().remove()
@@ -167,7 +165,7 @@ function Graph(graph) {
              .append('rect')
              .attr('rx',5)
              .attr('ry',5)
-             .style('fill', function (d) { return color[groupBy](d.id); })
+             .style('fill', function (d) { return color[group_by](d.id); })
              .style('opacity', 0.7)
              .style('cursor', 'pointer')
              .call(cola.drag);
@@ -183,15 +181,15 @@ function Graph(graph) {
            .append('line') // insert before 'node' so that nodes show up on top
            .attr('class', 'link')
            .style('stroke-width', d => edge_width(1-d.cost))
-           .style('stroke', d => color[colorBy](d.score))
+           .style('stroke', d => color[color_by](d.score))
            .style('opacity', edge_opacity);
 
         node.enter()
             .append('path')
             .attr('class', 'node')
             .attr('id', d => d.id)
-            .attr('d', d => display_type(d.type))  // should be able to change the size one day
-            .style('fill', (d) => (d[colorBy] ? color[colorBy](d[colorBy]) : default_node_color) )
+            .attr('d', d => shape(d.type))  // should be able to change the size one day
+            .style('fill', (d) => (d[color_by] ? color[color_by](d[color_by]) : default_node_color) )
             .style('stroke', 'white')
             .style('stroke-width', stroke_width)
             .style('cursor', 'pointer')
@@ -214,8 +212,7 @@ function Graph(graph) {
 
         cola.nodes(graph.nodes)
             .links(links)
-            // .links(turnForceOff ? [] : links)  # TODO
-            .groups(groups[groupBy])
+            .groups(groups[group_by])
             .jaccardLinkLengths(repulsion_strength, 0.7)
             .avoidOverlaps(true)
             .start(50, 0, 50);
@@ -235,7 +232,7 @@ function Graph(graph) {
             node.attr('cx', (d) => d.x )
                 .attr('cy', (d) => d.y );
 
-            if (groupBy) {
+            if (group_by) {
                 group.attr('x', (d) => d.bounds.x + d.padding / 2 )
                      .attr('y', (d) => d.bounds.y + d.padding / 2 )
                      .attr('width', (d) => d.bounds.width() - d.padding )
@@ -248,13 +245,13 @@ function Graph(graph) {
     }
 
 
-    function style({colorBy_=colorBy}={}) {
+    function style({color_by_=color_by}={}) {
 
-        colorBy = colorBy_;
+        color_by = color_by_;
 
-        node.style('fill', (d) => (d[color_nodes_by] ? color[color_nodes_by](d[color_nodes_by]) : default_node_color) );
+        node.style('fill', (d) => (d[color_by] ? color[color_by](d[color_by]) : default_node_color) );
 
-        color_legend.call(d3.legendColor().shapeWidth(30).orient('vertical').scale(color[color_nodes_by]).title(color_nodes_by));
+        color_legend.call(d3.legendColor().shapeWidth(30).orient('vertical').scale(color[color_by]).title(color_by));
 
 
 

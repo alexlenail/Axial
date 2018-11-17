@@ -29,9 +29,11 @@
     <div><label for="shapeBy">Shape nodes by</label><select id="shapeBy"><option value="" selected>None</option></select></div>
     <div><label for="colorBy">Color nodes by</label><select id="colorBy"><option value="" selected>None</option></select></div>
 
+    <div><label for="colorScheme">Color Schemes</label><select id="colorScheme"><option value="" selected>None</option></select></div>
+
     <div><a href="#" id="download"><big>⇩</big> Download SVG</a></div>
 
-    <div><label>Shift+Click a node to open GeneCards</label></div>
+    <div><label>⌘+Click a node to open GeneCards</label></div>
 </header>
 
 <div id="graph-container"></div>
@@ -48,11 +50,6 @@
 
 
 <script>
-
-
-// categorical is a shape, color, or box
-// continuous is a color
-// and you can change the continuous color scheme
 
 var node_attributes = {};
 graph.nodes.forEach(node => Object.entries(node).forEach(([key, val]) => { node_attributes[key] = node_attributes[key] || []; node_attributes[key].append(val) }))
@@ -94,9 +91,9 @@ $("#search_for_node").on('input', function () {
 $("#show_only_solution_edges").change( () => g.render({'show_only_solution_edges_': this.checked}));
 $("#turnForceOff").change(             () => g.render({'turnForceOff_': this.checked}));
 $("#repulsion_strength").change(       () => g.render({'repulsion_strength_': this.value}));
-$("#groupBy").change(                  () => g.render({'groupBy_': this.value}));
-$("#shapeBy").change(                  () => g.render({'shapeBy_': this.value}));
-$("#colorBy").change(                  () => g.style({'colorBy_': this.value}));
+$("#groupBy").change(                  () => g.render({'group_by_': this.value}));
+$("#shapeBy").change(                  () => g.render({'shape_by_': this.value}));
+$("#colorBy").change(                  () => g.style({'color_by_': this.value}));
 $("#edge_opacity").change(             () => g.style({'edge_opacity_': this.value}));
 
 
