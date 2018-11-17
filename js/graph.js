@@ -2,6 +2,37 @@
 
 function Graph(graph) {
 
+    node_attributes = {};
+    graph.nodes.forEach(node => Object.entries(node).forEach(([key, val]) => { node_attributes[key] = node_attributes[key] || []; node_attributes[key].append(val) }))
+
+    continuous = {};
+    categorical = {};
+    Object.entries(node_attributes).forEach(([attr, vals]) => {
+        if (vals.every(val => _.isNumber(val) || _.isNaN(val))) { continuous[attr] = d3.extent(vals); }
+        else { categorical[attr] = _.uniq(array); }
+    });
+
+    colors = Object.entries(continuous).map(([key, val]) => )
+
+
+    the names of the continuous and categorical attributes must be outside the closure.
+
+    // construct a groups object for each categorical attribute in graph's nodes
+
+    // construct a color scaleOrdinal for each categorical attribute in graph's nodes
+
+    // construct a color scaleOrdinal for each categorical attribute in graph's nodes
+
+    // construct a scaleLinear for each continuous attribute in graph's nodes
+
+
+    var colors20 = ['#3366cc', '#dc3912', '#ff9900', '#109618', '#990099', '#0099c6', '#dd4477',
+                    '#66aa00', '#b82e2e', '#316395', '#994499', '#22aa99', '#aaaa11', '#6633cc',
+                    '#e67300', '#8b0707', '#651067', '#329262', '#5574a6', '#3b3eac'];
+
+
+
+
     /////////////////////////////////////////////////////////////////////////////
                     ///////    Structure Variables    ///////
     /////////////////////////////////////////////////////////////////////////////
@@ -43,12 +74,6 @@ function Graph(graph) {
     var max_confidence = 1;
     var edge_width = d3.scaleLinear().domain([0, 1]).range([0.3, 3]).clamp(true);
 
-    var colors20 = ['#3366cc', '#dc3912', '#ff9900', '#109618', '#990099', '#0099c6', '#dd4477',
-                    '#66aa00', '#b82e2e', '#316395', '#994499', '#22aa99', '#aaaa11', '#6633cc',
-                    '#e67300', '#8b0707', '#651067', '#329262', '#5574a6', '#3b3eac'];
-
-
-
     var display_type = d3.scaleOrdinal(d3.symbols);
 
     var size = d3.scalePow().exponent(1).domain([1, 100]).range([8, 24]);
@@ -60,8 +85,6 @@ function Graph(graph) {
 
     var svg = d3.select('#graph-container').append('svg').attr('xmlns', 'http://www.w3.org/2000/svg').attr('xmlns:xlink', 'http://www.w3.org/1999/xlink');
     var g = svg.append('g');
-
-
 
 
     var cola = cola.d3adaptor(d3).size([w, h]);
@@ -109,7 +132,21 @@ function Graph(graph) {
                           ///////    Setup Graph    ///////
     /////////////////////////////////////////////////////////////////////////////
 
-    function render() {
+    function render({groupBy_=groupBy,
+                     show_only_solution_edges_=show_only_solution_edges,
+                     turnForceOff_=turnForceOff,
+                     repulsion_strength_=repulsion_strength,
+                     groupBy_=groupBy,
+                     shapeBy_=shapeBy}={}) {
+
+
+        groupBy = groupBy_;
+        show_only_solution_edges = show_only_solution_edges_;
+        turnForceOff = turnForceOff_;
+        repulsion_strength = repulsion_strength_;
+        groupBy = groupBy_;
+        shapeBy = shapeBy_;
+
 
         links = show_only_solution_edges ? graph.links.filter(function (l) {return l.in_solution}) : graph.links;
 
@@ -175,10 +212,6 @@ function Graph(graph) {
 
 
 
-
-
-
-
         cola.nodes(graph.nodes)
             .links(links)
             // .links(turnForceOff ? [] : links)  # TODO
@@ -214,11 +247,14 @@ function Graph(graph) {
         });
     }
 
-    function style() {
 
-        node.style('fill', (d) => (d[colorBy] ? color[colorBy](d[colorBy]) : default_node_color) );
+    function style({colorBy_=colorBy}={}) {
 
-        color_legend.call(d3.legendColor().shapeWidth(30).orient('vertical').scale(color[colorBy]).title(colorBy));
+        colorBy = colorBy_;
+
+        node.style('fill', (d) => (d[color_nodes_by] ? color[color_nodes_by](d[color_nodes_by]) : default_node_color) );
+
+        color_legend.call(d3.legendColor().shapeWidth(30).orient('vertical').scale(color[color_nodes_by]).title(color_nodes_by));
 
 
 

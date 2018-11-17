@@ -364,7 +364,7 @@ def heatmap(genes_by_samples_matrix, sample_attributes, title='Axial Heatmap', s
 
 
 def graph(networkx_graph, title='Axial Graph Visualization', scripts_mode="CDN", data_mode="directory",
-          attribute_metadata=dict(), output_dir=".", filename="graph.html"):
+          output_dir=".", filename="graph.html"):
     """
     Arguments:
         networkx_graph (networkx.Graph): any instance of networkx.Graph
@@ -376,7 +376,6 @@ def graph(networkx_graph, title='Axial Graph Visualization', scripts_mode="CDN",
                 "directory" compiles a directory with all data locally cached,
                 "inline" compiles a single HTML file with all data inlined.
         organism (str): "human" or "mouse"
-        attribute_metadata (dict):
         output_dir (str): the directory in which to output the file
         filename (str): the filename of the output file
     Returns:
@@ -399,42 +398,12 @@ def graph(networkx_graph, title='Axial Graph Visualization', scripts_mode="CDN",
     # unfortunately CoLa still uses the D3V3 graph format, requiring the following two lines.
     def indexOf(node_id): return [i for (i,node) in enumerate(graph_json['nodes']) if node['id'] == node_id][0]
     graph_json["links"] = [{**link, **{"source":indexOf(link['source_name']), "target":indexOf(link['target_name'])}} for link in graph_json["links"]]
+    # TODO round all numberic values in graph_json.
     graph_json = json.dumps(graph_json)
 
     data_block = _data_block(data_mode, [('graph', graph_json)])
 
-    # Other   =======================
-
-    _verify_attribute_metadata(attribute_metadata)
-
-    # TODO comment
-    unaccounted_for_attributes = set(_flatten([attrs.keys() for node_id, attrs in networkx_graph.nodes(data=True)])) - set(attribute_metadata.keys())
-    inferred_attribute_metadata = {}
-
-    for attr in unaccounted_for_attributes:
-        logger.info(f'Inferring display parameters for {attr}')
-        values = pd.Series(list(nx.get_node_attributes(networkx_graph, attr).values())).dropna()
-
-        if all([isinstance(value, numbers.Number) for value in values]):
-            if min(values) < 0:
-                inferred_attribute_metadata[attr] = {'display': 'color_scale', 'domain': f'[{min(values)},0,{max(values)}]', 'range':'["blue","white","red"]'}
-            elif 0 <= min(values) < 0.1:
-                inferred_attribute_metadata[attr] = {'display': 'color_scale', 'domain': f'[0,{max(values)}]', 'range':'["white","red"]'}
-            else:
-                inferred_attribute_metadata[attr] = {'display': 'color_scale', 'domain': f'[{min(values)},{max(values)}]', 'range':'["purple","orange"]'}
-
-        else:
-            inferred_attribute_metadata[attr] = {'display': 'color_category' }
-
-    # TODO comment
-    attribute_metadata = {**inferred_attribute_metadata, **attribute_metadata}
-
-    logger.info('Final display parameters:')
-    logger.info('\n'+json.dumps(attribute_metadata, indent=4))
-
-    # TODO cast attribute_metadata to list?
-
-    html = templateEnv.get_template('graph.html.j2').render(title=title, scripts_block=scripts_block+data_block, nodes=networkx_graph.nodes(), attributes=attribute_metadata)
+    html = templateEnv.get_template('graph.html.j2').render(title=title, scripts_block=scripts_block+data_block, nodes=networkx_graph.nodes())
 
     (output_dir / filename).write_text(html)
 

@@ -1152,7 +1152,3 @@ function Heatmap(samples_by_genes_matrix, gene_sets, classes, separate_zscore_by
 
 }
 
-
-
-
-

@@ -22,22 +22,12 @@
 
     {# <div><input type="checkbox" id="turnForceOff" name="turnForceOff" value="turnForceOff"><label for="turnForceOff">Turn Off Force</label></div> #}
 
-    <div><label for="">Force</label><input type="range" id="repulsion_strength" min="10" max="800" step="1" value="100"></div>
+    <div><label>Force</label><input type="range" id="repulsion_strength" min="10" max="800" step="1" value="100"></div>
+    <div><label>Opacity</label><input type="range" id="edge_opacity" min="0" max="1" step="0.01" value="0.6"></div>
 
-    <div><label for="">Opacity</label><input type="range" id="edge_opacity" min="0" max="1" step="0.01" value="0.6"></div>
-
-    <div><label for="colorBy">Color nodes by</label>
-        <select id="colorBy">
-            {% for attribute_name, metadata in attributes.items() if metadata['display'] in ['color_scale', 'color_category'] %}<option value="{{attribute_name}}">{{attribute_name}}</option>{% endfor %}
-        </select>
-    </div>
-
-    <div><label for="groupBy">Group nodes by</label>
-        <select id="groupBy">
-            <option value="" selected>None</option>
-            {% for attribute_name, metadata in attributes.items() if metadata['display'] in ['box'] %}<option value="{{attribute_name}}">{{attribute_name}}</option>{% endfor %}
-        </select>
-    </div>
+    <div><label for="groupBy">Group nodes by</label><select id="groupBy"><option value="" selected>None</option></select></div>
+    <div><label for="shapeBy">Shape nodes by</label><select id="shapeBy"><option value="" selected>None</option></select></div>
+    <div><label for="colorBy">Color nodes by</label><select id="colorBy"><option value="" selected>None</option></select></div>
 
     <div><a href="#" id="download"><big>⇩</big> Download SVG</a></div>
 
@@ -59,26 +49,32 @@
 
 <script>
 
-var color = {
-    {% for attribute_name, metadata in attributes.items() if metadata['display'] in ['color_scale'] %}
-        '{{attribute_name}}':d3.scaleLinear().domain({{ metadata['domain'] }}).range({{ metadata['range'] }}).nice(),
-    {% endfor %}
-    {% for attribute_name, metadata in attributes.items() if metadata['display'] in ['box'] %}
-        '{{attribute_name}}': d3.scaleOrdinal(d3.schemePastel1),
-    {% endfor %}
-    {% for attribute_name, metadata in attributes.items() if metadata['display'] in ['color_category'] %}
-        '{{attribute_name}}': d3.scaleOrdinal(colors20),
-    {% endfor %}
-};
 
-var groups = {
-    {% for attribute_name, metadata in attributes.items() if metadata['display'] in ['box'] %}'{{attribute_name}}': {},{% endfor %}
-};
+// categorical is a shape, color, or box
+// continuous is a color
+// and you can change the continuous color scheme
 
-g = Graph(graph, color, groups);
+var node_attributes = {};
+graph.nodes.forEach(node => Object.entries(node).forEach(([key, val]) => { node_attributes[key] = node_attributes[key] || []; node_attributes[key].append(val) }))
+
+var continuous = [];
+var categorical = [];
+Object.entries(node_attributes).forEach(([attr, vals]) => {
+    if (vals.every(val => _.isNumber(val) || _.isNaN(val))) { continuous.append(attr); } else { categorical.append(attr); }
+});
+
+
+$("#colorBy").append(continuous.map(attr => `<option value="${attr}">${attr}</option>`)
+            .concat(categorical.map(attr => `<option value="${attr}">${attr}</option>`)));
+$("#shapeBy").append(categorical.map(attr => `<option value="${attr}">${attr}</option>`));
+$("#groupBy").append(categorical.map(attr => `<option value="${attr}">${attr}</option>`));
+
+
+g = Graph(graph);
 
 g.render();
 g.style();
+
 
 /////////////////////////////////////////////////////////////////////////////
                 ///////    Additional Features    ///////
@@ -95,32 +91,13 @@ $("#search_for_node").on('input', function () {
     else { remove_focus(); remove_highlight(); }
 });
 
-$("#show_only_solution_edges").change(function() {
-    show_only_solution_edges = this.checked; restart();
-});
-
-$("#colorBy").change(function() {
-    colorBy = this.value; recolor();
-});
-
-$("#groupBy").change(function() {
-    if(this.value) { groupBy = this.value; restart(); }
-    else { groupBy = null; restart(); }
-});
-
-$("#turnForceOff").change(function() {
-    turnForceOff = this.checked; restart();
-});
-
-$("#edge_opacity").change(function(){
-    edge_opacity = this.value;
-    link.style("opacity", edge_opacity )
-})
-
-$("#repulsion_strength").change(function(){
-    repulsion_strength = this.value;
-    restart();
-})
+$("#show_only_solution_edges").change( () => g.render({'show_only_solution_edges_': this.checked}));
+$("#turnForceOff").change(             () => g.render({'turnForceOff_': this.checked}));
+$("#repulsion_strength").change(       () => g.render({'repulsion_strength_': this.value}));
+$("#groupBy").change(                  () => g.render({'groupBy_': this.value}));
+$("#shapeBy").change(                  () => g.render({'shapeBy_': this.value}));
+$("#colorBy").change(                  () => g.style({'colorBy_': this.value}));
+$("#edge_opacity").change(             () => g.style({'edge_opacity_': this.value}));
 
 
 /////////////////////////////////////////////////////////////////////////////
