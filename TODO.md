@@ -2,10 +2,6 @@
 
 
 
-categorical is a shape, color, or box
-continuous is a color
-and you can change the continuous color scheme
-
 
 
 

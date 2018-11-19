@@ -35,8 +35,10 @@ https://unpkg.com/axialjs@0.0.2/js/reorder.js
 https://unpkg.com/axialjs@0.0.2/js/braid.js (depends on util.js, reorder.js)
 https://unpkg.com/axialjs@0.0.2/js/heatmap.js (depends on util.js, reorder.js)
 
-https://unpkg.com/axialjs@0.0.2/js/graph.js
+https://unpkg.com/axialjs@0.0.2/js/cola.min.js
+https://unpkg.com/axialjs@0.0.2/js/graph.js (depends on cola.min.js)
 ```
+
 All axialjs visualizations depend on
 
 ```

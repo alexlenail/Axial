@@ -76,15 +76,15 @@ def _scripts_block(scripts, mode, output_dir):
         for script in scripts:
             (output_dir / "scripts" / script.rsplit('/', 1)[1]).write_text(requests.get(script).text)
 
-        script_block = '\n'.join([f"<script type='text/javascript' src='scripts/{script.rsplit('/', 1)[1]}'></script>" for script in scripts])
+        script_block = '\n'.join([f"<script src='scripts/{script.rsplit('/', 1)[1]}'></script>" for script in scripts])
 
     elif mode == "CDN":
 
-        script_block = '\n'.join([f"<script type='text/javascript' src='{script}'></script>" for script in scripts])
+        script_block = '\n'.join([f"<script src='{script}'></script>" for script in scripts])
 
     elif mode == "inline":
 
-        script_block = '\n'.join([f"<script type='text/javascript'>{requests.get(script).text}</script>" for script in scripts])
+        script_block = '\n'.join([f"<script>{requests.get(script).text}</script>" for script in scripts])
 
     else: raise ValueError('scripts_mode must be one of ["CDN", "directory", "inline"]')
 
@@ -102,19 +102,19 @@ def _data_block(mode, names_and_jsons, include_gene_sets=True, organism="human")
 
         for name, json in names_and_jsons:
             (output_dir / "data" / f"{name}.js").write_text(json)
-            data_block.append(f"<script type='text/javascript' src='data/{name}.js'></script>")
+            data_block.append(f"<script src='data/{name}.js'></script>")
 
         if include_gene_sets:
             copyfile(gene_ontology[organism], output_dir / "data" / "gene_sets.js")
-            data_block.append(f"<script type='text/javascript' src='data/gene_sets.js'></script>")
+            data_block.append(f"<script src='data/gene_sets.js'></script>")
 
     elif mode == "inline":
 
         for name, json in names_and_jsons:
-            data_block.append(f"<script type='text/javascript'>{json}</script>")
+            data_block.append(f"<script>{json}</script>")
 
         if include_gene_sets:
-            data_block.append(f"<script type='text/javascript'>{Path(gene_ontology[organism]).read_text()}</script>")
+            data_block.append(f"<script>{Path(gene_ontology[organism]).read_text()}</script>")
 
 
     else: raise ValueError('data_mode must be one of ["directory", "inline"]')
@@ -388,7 +388,7 @@ def graph(networkx_graph, title='Axial Graph Visualization', scripts_mode="CDN",
 
     # Scripts =======================
 
-    scripts = third_party_scripts + [CDN_url+"js/graph.js"]
+    scripts = third_party_scripts + [CDN_url+"js/cola.min.js", CDN_url+"js/graph.js"]
 
     scripts_block = _scripts_block(scripts, scripts_mode, output_dir)
 
@@ -399,7 +399,7 @@ def graph(networkx_graph, title='Axial Graph Visualization', scripts_mode="CDN",
     def indexOf(node_id): return [i for (i,node) in enumerate(graph_json['nodes']) if node['id'] == node_id][0]
     graph_json["links"] = [{**link, **{"source":indexOf(link['source_name']), "target":indexOf(link['target_name'])}} for link in graph_json["links"]]
     # TODO round all numberic values in graph_json.
-    graph_json = json.dumps(graph_json)
+    graph_json = f"var graph = {json.dumps(graph_json)};"
 
     data_block = _data_block(data_mode, [('graph', graph_json)])
 
