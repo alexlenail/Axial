@@ -16,7 +16,6 @@ import pkg_resources
 import requests
 
 # python external libraries
-import numpy as np
 import pandas as pd
 import networkx as nx
 from networkx.readwrite import json_graph as nx_json
@@ -31,15 +30,11 @@ handler.setLevel(logging.INFO)
 handler.setFormatter(logging.Formatter('%(asctime)s - Axial: %(levelname)s - %(message)s', "%I:%M:%S"))
 logger.addHandler(handler)
 
-gene_ontology = {
-    'human': '/Users/alex/Documents/Axial/axial/go/human_gene_sets.js',
-    'mouse': '/Users/alex/Documents/Axial/axial/go/mouse_gene_sets.js',
-}
 
-# gene_ontology = {
-#     'human': pkg_resources.resource_filename('axial', 'go/human_gene_sets.js'),
-#     'mouse': pkg_resources.resource_filename('axial', 'go/mouse_gene_sets.js'),
-# }
+gene_ontology = {
+    'human': pkg_resources.resource_filename('axial', 'go/human_gene_sets.js'),
+    'mouse': pkg_resources.resource_filename('axial', 'go/mouse_gene_sets.js'),
+}
 
 CDN_url = 'https://unpkg.com/axialjs@latest/'
 
@@ -56,10 +51,7 @@ third_party_scripts = [
     "https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.9.1/underscore-min.js",
 ]
 
-
-templateEnv = jinja2.Environment(loader=jinja2.FileSystemLoader( "/Users/alex/Documents/Axial/axial/templates" ))
-
-# templateEnv = jinja2.Environment(loader=jinja2.PackageLoader('axial', 'templates'))
+templateEnv = jinja2.Environment(loader=jinja2.PackageLoader('axial', 'templates'))
 
 
 ###############################################################################
@@ -127,30 +119,32 @@ def _data_block(mode, names_and_jsons, include_gene_sets=True, organism="human")
 def _verify_differential_df(df):
     """
     """
-    # make sure all q values are positive
-    # make sure it looks like the -log transform has been taken.
-    # make sure the logFCs sum to zero, are all less than 5ish
-
-    pass
+    if any(df.q < 0): logger.critical('Negative q-values not allowed')
+    assert all(df.q >= 0)
+    if all(df.q < 1): logger.critical('Q-values must be -log\'d -- raw q-values not accepted')
+    assert any(df.q > 1)
+    if any(abs(df.logFC) > 10): logger.info('some logFC exceed 10 -- please make sure log transform was appropriately taken.')
 
 
 def _verify_sample_by_genes_matrix(df):
     """
     """
+    if any([df[col].dtype.kind not in 'bifc' for col in df.columns]): logger.critical('All values in sample by genes matrix must be numeric')
+    assert all([df[col].dtype.kind in 'bifc' for col in df.columns])
 
-    pass
-
+    if len(df.index) < len(df.columns): logger.warning('Genes must be on the index, not in the columns')
+    assert len(df.index) > len(df.columns)
 
 
 def _verify_sample_attributes(matrix, attributes):
     """
     """
+    if set(matrix.columns.tolist()) != set(attributes.index.tolist()):
+        logger.warning('Given sample metadata does not perfectly overlap with given sample data:')
+        logger.warning('Samples with data: ', matrix.columns.tolist())
+        logger.warning('Samples with metadata: ', attributes.index.tolist())
 
-    pass
-
-def _verify_attribute_metadata(attribute_metadata):
-
-    pass
+    assert len(set(matrix.columns.tolist()) & set(attributes.index.tolist())) > 0
 
 
 def _flatten(list_of_lists): return [item for sublist in list_of_lists for item in sublist]
@@ -206,7 +200,7 @@ def volcano(differential_df, title='Axial Volcano Plot', scripts_mode="CDN", dat
     (output_dir / filename).write_text(html)
 
 
-    return (output_dir / filename).absolute()
+    return (output_dir / filename).resolve()
 
 
 
@@ -258,7 +252,7 @@ def bar(differential_df, title='Axial Pathway Bar Plot', scripts_mode="CDN", dat
     (output_dir / filename).write_text(html)
 
 
-    return (output_dir / filename).absolute()
+    return (output_dir / filename).resolve()
 
 
 
@@ -307,7 +301,7 @@ def braid(genes_by_samples_matrix, sample_attributes, title='Axial Braid Plot', 
     (output_dir / filename).write_text(html)
 
 
-    return (output_dir / filename).absolute()
+    return (output_dir / filename).resolve()
 
 
 def heatmap(genes_by_samples_matrix, sample_attributes, title='Axial Heatmap', scripts_mode="CDN", data_mode="directory",
@@ -358,7 +352,7 @@ def heatmap(genes_by_samples_matrix, sample_attributes, title='Axial Heatmap', s
     (output_dir / filename).write_text(html)
 
 
-    return (output_dir / filename).absolute()
+    return (output_dir / filename).resolve()
 
 
 
@@ -394,11 +388,17 @@ def graph(networkx_graph, title='Axial Graph Visualization', scripts_mode="CDN",
 
     # Data    =======================
 
-    graph_json = nx_json.node_link_data(networkx_graph, attrs=dict(source='source_name', target='target_name', name='id', key='key', link='links'))
-    # unfortunately CoLa still uses the D3V3 graph format, requiring the following two lines.
-    def indexOf(node_id): return [i for (i,node) in enumerate(graph_json['nodes']) if node['id'] == node_id][0]
-    graph_json["links"] = [{**link, **{"source":indexOf(link['source_name']), "target":indexOf(link['target_name'])}} for link in graph_json["links"]]
-    # TODO round all numberic values in graph_json.
+    graph_json = nx_json.node_link_data(networkx_graph)
+
+    for node in graph_json['nodes']:
+        for attr, val in node.items():
+            if isinstance(val, numbers.Number):
+                node[attr] = round(val, 2)
+    for link in graph_json['links']:
+        for attr, val in link.items():
+            if isinstance(val, numbers.Number):
+                link[attr] = round(val, 2)
+
     graph_json = f"var graph = {json.dumps(graph_json)};"
 
     data_block = _data_block(data_mode, [('graph', graph_json)])
@@ -407,5 +407,5 @@ def graph(networkx_graph, title='Axial Graph Visualization', scripts_mode="CDN",
 
     (output_dir / filename).write_text(html)
 
-    return (output_dir / filename).absolute()
+    return (output_dir / filename).resolve()
 

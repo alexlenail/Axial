@@ -22,6 +22,13 @@ function Graph(graph, nested_groups) {
         else { categorical_edge_attributes[attr] = _.uniq(vals); }
     });
 
+
+    // const index = new Map(nodes.map(d => [d.id, d]));
+    //   const links = data.links.map(d => Object.assign(Object.create(d), {
+    //     source: index.get(d.source),
+    //     target: index.get(d.target)
+    //   }));
+
     /////////////////////////////////////////////////////////////////////////////
                     ///////    Styling Variables    ///////
     /////////////////////////////////////////////////////////////////////////////
@@ -117,7 +124,11 @@ function Graph(graph, nested_groups) {
 
 
     var focus_node = null;
-    var force = null;
+    // var force = null;
+    var links = null;
+
+    var cola_force = cola.d3adaptor(d3).size([w, h]);
+    var d3_force = d3.forceSimulation();
 
 
     /////////////////////////////////////////////////////////////////////////////
@@ -148,6 +159,16 @@ function Graph(graph, nested_groups) {
                      show_only_solution_edges_=show_only_solution_edges,
                      group_nodes_by_=group_nodes_by}={}) {
 
+        if (group_nodes_by !== group_nodes_by_) {
+            force.on('tick', null);
+            force.stop();
+            // node.data([]).exit().remove();
+            // text.data([]).exit().remove();
+            // link.data([]).exit().remove();
+            // group.data([]).exit().remove();
+            // label.data([]).exit().remove();
+        }
+
         fix_nodes = fix_nodes_;
         repulsion_strength = repulsion_strength_;
         show_only_solution_edges = show_only_solution_edges_;
@@ -164,30 +185,6 @@ function Graph(graph, nested_groups) {
         link.exit().remove();
         group.exit().remove();
         label.exit().remove();
-
-        group = group.enter()
-             .append('rect')
-             .attr('rx',5)
-             .attr('ry',5)
-             .style('fill', function (d) { return node_color[group_nodes_by](d.id); })
-             .style('opacity', group_opacity)
-             .style('cursor', 'pointer')
-             .merge(group);
-
-        label = label.enter()
-             .append('text')
-             .attr('class', 'label')
-             .styles(text_styles)
-             .text(function (d) { return d.id; })
-             .merge(label);
-
-        link = link.enter()
-           .append('line')
-           .attr('class', 'link')
-           .style('stroke-width', d => edge_width(1-d.cost))
-           .style('stroke', d => d[color_edges_by] ? edge_color[color_edges_by](d[color_edges_by]) : default_edge_color)
-           .style('opacity', edge_opacity)
-           .merge(link);
 
         node = node.enter()
             .append('path')
@@ -210,35 +207,57 @@ function Graph(graph, nested_groups) {
             .attr('dx', d => (text_center ? 0 : Math.sqrt(node_size[size_nodes_by] ? node_size[size_nodes_by](d[size_nodes_by]) : default_node_size))/2 )
             .merge(text);
 
+        link = link.enter()
+           .insert('line', '.node')
+           .attr('class', 'link')
+           .style('stroke-width', d => edge_width(1-d.cost))
+           .style('stroke', d => d[color_edges_by] ? edge_color[color_edges_by](d[color_edges_by]) : default_edge_color)
+           .style('opacity', edge_opacity)
+           .merge(link);
+
+        group = group.enter()
+             .insert('rect', '.link')
+             .attr('rx',5)
+             .attr('ry',5)
+             .style('fill', function (d) { return node_color[group_nodes_by](d.id); })
+             .style('opacity', group_opacity)
+             .style('cursor', 'pointer')
+             .merge(group);
+
+        label = label.enter()
+             .insert('text', '.link')
+             .attr('class', 'label')
+             .styles(text_styles)
+             .text(function (d) { return d.id; })
+             .merge(label);
+
 
         if (group_nodes_by) {
 
-            force = cola.d3adaptor(d3)
-                        .size([w, h])
-                        .nodes(graph.nodes)
-                        .links(links)
-                        .groups(groups[group_nodes_by])
-                        .jaccardLinkLengths(repulsion_strength, 0.7)
-                        .avoidOverlaps(true)
-                        .start(50, 0, 50);
+            force = cola_force.nodes(graph.nodes)
+                              .links(links)
+                              .groups(groups[group_nodes_by])
+                              .jaccardLinkLengths(repulsion_strength, 0.7)
+                              .avoidOverlaps(true)
+                              .start(50, 0, 50);
 
-            node.call(force.drag);
-            group.call(force.drag);
+            node.call(cola_force.drag);
+            group.call(cola_force.drag);
 
-            force.groupCompactness = group_compactness;
+            cola_force.groupCompactness = group_compactness;
 
-            force.on('tick',  ticked);
+            cola_force.on('tick',  ticked);
 
         } else {
 
-            force = d3.forceSimulation(graph.nodes)
-                      .force("link", d3.forceLink(links))
-                      .force("charge", d3.forceManyBody().strength(-repulsion_strength))
-                      .force("center", d3.forceCenter(w/2,h/2));
+            force = d3_force.nodes(graph.nodes)
+                            .force("link", d3.forceLink(links))
+                            .force("charge", d3.forceManyBody().strength(-repulsion_strength))
+                            .force("center", d3.forceCenter(w/2,h/2));
 
-            node.call(drag(force));
+            node.call(drag(d3_force));
 
-            force.on('tick', ticked);
+            d3_force.on('tick', ticked);
         }
     }
 

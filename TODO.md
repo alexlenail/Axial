@@ -7,18 +7,11 @@ handoff between layout algorithms
 
 affix nodes
 
-
+move the indexOf stuff into the javascript
 
 ---
 
 
-fix how the python puts scripts in a directory -- get rid of the .rsplit()
-
-
-the "verify" functions
-
-
-pkg_resources -- publish python package
 
 
 finish docs homepage
