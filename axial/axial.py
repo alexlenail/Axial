@@ -119,7 +119,7 @@ def _data_block(mode, names_and_jsons, include_gene_sets=True, organism="human")
 
     else: raise ValueError('data_mode must be one of ["directory", "inline"]')
 
-    data_block = '\n'.join(data_block)+'\n'
+    data_block = '\n'.join(data_block)
     return data_block
 
 
@@ -201,7 +201,7 @@ def volcano(differential_df, title='Axial Volcano Plot', scripts_mode="CDN", dat
     scripts_block = _scripts_block(scripts, scripts_mode, output_dir)
 
 
-    html = templateEnv.get_template('volcano.html.j2').render(title=title, scripts_block=scripts_block+data_block, organism="HOMO_SAPIENS")
+    html = templateEnv.get_template('volcano.html.j2').render(title=title, scripts_block=scripts_block+'\n'+data_block, organism="HOMO_SAPIENS")
 
     (output_dir / filename).write_text(html)
 
@@ -253,7 +253,7 @@ def bar(differential_df, title='Axial Pathway Bar Plot', scripts_mode="CDN", dat
     scripts_block = _scripts_block(scripts, scripts_mode, output_dir)
 
 
-    html = templateEnv.get_template('bar.html.j2').render(title=title, scripts_block=scripts_block+data_block)
+    html = templateEnv.get_template('bar.html.j2').render(title=title, scripts_block=scripts_block+'\n'+data_block)
 
     (output_dir / filename).write_text(html)
 
@@ -302,7 +302,7 @@ def braid(genes_by_samples_matrix, sample_attributes, title='Axial Braid Plot', 
     scripts_block = _scripts_block(scripts, scripts_mode, output_dir)
 
 
-    html = templateEnv.get_template('braid.html.j2').render(title=title, scripts_block=scripts_block+data_block)
+    html = templateEnv.get_template('braid.html.j2').render(title=title, scripts_block=scripts_block+'\n'+data_block)
 
     (output_dir / filename).write_text(html)
 
@@ -353,7 +353,7 @@ def heatmap(genes_by_samples_matrix, sample_attributes, title='Axial Heatmap', s
     scripts_block = _scripts_block(scripts, scripts_mode, output_dir)
 
 
-    html = templateEnv.get_template('heatmap.html.j2').render(title=title, scripts_block=scripts_block+data_block, separate_zscore_by=separate_zscore_by)
+    html = templateEnv.get_template('heatmap.html.j2').render(title=title, scripts_block=scripts_block+'\n'+data_block, separate_zscore_by=separate_zscore_by)
 
     (output_dir / filename).write_text(html)
 
@@ -403,7 +403,7 @@ def graph(networkx_graph, title='Axial Graph Visualization', scripts_mode="CDN",
 
     data_block = _data_block(data_mode, [('graph', graph_json)])
 
-    html = templateEnv.get_template('graph.html.j2').render(title=title, scripts_block=scripts_block+data_block, nodes=networkx_graph.nodes())
+    html = templateEnv.get_template('graph.html.j2').render(title=title, scripts_block=scripts_block+'\n'+data_block, nodes=networkx_graph.nodes())
 
     (output_dir / filename).write_text(html)
 

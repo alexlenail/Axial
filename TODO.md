@@ -1,8 +1,21 @@
 
 
 
+legends show default stuff, always render
+
+handoff between layout algorithms
+
+affix nodes
 
 
+
+---
+
+
+fix how the python puts scripts in a directory -- get rid of the .rsplit()
+
+
+the "verify" functions
 
 
 pkg_resources -- publish python package
@@ -11,11 +24,13 @@ pkg_resources -- publish python package
 finish docs homepage
 
 
-d3 instead of cola when you aren't showing boxes
-
 
 
 ---
+
+window.location.hash in all vizzies
+
+horizontal scroll issues
 
 
 loading UI
