@@ -2,8 +2,12 @@
 
 function Graph(graph, nested_groups) {
 
+    // TODO assert that all the graph.nodes have IDs
+
     var node_attributes = {};
     graph.nodes.forEach(node => Object.entries(node).forEach(([key, val]) => { node_attributes[key] = node_attributes[key] || []; node_attributes[key].push(val) }))
+
+    // TODO remove attributes like ID, name which you don't want to color by
 
     var continuous_node_attributes = {};
     var categorical_node_attributes = {};
@@ -16,7 +20,7 @@ function Graph(graph, nested_groups) {
     var edge_indices = new Map(graph.nodes.map((d, i) => [d.id, i]));
     graph.links.forEach(edge => {
         Object.entries(edge).forEach(([key, val]) => { edge_attributes[key] = edge_attributes[key] || []; edge_attributes[key].push(val) })
-        Object.assign(edge, {'source_name': edge.source, 'target_name': edge.target, 'source': edge_indices.get(edge.source), 'target': edge_indices.get(edge.target)})
+        Object.assign(edge, {'source_name': edge.source, 'target_name': edge.target, 'source': edge_indices.get(edge.source), 'target': edge_indices.get(edge.target), 'id':_([edge.source, edge.target]).sortBy().join('--')})
     });
 
     var continuous_edge_attributes = {};
@@ -122,8 +126,10 @@ function Graph(graph, nested_groups) {
 
 
     var focus_node = null;
-    // var force = null;
+    var force = null;
     var links = null;
+    var nodes = null;
+    var groups = null;
 
     var cola_force = cola.d3adaptor(d3).size([w, h]);
     var d3_force = d3.forceSimulation();
@@ -160,11 +166,7 @@ function Graph(graph, nested_groups) {
         if (group_nodes_by !== group_nodes_by_) {
             force.on('tick', null);
             force.stop();
-            // node.data([]).exit().remove();
-            // text.data([]).exit().remove();
-            // link.data([]).exit().remove();
-            // group.data([]).exit().remove();
-            // label.data([]).exit().remove();
+            // remove drag handlers somehow
         }
 
         fix_nodes = fix_nodes_;
@@ -172,13 +174,17 @@ function Graph(graph, nested_groups) {
         show_only_solution_edges = show_only_solution_edges_;
         group_nodes_by = group_nodes_by_;
 
-        links = show_only_solution_edges ? graph.links.filter(link => link.in_solution) : graph.links;
+        console.log('render with repulsion_strength: ', repulsion_strength);
 
-        node = node.data(graph.nodes);
-        text = text.data(graph.nodes);
-        link = link.data(links);
-        group = group.data(groups[group_nodes_by] || []);
-        label = label.data(groups[group_nodes_by] || []);
+        nodes = graph.nodes.map(node => Object.create(node));
+        links = show_only_solution_edges ? graph.links.filter(link => link.in_solution) : graph.links.map(edge => Object.create(edge));
+        groups = (groups[group_nodes_by] || []).map(group => Object.create(group));
+
+        node = node.data(nodes, d => d.id);
+        text = text.data(nodes, d => d.id);
+        link = link.data(links, d => d.id);
+        group = group.data(groups, d => d.id);
+        label = label.data(groups, d => d.id);
 
         link.exit().remove();
         group.exit().remove();
@@ -193,7 +199,7 @@ function Graph(graph, nested_groups) {
             .on('mouseout', remove_highlight)
             // .on('mousedown', set_focus)
             // .on('mouseup', remove_focus)
-            .on('click', d => { if (d3.event.metaKey) {window.open('http://www.genecards.org/cgi-bin/carddisp.pl?gene='+d.id);} })
+            .on('click', d => { if (d3.event.metaKey) { window.open('http://www.genecards.org/cgi-bin/carddisp.pl?gene='+d.id); } })
             .merge(node)
 
         text = text.enter()
@@ -217,7 +223,7 @@ function Graph(graph, nested_groups) {
              .insert('rect', '.link')
              .attr('rx',5)
              .attr('ry',5)
-             .style('fill', function (d) { return node_color[group_nodes_by](d.id); })
+             .style('fill', d => node_color[group_nodes_by](d.id))
              .style('opacity', group_opacity)
              .style('cursor', 'pointer')
              .merge(group);
@@ -226,15 +232,15 @@ function Graph(graph, nested_groups) {
              .insert('text', '.link')
              .attr('class', 'label')
              .styles(text_styles)
-             .text(function (d) { return d.id; })
+             .text(d => d.id)
              .merge(label);
 
 
         if (group_nodes_by) {
 
-            force = cola_force.nodes(graph.nodes)
+            force = cola_force.nodes(nodes)
                               .links(links)
-                              .groups(groups[group_nodes_by])
+                              .groups(groups)
                               .jaccardLinkLengths(repulsion_strength, 0.7)
                               .avoidOverlaps(true)
                               .start(50, 0, 50);
@@ -248,7 +254,7 @@ function Graph(graph, nested_groups) {
 
         } else {
 
-            force = d3_force.nodes(graph.nodes)
+            force = d3_force.nodes(nodes)
                             .force("link", d3.forceLink(links))
                             .force("charge", d3.forceManyBody().strength(-repulsion_strength))
                             .force("center", d3.forceCenter(w/2,h/2));

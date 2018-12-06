@@ -1,11 +1,11 @@
 
 
+handoff between layout algorithms
 
 legends show default stuff, always render
 
-handoff between layout algorithms
-
 affix nodes
+
 
 ---
 
