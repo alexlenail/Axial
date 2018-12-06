@@ -7,8 +7,6 @@ handoff between layout algorithms
 
 affix nodes
 
-move the indexOf stuff into the javascript
-
 ---
 
 
@@ -20,6 +18,7 @@ finish docs homepage
 
 
 ---
+
 
 window.location.hash in all vizzies
 

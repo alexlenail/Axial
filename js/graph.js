@@ -13,7 +13,11 @@ function Graph(graph, nested_groups) {
     });
 
     var edge_attributes = {};
-    graph.links.forEach(edge => Object.entries(edge).forEach(([key, val]) => { edge_attributes[key] = edge_attributes[key] || []; edge_attributes[key].push(val) }))
+    var edge_indices = new Map(graph.nodes.map((d, i) => [d.id, i]));
+    graph.links.forEach(edge => {
+        Object.entries(edge).forEach(([key, val]) => { edge_attributes[key] = edge_attributes[key] || []; edge_attributes[key].push(val) })
+        Object.assign(edge, {'source_name': edge.source, 'target_name': edge.target, 'source': edge_indices.get(edge.source), 'target': edge_indices.get(edge.target)})
+    });
 
     var continuous_edge_attributes = {};
     var categorical_edge_attributes = {};
@@ -22,12 +26,6 @@ function Graph(graph, nested_groups) {
         else { categorical_edge_attributes[attr] = _.uniq(vals); }
     });
 
-
-    // const index = new Map(nodes.map(d => [d.id, d]));
-    //   const links = data.links.map(d => Object.assign(Object.create(d), {
-    //     source: index.get(d.source),
-    //     target: index.get(d.target)
-    //   }));
 
     /////////////////////////////////////////////////////////////////////////////
                     ///////    Styling Variables    ///////
