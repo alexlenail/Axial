@@ -1,330 +1,356 @@
 
 
-function Graph() {
+function Graph(graph, nested_groups) {
+
+    // TODO assert that all the graph.nodes have IDs
+
+    var node_attributes = {};
+    graph.nodes.forEach(node => Object.entries(node).forEach(([key, val]) => { node_attributes[key] = node_attributes[key] || []; node_attributes[key].push(val) }))
+
+    // TODO remove attributes like ID, name which you don't want to color by
+
+    var continuous_node_attributes = {};
+    var categorical_node_attributes = {};
+    Object.entries(node_attributes).forEach(([attr, vals]) => {
+        if (vals.every(val => _.isNumber(val) || _.isNaN(val))) { continuous_node_attributes[attr] = _(d3.extent(vals).concat([0])).sortBy(); }
+        else { categorical_node_attributes[attr] = _.uniq(vals); }
+    });
+
+    var edge_attributes = {};
+    var edge_indices = new Map(graph.nodes.map((d, i) => [d.id, i]));
+    graph.links.forEach(edge => {
+        Object.entries(edge).forEach(([key, val]) => { edge_attributes[key] = edge_attributes[key] || []; edge_attributes[key].push(val) })
+        Object.assign(edge, {'source_name': edge.source, 'target_name': edge.target, 'source': edge_indices.get(edge.source), 'target': edge_indices.get(edge.target), 'id':_([edge.source, edge.target]).sortBy().join('--')})
+    });
+
+    var continuous_edge_attributes = {};
+    var categorical_edge_attributes = {};
+    Object.entries(edge_attributes).forEach(([attr, vals]) => {
+        if (vals.every(val => _.isNumber(val) || _.isNaN(val))) { continuous_edge_attributes[attr] = _(d3.extent(vals).concat([0])).sortBy(); }
+        else { categorical_edge_attributes[attr] = _.uniq(vals); }
+    });
+
 
     /////////////////////////////////////////////////////////////////////////////
-                          ///////    Variables    ///////
+                    ///////    Styling Variables    ///////
     /////////////////////////////////////////////////////////////////////////////
 
-    var w = window.innerWidth;
-    var h = window.innerHeight;
+    var fix_nodes = false;
+    var repulsion_strength = 100;
+    var show_only_solution_edges = false;
+
+    var text_center = false;
+    var text_styles = {
+        'font-family': 'sans-serif',
+        'font-weight': 500,
+        'cursor': 'pointer',
+        'text-anchor': 'start',
+        'font-size': '10px',
+    };
+
+    var confidence_domain = [0, 1];
+    var edge_width_range = [0.3, 5];
+    var edge_width = d3.scaleLinear().domain(confidence_domain).range(edge_width_range).clamp(true).nice();
+
+    var color_schemes = {
+        'Blue_White_Red': ["blue","white","red"]
+    }
+    var node_color_scheme = 'Blue_White_Red';
+
+    var schemeCategorical20 = ['#3366cc', '#dc3912', '#ff9900', '#109618', '#990099', '#0099c6',
+                '#dd4477', '#66aa00', '#b82e2e', '#316395', '#994499', '#22aa99', '#aaaa11',
+                '#6633cc', '#e67300', '#8b0707', '#651067', '#329262', '#5574a6', '#3b3eac'];
+
+
+    var node_color = _.object(Object.entries(continuous_node_attributes).map(([attr, domain]) => [attr, d3.scaleLinear().domain(domain).range(color_schemes[node_color_scheme])])
+                      .concat(Object.keys(categorical_node_attributes).map(attr => [attr, d3.scaleOrdinal(schemeCategorical20)])));
+    var edge_color = _.object(Object.entries(continuous_edge_attributes).map(([attr, domain]) => [attr, d3.scaleLinear().domain(domain).range(color_schemes[node_color_scheme])])
+                      .concat(Object.keys(categorical_edge_attributes).map(attr => [attr, d3.scaleOrdinal(schemeCategorical20)])));
+
+    var node_shape = _.object(Object.entries(categorical_node_attributes).map(([attr, domain]) => [attr, d3.scaleOrdinal(d3.symbols)]));
+
+    var node_size  = _.object(Object.entries(continuous_node_attributes).map(([attr, domain]) => [attr, d3.scalePow().exponent(1).domain(domain).range([200, 1000]).clamp(true)]));
+
+    var color_nodes_by = null;
+    var color_edges_by = null;
+    var shape_nodes_by = null;
+    var size_nodes_by = null;
+
+    var default_node_color = '#ccc';
+    var default_edge_color = '#aaa';
+    var default_node_shape = d3.symbolCircle;
+    var default_node_size = 300;  // refers to node _area_.
+
+    var group_nodes_by = null;
+    var group_padding = 8;
+    var group_boundary_margin = 32;
+    graph.nodes.forEach(node => { node.height = node.width = group_boundary_margin; });
+    var group_compactness = 0.000001;
+    var group_opacity = 0.7;
+
+    var highlight_color = 'blue';
+    var highlight_trans = 0.1;
+    var edge_opacity = 0.6;
+    var node_border_width = 1;
+
+
+    /////////////////////////////////////////////////////////////////////////////
+                          ///////    Set Up Chart    ///////
+    /////////////////////////////////////////////////////////////////////////////
+
+    var margin = {top: 0, right: 0, bottom: 0, left: 0};
+
+    var w = window.innerWidth - (margin.left + margin.right);
+    var h = window.innerHeight - (margin.top + margin.bottom);
+
+    var svg = d3.select('#graph-container').append('svg').attr('xmlns', 'http://www.w3.org/2000/svg').attr('xmlns:xlink', 'http://www.w3.org/1999/xlink');
+    var g = svg.append('g');
+
+
+    groupings = _(categorical_node_attributes).mapObject((values, attr) => values.map(value => {
+        return {'id':value, 'leaves':graph.nodes.map((node, i) => node[attr] === value ? i : -1).filter(x => x > -1), 'groups':[], 'padding':group_padding}
+    }));
+
+    // Nest location groups here.
+    // console.log(nested_groups);
+
+
+
+
+    var linked = {};
+    graph.links.forEach(function(d) { linked[d.source_name + ',' + d.target_name] = true; });
+
+    function isConnected(a, b) {
+        return linked[a.id + ',' + b.id] || linked[b.id + ',' + a.id] || a.id == b.id;
+    }
 
 
     var focus_node = null;
+    var force = null;
+    var links = null;
+    var nodes = null;
+    var groups = null;
 
-    var show_only_solution_edges = false;
-    var repulsion_strength = 100;
-    var colorBy = "prize";
-    var groupBy = null;
-    var turnForceOff = false;
-
-    var text_center = false;
-    var outline = false;
-    var highlight_color = "blue";
-    var highlight_trans = 0.1;
-    var default_node_color = "#ccc";
-    var default_link_color = "#aaa";
-    var edge_opacity = 0.6;
-    var nominal_base_node_size = 8;
-    var nominal_text_size = 10;
-    var max_text_size = 24;
-    var default_stroke_width = 1;
-    var max_stroke = 16;
-    var max_base_node_size = 36;
-    var min_zoom = 0.2;
-    var max_zoom = 7;
-    var group_boundary_margin = 32;
-    var group_compactness = 0.000001;
-    var group_padding = 8;
-
-    var tocolor = "fill";
-    var towhite = "stroke";
-    if (outline) {
-        tocolor = "stroke"
-        towhite = "fill"
-    }
-
-    var svg = d3.select("#graph-container").append("svg").attr("xmlns", "http://www.w3.org/2000/svg").attr("xmlns:xlink", "http://www.w3.org/1999/xlink");
-    var g = svg.append("g");
-    svg.style("cursor", "move");
-
-    var cola = cola.d3adaptor(d3).size([w, h]);
-    cola.groupCompactness = group_compactness;
-
-
-    var min_confidence = 0;
-    var max_confidence = 1;
-    var edge_width = d3.scaleLinear().domain([0, 1]).range([0.3, 3]).clamp(true);
-
-    var colors20 = ["#3366cc", "#dc3912", "#ff9900", "#109618", "#990099", "#0099c6", "#dd4477",
-                    "#66aa00", "#b82e2e", "#316395", "#994499", "#22aa99", "#aaaa11", "#6633cc",
-                    "#e67300", "#8b0707", "#651067", "#329262", "#5574a6", "#3b3eac"];
-    var color = {
-        {% for attribute_name, metadata in attributes.items() if metadata['display'] in ['color_scale'] %}
-            '{{attribute_name}}':d3.scaleLinear().domain({{ metadata['domain'] }}).range({{ metadata['range'] }}).nice(),
-        {% endfor %}
-        {% for attribute_name, metadata in attributes.items() if metadata['display'] in ['box'] %}
-            '{{attribute_name}}': d3.scaleOrdinal(d3.schemePastel1),
-        {% endfor %}
-        {% for attribute_name, metadata in attributes.items() if metadata['display'] in ['color_category'] %}
-            '{{attribute_name}}': d3.scaleOrdinal(colors20),
-        {% endfor %}
-    };
-
-    var triangle = d3.symbol().type(d3.symbolTriangle).size(200)(),
-         circle = d3.symbol().type(d3.symbolCircle).size(200)(),
-         diamond = d3.symbol().type(d3.symbolDiamond).size(200)();
-
-    var display_type = d3.scaleOrdinal().domain(['protein', 'TF', 'metabolite']).range([circle, triangle, diamond] );
-
-    var size = d3.scalePow().exponent(1).domain([1, 100]).range([8, 24]);
+    var cola_force = cola.d3adaptor(d3).size([w, h]);
+    var d3_force = d3.forceSimulation();
 
 
     /////////////////////////////////////////////////////////////////////////////
                           ///////    Legends    ///////
     /////////////////////////////////////////////////////////////////////////////
 
-    // SYMBOL LEGEND
-    var shapes = svg.append("g")
-                    .attr("class", "legend_Symbol")
-                    .attr("transform", "translate(20, 20)")
-                    .style("stroke", "black")
-                    .attr("font-family", "sans-serif")
-                    .call(d3.legendSymbol()
-                            .scale(display_type)
-                            .orient("vertical")
-                            .title("Node Type"));
+    var legends = svg.append('g').attr('class', 'legends');
 
-    // COLOR LEGEND
-    var colors = svg.append("g")
-                    .attr("class", 'legendLinear color_Legend')
-                    .attr("transform", "translate(20,340)")
-                    .style("stroke", "black")
-                    .attr("font-family", "sans-serif")
-                    .call(d3.legendColor()
-                            .shapeWidth(30)
-                            .orient('vertical')
-                            .scale(color[colorBy])
-                            .title(colorBy));
-
-    // WIDTH LEGEND
-    var widths = svg.append("g")
-                    .attr("class", "legendSizeLine")
-                    .attr("transform", "translate(20, 160)")
-                    .style("stroke", "black")
-                    .attr("font-family", "sans-serif")
-                    .call(d3.legendSize()
-                            .scale(edge_width)
-                            .shape("line")
-                            .orient("vertical")
-                            .shapeWidth(40)
-                            .labelAlign("start")
-                            .shapePadding(10)
-                            .title("Confidence"));
+    // var node_shape_legend = legends.append('g').styles(text_styles).call(d3.legendSymbol().scale(node_shape[shape_nodes_by]).orient('vertical').title(shape_nodes_by));
+    // var node_color_legend = legends.append('g').styles(text_styles).call(d3.legendColor().scale(node_color[color_nodes_by]).orient('vertical').title(color_nodes_by));
+    var edge_width_legend = legends.append('g').styles(text_styles).call(d3.legendSize().scale(edge_width).shape('line').orient('vertical').shapeWidth(40).labelAlign('start').shapePadding(10).title('Confidence'));
+    // var edge_color_legend = legends.append('g').styles(text_styles).call(d3.legendColor().scale(edge_color[color_edges_by]).orient('vertical').title(color_edges_by));
 
 
     /////////////////////////////////////////////////////////////////////////////
-                          ///////   Links Setup    ///////
+                          ///////    Methods   ///////
     /////////////////////////////////////////////////////////////////////////////
 
-    var linked = {};
-    graph.links.forEach(function(d) { linked[d.source_name + "," + d.target_name] = true; });
-
-    function isConnected(a, b) {
-        return linked[a.id + "," + b.id] || linked[b.id + "," + a.id] || a.id == b.id;
-    }
-
-    function hasConnections(a) {
-        for (var property in linked) {
-            s = property.split(",");
-            if ((s[0] == a.id || s[1] == a.id) && linked[property]) { return true; }
-        }
-        return false;
-    }
-
-    let isNumber = (n) => !isNaN(parseFloat(n)) && isFinite(n);
-
-
-    /////////////////////////////////////////////////////////////////////////////
-                          ///////   Groups Setup    ///////
-    /////////////////////////////////////////////////////////////////////////////
-
-    var groups = {
-        {% for attribute_name, metadata in attributes.items() if metadata['display'] in ['box'] %}"{{attribute_name}}": {},{% endfor %}
-    };
-
-    graph.nodes.forEach(function (v, i) {
-        Object.keys(groups).forEach(function (key) {
-            if (key in v) {
-                if (!(v[key] in groups[key])) { groups[key][v[key]] = {'id':v[key], 'leaves':[], 'groups':[], 'padding':group_padding}; }
-                groups[key][v[key]]['leaves'].push(i);
-            }
-        });
-    });
-
-    Object.keys(groups).forEach(function (key) {
-        groups[key] = Object.values(groups[key])
-    });
-
-    graph.nodes.forEach(function (n) {
-        n.height = n.width = group_boundary_margin;
-    });
-
-
-    /////////////////////////////////////////////////////////////////////////////
-                          ///////    Setup Graph    ///////
-    /////////////////////////////////////////////////////////////////////////////
-
-    var node = g.selectAll(".node")
-                .data(graph.nodes)
-                .enter().append("path")
-                .attr("class", "node")
-                .attr("id", d => d.id)
-                .attr("d", d => display_type(d.type))
-                // .size(function(d) { return Math.PI * Math.pow(size(d.size) || nominal_base_node_size, 2); })
-                .style(tocolor, (d) => (d[colorBy] ? color[colorBy](d[colorBy]) : default_node_color) )
-                .style("stroke-width", default_stroke_width)
-                .style(towhite, "white")
-                .on("mouseover", (d) => set_highlight(d)).on("mouseout", (d) => remove_highlight());
-
-    node.call(cola.drag);
-    // node.on("mousedown", (d) => set_focus(d));
-    // node.on("mouseup", (d) => remove_focus(d));
-
-    var text = g.selectAll(".text")
-                .data(graph.nodes)
-                .enter().append("text")
-                .attr("dy", ".35em")
-                .style("font-size", nominal_text_size + "px")
-                .attr("font-family", "sans-serif")
-                .text((d) => (text_center ? d.id : '\u2002' + d.id))
-                .style("text-anchor", (d) => (text_center ? "middle" : "inherit") )
-                .attr("dx", (d) => (text_center ? 0 : (size(d.size) || nominal_base_node_size)) );
-
-
-    var link = g.selectAll(".link");
+    var node = g.selectAll('.node');
+    var text = g.selectAll('.text');
+    var link = g.selectAll('.link');
     var group = g.selectAll('.group');
-    var label = g.selectAll(".label");
+    var label = g.selectAll('.label');
 
 
-    /////////////////////////////////////////////////////////////////////////////
-                        ///////    Re-Draw Graph    ///////
-    /////////////////////////////////////////////////////////////////////////////
+    function render({fix_nodes_=fix_nodes,
+                     repulsion_strength_=repulsion_strength,
+                     show_only_solution_edges_=show_only_solution_edges,
+                     group_nodes_by_=group_nodes_by}={}) {
 
+        if (group_nodes_by !== group_nodes_by_) {
+            force.on('tick', null);
+            force.stop();
+            // remove drag handlers somehow
+        }
 
-    function restart() {
-        // When we restart, we'd like to be able to change
-        //  - which edges exist
-        //  - how the nodes are grouped
+        fix_nodes = fix_nodes_;
+        repulsion_strength = repulsion_strength_;
+        show_only_solution_edges = show_only_solution_edges_;
+        group_nodes_by = group_nodes_by_;
 
-        // Changing which links exist
-        links = show_only_solution_edges ? graph.links.filter(function (l) {return l.in_solution}) : graph.links;
-        link = link.data(links);
+        console.log('render with repulsion_strength: ', repulsion_strength);
+
+        nodes = graph.nodes.map(node => Object.create(node));
+        links = show_only_solution_edges ? graph.links.filter(link => link.in_solution) : graph.links.map(edge => Object.create(edge));
+        groups = (groupings[group_nodes_by] || []).map(group => Object.create(group));
+
+        node = node.data(nodes, d => d.id);
+        text = text.data(nodes, d => d.id);
+        link = link.data(links, d => d.id);
+        group = group.data(groups, d => d.id);
+        label = label.data(groups, d => d.id);
+
         link.exit().remove();
+        group.exit().remove();
+        label.exit().remove();
+
+        node = node.enter()
+            .append('path')
+            .attr('class', 'node')
+            .attr('id', d => 'node-'+d.id)
+            .style('cursor', 'pointer')
+            .on('mouseover', set_highlight)
+            .on('mouseout', remove_highlight)
+            // .on('mousedown', set_focus)
+            // .on('mouseup', remove_focus)
+            .on('click', d => { if (d3.event.metaKey) { window.open('http://www.genecards.org/cgi-bin/carddisp.pl?gene='+d.id); } })
+            .merge(node)
+
+        text = text.enter()
+            .append('text')
+            .attr('dy', '.35em')
+            .styles(text_styles)
+            .text(d => (text_center ? d.id : '\u2002' + d.id))
+            .style('text-anchor', d => (text_center ? 'middle' : 'inherit') )
+            .attr('dx', d => (text_center ? 0 : Math.sqrt(node_size[size_nodes_by] ? node_size[size_nodes_by](d[size_nodes_by]) : default_node_size))/2 )
+            .merge(text);
+
         link = link.enter()
-                   .insert("line", ".node") // insert before "node" so that nodes show up on top
-                   .attr("class", "link")
-                   .style("stroke-width", function(d) {
-                       if (isNumber(d.cost) && d.cost >= 0) { return edge_width(1-d.cost); }
-                       else { return default_stroke_width; }
-                   })
-                   .style("stroke", function(d) {
-                       if (isNumber(d.score) && d.score >= 0) { return color[colorBy](d.score); }
-                       else { return default_link_color; }
-                   })
-                   .style("opacity", edge_opacity)
-                   .merge(link);
+           .insert('line', '.node')
+           .attr('class', 'link')
+           .style('stroke-width', d => edge_width(1-d.cost))
+           .style('stroke', d => d[color_edges_by] ? edge_color[color_edges_by](d[color_edges_by]) : default_edge_color)
+           .style('opacity', edge_opacity)
+           .merge(link);
 
-        // Changing what the grouping is
-        if (groupBy) {
-            group = group.data([]);
-            group.exit().remove();
-            group = group.data(groups[groupBy])
-                         .enter()
-                         .insert('rect', '.link')
-                         .attr('rx',5)
-                         .attr('ry',5)
-                         .style("fill", function (d) { return color[groupBy](d.id); })
-                         .style("opacity", 0.7)
-                         .call(cola.drag);
+        group = group.enter()
+             .insert('rect', '.link')
+             .attr('rx',5)
+             .attr('ry',5)
+             .style('fill', d => node_color[group_nodes_by](d.id))
+             .style('opacity', group_opacity)
+             .style('cursor', 'pointer')
+             .merge(group);
 
-            label = label.data([]);
-            label.exit().remove()
-            label = label.data(groups[groupBy])
-                         .enter()
-                         .insert('text', '.group')
-                         .attr("class", "label")
-                         .attr("font-family", "sans-serif")
-                         .text(function (d) { return d.id; })
-                         .call(cola.drag);
+        label = label.enter()
+             .insert('text', '.link')
+             .attr('class', 'label')
+             .styles(text_styles)
+             .text(d => d.id)
+             .merge(label);
 
-            cola.nodes(graph.nodes)
-                .links(links)
-                // .links(turnForceOff ? [] : links)  # TODO
-                .groups(groups[groupBy])
-                .jaccardLinkLengths(repulsion_strength, 0.7)
-                .avoidOverlaps(true)
-                .start(50, 0, 50);
+
+        if (group_nodes_by) {
+
+            force = cola_force.nodes(nodes)
+                              .links(links)
+                              .groups(groups)
+                              .jaccardLinkLengths(repulsion_strength, 0.7)
+                              .avoidOverlaps(true)
+                              .start(50, 0, 50);
+
+            node.call(cola_force.drag);
+            group.call(cola_force.drag);
+
+            cola_force.groupCompactness = group_compactness;
+
+            cola_force.on('tick',  ticked);
 
         } else {
-            group = group.data([])
-            group.exit().remove()
-            cola.groups([]);
 
-            label = label.data([]);
-            label.exit().remove()
+            force = d3_force.nodes(nodes)
+                            .force("link", d3.forceLink(links))
+                            .force("charge", d3.forceManyBody().strength(-repulsion_strength))
+                            .force("center", d3.forceCenter(w/2,h/2));
 
-            cola.nodes(graph.nodes)
-                .links(links)
-                // .links(turnForceOff ? [] : links)  # TODO
-                .jaccardLinkLengths(repulsion_strength, 0.7)
-                .avoidOverlaps(true)
-                .start(50, 0, 50);
+            node.call(drag(d3_force));
+
+            d3_force.on('tick', ticked);
+        }
+    }
+
+    function ticked () {
+
+        node.attr('transform', (d) => 'translate(' + d.x + ',' + d.y + ')' );
+        text.attr('transform', (d) => 'translate(' + d.x + ',' + d.y + ')' );
+
+        link.attr('x1', (d) => d.source.x )
+            .attr('y1', (d) => d.source.y )
+            .attr('x2', (d) => d.target.x )
+            .attr('y2', (d) => d.target.y );
+
+        node.attr('cx', (d) => d.x )
+            .attr('cy', (d) => d.y );
+
+        if (group_nodes_by) {
+            group.attr('x', (d) => d.bounds.x + d.padding / 2 )
+                 .attr('y', (d) => d.bounds.y + d.padding / 2 )
+                 .attr('width', (d) => d.bounds.width() - d.padding )
+                 .attr('height',(d) => d.bounds.height() - d.padding );
+
+            label.attr('x', (d) => d.bounds.x + d.padding / 2 )
+                 .attr('y', (d) => d.bounds.y + d.padding / 2 );
         }
 
-        cola.on('tick', function () {
-
-            node.attr("transform", (d) => "translate(" + d.x + "," + d.y + ")" );
-            text.attr("transform", (d) => "translate(" + d.x + "," + d.y + ")" );
-
-            link.attr("x1", (d) => d.source.x )
-                .attr("y1", (d) => d.source.y )
-                .attr("x2", (d) => d.target.x )
-                .attr("y2", (d) => d.target.y );
-
-            node.attr("cx", (d) => d.x )
-                .attr("cy", (d) => d.y );
-
-            if (groupBy) {
-                group.attr('x', (d) => d.bounds.x + d.padding / 2 )
-                     .attr('y', (d) => d.bounds.y + d.padding / 2 )
-                     .attr('width', (d) => d.bounds.width() - d.padding )
-                     .attr('height',(d) => d.bounds.height() - d.padding );
-
-                label.attr("x", (d) => d.bounds.x + d.padding / 2 )
-                     .attr("y", (d) => d.bounds.y + d.padding / 2 );
-            }
-        });
     }
 
-    function recolor() {
-        node.style(tocolor, (d) => (d[colorBy] ? color[colorBy](d[colorBy]) : default_node_color) );
+    function drag(force) {
 
-        colors.remove()
-        colors = svg.append("g")
-                    .attr("class", 'legendLinear color_Legend')
-                    .attr("transform", "translate(20,340)")
-                    .style("stroke", "black")
-                    .attr("font-family", "sans-serif")
-                    .call(d3.legendColor()
-                            .shapeWidth(30)
-                            .orient('vertical')
-                            .scale(color[colorBy])
-                            .title(colorBy));
+        function dragstarted(d) {
+            if (!d3.event.active) force.alphaTarget(0.3).restart();
+            d.fx = d.x;
+            d.fy = d.y;
+        }
+
+        function dragged(d) {
+            d.fx = d3.event.x;
+            d.fy = d3.event.y;
+        }
+
+        function dragended(d) {
+            if (!d3.event.active) force.alphaTarget(0);
+            d.fx = null;
+            d.fy = null;
+        }
+
+        return d3.drag()
+                 .on("start", dragstarted)
+                 .on("drag", dragged)
+                 .on("end", dragended);
     }
 
-    restart();
-    recolor();
+    function style({color_nodes_by_=color_nodes_by,
+                    color_edges_by_=color_edges_by,
+                    size_nodes_by_=size_nodes_by,
+                    edge_opacity_=edge_opacity,
+                    node_color_scheme_=node_color_scheme,
+                    shape_nodes_by_=shape_nodes_by}={}) {
+
+        color_nodes_by = color_nodes_by_;
+        color_edges_by = color_edges_by_;
+        size_nodes_by = size_nodes_by_;
+        edge_opacity = edge_opacity_;
+        node_color_scheme = node_color_scheme_;
+        shape_nodes_by = shape_nodes_by_;
+
+
+        node.attr('d', configure_shape)
+            .style('fill', (d) => d[color_nodes_by] ? node_color[color_nodes_by](d[color_nodes_by]) : default_node_color)
+            .style('stroke', 'white')
+            .style('stroke-width', node_border_width);
+
+        // color_legend.call(d3.legendColor().shapeWidth(30).orient('vertical').scale(color[color_nodes_by]).title(color_nodes_by));
+
+        link.style('opacity', edge_opacity);
+
+        text.attr('dx', d => (text_center ? 0 : Math.sqrt(node_size[size_nodes_by] ? node_size[size_nodes_by](d[size_nodes_by]) : default_node_size))/2 );
+
+    }
+
+    function configure_shape(d) {
+
+        var size = d[size_nodes_by] ? node_size[size_nodes_by](d[size_nodes_by]) : default_node_size;
+        var shape = d[shape_nodes_by] ? node_shape[shape_nodes_by](d[shape_nodes_by]) : default_node_shape;
+
+        return d3.symbol().type(shape).size(size)();
+
+    }
 
 
     /////////////////////////////////////////////////////////////////////////////
@@ -332,18 +358,16 @@ function Graph() {
     /////////////////////////////////////////////////////////////////////////////
 
     function set_highlight(d) {
-        svg.style("cursor", "pointer");
-
-        node.style(towhite, (o) => (isConnected(d, o) ? highlight_color : "white"));
-        text.style("font-weight", (o) => (isConnected(d, o) ? "bold" : "normal"));
-        link.style("stroke", (o) => (o.source.index == d.index || o.target.index == d.index ? highlight_color : default_link_color));
+        node.style('stroke', (o) => (isConnected(d, o) ? highlight_color : 'white'));
+        text.style('font-weight', (o) => (isConnected(d, o) ? 'bold' : 'normal'));
+        link.style('stroke', (o) => (o.source.index == d.index || o.target.index == d.index ? highlight_color : default_edge_color));
     }
 
     function remove_highlight() {
-        if (focus_node===null) {
-            node.style(towhite, "white");
-            text.style("font-weight", "normal");
-            link.style("stroke", default_link_color);
+        if (focus_node === null) {
+            node.style('stroke', 'white');
+            text.style('font-weight', 'normal');
+            link.style('stroke', default_edge_color);
         }
     }
 
@@ -352,61 +376,67 @@ function Graph() {
                           ///////    Focus    ///////
     /////////////////////////////////////////////////////////////////////////////
 
-    node.on("click", function(d) { if (shiftKey) {shiftKey = false; window.open("http://www.genecards.org/cgi-bin/carddisp.pl?gene="+d.id);} });
-
     function set_focus(d) {
         d3.event.stopPropagation();
         focus_node = d3.select(this);
-        // console.log('set_focus');
+
         if (highlight_trans < 1) {
-            node.style("opacity", (o) => (isConnected(d, o) ? 1 : highlight_trans));
-            text.style("opacity", (o) => (isConnected(d, o) ? 1 : highlight_trans));
-            link.style("opacity", (o) => (o.source.index == d.index || o.target.index == d.index ? 1 : highlight_trans));
-            group.style("opacity", (o) => (highlight_trans * 2));
-            label.style("opacity", (o) => (highlight_trans * 2));
+
+            g.selectAll('.node').style('opacity', (o) => (isConnected(d, o) ? 1 : highlight_trans));
+            g.selectAll('.text').style('opacity', (o) => (isConnected(d, o) ? 1 : highlight_trans));
+            g.selectAll('.link').style('opacity', (o) => (o.source.index == d.index || o.target.index == d.index ? 1 : highlight_trans));
+            g.selectAll('.group').style('opacity', (o) => (highlight_trans * 2));
+            g.selectAll('.label').style('opacity', (o) => (highlight_trans * 2));
+
         }
     }
 
+    function set_focus_by_id(id) { set_focus(d3.select(`#node-${id}`)); }
+
     function remove_focus() {
-        focus_node = null;
-        // console.log('remove_focus');
         d3.event.stopPropagation();
-        node.style("opacity", 1);
-        text.style("opacity", 1);
-        link.style("opacity", edge_opacity);
-        group.style("opacity", 0.6);
-        label.style("opacity", 1);
+        focus_node = null;
+
+        g.selectAll('.node').style('opacity', 1);
+        g.selectAll('.text').style('opacity', 1);
+        g.selectAll('.link').style('opacity', edge_opacity);
+        g.selectAll('.group').style('opacity', 0.6);
+        g.selectAll('.label').style('opacity', 1);
+
         remove_highlight();
     }
 
-    var shiftKey;
-
-    function keypress() { shiftKey = d3.event.shiftKey || d3.event.metaKey; }
-
-    d3.select("body").on("keydown", keypress).on("keyup", keypress);
 
     /////////////////////////////////////////////////////////////////////////////
                         ///////   Zoom & Resize    ///////
     /////////////////////////////////////////////////////////////////////////////
 
-    svg.call(d3.zoom()
-               .scaleExtent([1 / 2, 8])
-               .on("zoom", zoomed));
+    svg.call(d3.zoom().scaleExtent([1 / 2, 8]).on('zoom', zoomed));
 
-    function zoomed() { g.attr("transform", d3.event.transform); }
-
+    function zoomed() { g.attr('transform', d3.event.transform); }
 
     function resize() {
-        w = window.innerWidth;
-        h = window.innerHeight;
-        svg.attr("width", window.innerWidth).attr("height", window.innerHeight);
+        svg.attr('width', $('#graph-container').innerWidth()).attr('height', $('#graph-container').innerHeight());
+        w = $('#graph-container').innerWidth() - (margin.left + margin.right);
+        h = $('#graph-container').innerHeight() - (margin.top + margin.bottom);
     }
 
-    d3.select(window).on("resize", resize)
+    d3.select(window).on('resize', resize);
 
     resize();
 
+
+    /////////////////////////////////////////////////////////////////////////////
+                          ///////    Return    ///////
+    /////////////////////////////////////////////////////////////////////////////
+
     return {
+        'render': render,
+        'style' : style,
+        'set_focus_by_id': set_focus_by_id,
+
+        continuous_node_attributes: () => continuous_node_attributes,  // should be making a copy to be safe
+        categorical_node_attributes: () => categorical_node_attributes,  // should be making a copy to be safe
 
 
     }

@@ -3,8 +3,8 @@ from setuptools import setup
 setup(
     name='axial',
     packages=['axial'],
-    package_data={'axial': ['axial/templates/*', 'axial/go/*']},
-    version='0.0.3',
+    package_data={'axial': ['templates/*', 'go/*']},
+    version='0.0.5',
     url='https://github.com/zfrenchee/axial',
     classifiers=[
         'Programming Language :: Python :: 3.5',
@@ -14,6 +14,11 @@ setup(
     author='zfrenchee',
     author_email='alex@lenail.org',
     description='',
-    install_requires=[],
+    install_requires=[
+        "pandas>=0.23.4",
+        "networkx>=2.1",
+        "requests",
+        "jinja2",
+    ],
 )
 
