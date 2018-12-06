@@ -107,7 +107,7 @@ function Graph(graph, nested_groups) {
     var g = svg.append('g');
 
 
-    groups = _(categorical_node_attributes).mapObject((values, attr) => values.map(value => {
+    groupings = _(categorical_node_attributes).mapObject((values, attr) => values.map(value => {
         return {'id':value, 'leaves':graph.nodes.map((node, i) => node[attr] === value ? i : -1).filter(x => x > -1), 'groups':[], 'padding':group_padding}
     }));
 
@@ -178,7 +178,7 @@ function Graph(graph, nested_groups) {
 
         nodes = graph.nodes.map(node => Object.create(node));
         links = show_only_solution_edges ? graph.links.filter(link => link.in_solution) : graph.links.map(edge => Object.create(edge));
-        groups = (groups[group_nodes_by] || []).map(group => Object.create(group));
+        groups = (groupings[group_nodes_by] || []).map(group => Object.create(group));
 
         node = node.data(nodes, d => d.id);
         text = text.data(nodes, d => d.id);
