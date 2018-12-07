@@ -36,8 +36,7 @@ function Graph(graph, nested_groups) {
     /////////////////////////////////////////////////////////////////////////////
 
     var fix_nodes = false;
-    var repulsion_strength = 100;
-    var show_only_solution_edges = false;
+    var repulsion_strength = 20;
 
     var text_center = false;
     var text_styles = {
@@ -127,13 +126,13 @@ function Graph(graph, nested_groups) {
 
     var focus_node = null;
     var force = null;
-    var links = null;
-    var nodes = null;
-    var groups = null;
+    var nodes = graph.nodes.map(node => Object.assign({}, node));
+    var links = graph.links.map(edge => Object.assign({}, edge));
+    var groups = (groupings[group_nodes_by] || []).map(group => Object.create(group));
 
-    var cola_force = cola.d3adaptor(d3).size([w, h]);
     var d3_force = d3.forceSimulation();
-
+    var cola_force = cola.d3adaptor(d3).size([w, h]);
+    cola_force.groupCompactness = group_compactness;
 
     /////////////////////////////////////////////////////////////////////////////
                           ///////    Legends    ///////
@@ -160,25 +159,28 @@ function Graph(graph, nested_groups) {
 
     function render({fix_nodes_=fix_nodes,
                      repulsion_strength_=repulsion_strength,
-                     show_only_solution_edges_=show_only_solution_edges,
                      group_nodes_by_=group_nodes_by}={}) {
 
+        console.log('render with group_nodes_by transition: ', group_nodes_by, group_nodes_by_);
+
         if (group_nodes_by !== group_nodes_by_) {
-            force.on('tick', null);
-            force.stop();
+
+            group_nodes_by = group_nodes_by_;
+
+            // force.on('tick', null);
+            // force.stop();
             // remove drag handlers somehow
+
+            groups = (groupings[group_nodes_by] || []).map(group => Object.assign({}, group));
         }
 
         fix_nodes = fix_nodes_;
         repulsion_strength = repulsion_strength_;
-        show_only_solution_edges = show_only_solution_edges_;
-        group_nodes_by = group_nodes_by_;
 
-        console.log('render with repulsion_strength: ', repulsion_strength);
-
-        nodes = graph.nodes.map(node => Object.create(node));
-        links = show_only_solution_edges ? graph.links.filter(link => link.in_solution) : graph.links.map(edge => Object.create(edge));
-        groups = (groupings[group_nodes_by] || []).map(group => Object.create(group));
+        nodes.forEach(d => {
+            d.fx = fix_nodes ? d.x : null;
+            d.fy = fix_nodes ? d.y : null;
+        });
 
         node = node.data(nodes, d => d.id);
         text = text.data(nodes, d => d.id);
@@ -186,6 +188,8 @@ function Graph(graph, nested_groups) {
         group = group.data(groups, d => d.id);
         label = label.data(groups, d => d.id);
 
+        node.exit().remove();
+        text.exit().remove();
         link.exit().remove();
         group.exit().remove();
         label.exit().remove();
@@ -238,34 +242,37 @@ function Graph(graph, nested_groups) {
 
         if (group_nodes_by) {
 
+            // console.log('set cola force', groups);
+
             force = cola_force.nodes(nodes)
-                              .links(links)
-                              .groups(groups)
-                              .jaccardLinkLengths(repulsion_strength, 0.7)
-                              .avoidOverlaps(true)
-                              .start(50, 0, 50);
+                               .links(links)
+                               .groups(groups)
+                               .jaccardLinkLengths(repulsion_strength, 0.7)
+                               .avoidOverlaps(true);
 
-            node.call(cola_force.drag);
-            group.call(cola_force.drag);
+            force.on('tick', ticked).start(50, 0, 50);
 
-            cola_force.groupCompactness = group_compactness;
-
-            cola_force.on('tick',  ticked);
+            // node.call(cola_force.drag);
+            // group.call(cola_force.drag);
 
         } else {
 
             force = d3_force.nodes(nodes)
-                            .force("link", d3.forceLink(links))
-                            .force("charge", d3.forceManyBody().strength(-repulsion_strength))
-                            .force("center", d3.forceCenter(w/2,h/2));
+                            .force("link", d3.forceLink(links)) // .strength(1/repulsion_strength+1)
+                            .force("charge", d3.forceManyBody().strength(-2*repulsion_strength+10))
+                            .force("center", d3.forceCenter(w/2,h/2))
+                            .on('tick', ticked)
+                            .alpha(1).restart();
 
-            node.call(drag(d3_force));
+            // node.call(drag(force));
 
-            d3_force.on('tick', ticked);
         }
+
     }
 
-    function ticked () {
+    function ticked() {
+
+        // console.log('tick');
 
         node.attr('transform', (d) => 'translate(' + d.x + ',' + d.y + ')' );
         text.attr('transform', (d) => 'translate(' + d.x + ',' + d.y + ')' );
@@ -293,7 +300,7 @@ function Graph(graph, nested_groups) {
     function drag(force) {
 
         function dragstarted(d) {
-            if (!d3.event.active) force.alphaTarget(0.3).restart();
+            if (!d3.event.active) { force.alphaTarget(0.3).restart(); }
             d.fx = d.x;
             d.fy = d.y;
         }
@@ -304,7 +311,7 @@ function Graph(graph, nested_groups) {
         }
 
         function dragended(d) {
-            if (!d3.event.active) force.alphaTarget(0);
+            if (!d3.event.active) { force.alphaTarget(0); }
             d.fx = null;
             d.fy = null;
         }

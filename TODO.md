@@ -1,13 +1,29 @@
 
 
+group nodes by x -> group nodes by y --> breaks
+
+seems like cola force is not properly "resetting"
+
+I can check the old visualization code from omicsintegrator to try to diff them
+
+
+
+---
+
 handoff between layout algorithms
 
 legends show default stuff, always render
 
 affix nodes
 
+rounding in the python
+
+
+only show some nodes (boolean attributes)
+only show some edges (boolean attributes)
 
 ---
+
 
 
 
