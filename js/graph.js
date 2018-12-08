@@ -186,7 +186,7 @@ function Graph(graph, nested_groups) {
             node.on(".drag", null);
             // possibly need to add a line for removing cola drag handlers -- if they aren't under '.drag'
 
-            groups = _.cloneDeep(groupings[group_nodes_by]);
+            groups = group_nodes_by ? _.cloneDeep(groupings[group_nodes_by]) : [];
         }
 
         fix_nodes = fix_nodes_;

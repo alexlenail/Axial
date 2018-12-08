@@ -1,6 +1,6 @@
 
 
-location nesting
+
 
 legends show default stuff, always render
 
@@ -21,15 +21,15 @@ label text is bigger
 
 finish docs homepage
 
+fix all apps (migrate underscore to lodash)
+
+window.location.hash in all vizzies
+
+horizontal scroll issues -- factor out scrolling of all vizzies
 
 
 
 ---
-
-
-window.location.hash in all vizzies
-
-horizontal scroll issues
 
 
 loading UI

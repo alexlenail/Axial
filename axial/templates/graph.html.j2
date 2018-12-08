@@ -22,9 +22,7 @@
                 <div class="form-group">
                     <input type="text" class="input" id="search_for_node" list="nodes" placeholder="search..." />
                     <datalist id="nodes">
-                        {% for node in nodes %}
-                        <option value="{{ node }}">{{ node }}</option>
-                        {% endfor %}
+                        {% for node in nodes %}<option value="{{ node }}">{{ node }}</option>{% endfor %}
                     </datalist>
                 </div>
 
