@@ -101,6 +101,7 @@
 <script src='https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.25.6/d3-legend.min.js'></script>
 <script src='https://cdnjs.cloudflare.com/ajax/libs/awesomplete/1.1.3/awesomplete.min.js'></script>
 <script src='https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.9.1/underscore-min.js'></script>
+<script src='https://unpkg.com/clone@2.1.2/clone.js'></script>
 <script src='https://unpkg.com/axialjs@latest/js/volcano.js'></script>
 <script src='https://unpkg.com/axialjs@latest/js/util.js'></script>
 <script src='https://unpkg.com/axialjs@latest/js/GOrilla.js'></script>
@@ -135,7 +136,7 @@ $("#show_text").change(                      function () {volcano.style({'show_t
 
 var input = document.getElementById("chooseGene");
 var form = new Awesomplete(input, {
-    list: _(volcano.data).map('id'),
+    list: _(volcano.data).pluck('id'),
     maxItems: 30,
 });
 document.addEventListener('awesomplete-selectcomplete', function(e) { volcano.showTipOn(e.text.value) });
