@@ -105,11 +105,9 @@ function Graph(graph, nested_groups) {
     var svg = d3.select('#graph-container').append('svg').attr('xmlns', 'http://www.w3.org/2000/svg').attr('xmlns:xlink', 'http://www.w3.org/1999/xlink');
     var g = svg.append('g');
 
-    groupings = _.mapValues(categorical_node_attributes, (values, attr) => values.filter(v => v).map(value => {
+    groupings = _(categorical_node_attributes).mapObject((values, attr) => values.filter(v => v).map(value => {
         return {'id':value, 'leaves':graph.nodes.map((node, i) => node[attr] === value ? i : -1).filter(x => x > -1), 'groups':[], 'padding':group_padding}
     }));
-
-    console.log(groupings);
 
     // Nest location groups here.
     // console.log(nested_groups);
@@ -175,22 +173,24 @@ function Graph(graph, nested_groups) {
                      repulsion_strength_=repulsion_strength,
                      group_nodes_by_=group_nodes_by}={}) {
 
-        if (group_nodes_by !== group_nodes_by_) {
-
-            group_nodes_by = group_nodes_by_;
-
-            force.on('tick', null);
-
-            // this isn't doing a good enough job of stopping the cola force.
-            force.stop();
-            node.on(".drag", null);
-            // possibly need to add a line for removing cola drag handlers -- if they aren't under '.drag'
-
-            groups = group_nodes_by ? _.cloneDeep(groupings[group_nodes_by]) : [];
-        }
 
         fix_nodes = fix_nodes_;
         repulsion_strength = repulsion_strength_;
+        group_nodes_by = group_nodes_by_;
+        groups = group_nodes_by ? clone(groupings[group_nodes_by]) : [];
+
+        if (group_nodes_by) {
+
+            d3_force.stop();
+            force.on('tick', null);
+            node.on(".drag", null);
+
+        } else {
+
+            cola_force.stop();
+            node.on(".drag", null);
+
+        }
 
         nodes.forEach(d => {
             d.fx = fix_nodes ? d.x : null;
@@ -243,7 +243,6 @@ function Graph(graph, nested_groups) {
              .attr('rx',5)
              .attr('ry',5)
              .style('fill', d => node_color[group_nodes_by](d.id))
-             .style("opacity", 0.7)
              .style('opacity', group_opacity)
              .style('cursor', 'pointer')
              .merge(group);
@@ -285,8 +284,6 @@ function Graph(graph, nested_groups) {
     }
 
     function ticked() {
-
-        // console.log('tick');
 
         node.attr('transform', (d) => 'translate(' + d.x + ',' + d.y + ')' );
         text.attr('transform', (d) => 'translate(' + d.x + ',' + d.y + ')' );

@@ -1,27 +1,25 @@
 
 
 
-
 legends show default stuff, always render
 
 affix nodes
 
-rounding in the python
 
 only show some nodes (boolean attributes)
 only show some edges (boolean attributes)
 
 label text is bigger
 
+
 ---
 
 
+rounding in the python
 
-
+click & drag broken on braid and heatmap
 
 finish docs homepage
-
-fix all apps (migrate underscore to lodash)
 
 window.location.hash in all vizzies
 

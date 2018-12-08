@@ -49,6 +49,7 @@ third_party_scripts = [
 
     "https://cdnjs.cloudflare.com/ajax/libs/awesomplete/1.1.3/awesomplete.min.js",
     "https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.9.1/underscore-min.js",
+    "https://unpkg.com/clone@2.1.2/clone.js",
 ]
 
 templateEnv = jinja2.Environment(loader=jinja2.PackageLoader('axial', 'templates'))
