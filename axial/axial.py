@@ -48,7 +48,7 @@ third_party_scripts = [
     "https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.25.6/d3-legend.min.js",
 
     "https://cdnjs.cloudflare.com/ajax/libs/awesomplete/1.1.3/awesomplete.min.js",
-    "https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.9.1/underscore-min.js",
+    "https://cdn.jsdelivr.net/npm/lodash@4.17.11/lodash.min.js"
 ]
 
 templateEnv = jinja2.Environment(loader=jinja2.PackageLoader('axial', 'templates'))

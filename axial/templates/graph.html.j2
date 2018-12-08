@@ -12,7 +12,7 @@
         <div class="card">
             <div class="card-header">
                 <a class="pull-right" role="button"><i class="fa" id="hide-show"></i></a>
-                <h1><a href="index.html" class="link-unstyled">Axial Graph Visualization</a></h1>
+                <h1><a href="index.html" class="link-unstyled">{{ title }}</a></h1>
                 <p><a id="download" href="#">Download SVG</a></p>
 
             </div>
@@ -32,13 +32,18 @@
 
                 <div class="form-group"><label class="mr-2">Force</label><input type="range" id="repulsion_strength" min="1" max="100" step="1" value="20"></div>
 
+                <b><label>Nodes</label></b>
                 <div class="form-group"><label class="mr-2">Group nodes by</label><select id="group_nodes_by"><option value="" selected>None</option></select></div>
                 <div class="form-group"><label class="mr-2">Shape nodes by</label><select id="shape_nodes_by"><option value="" selected>None</option></select></div>
                 <div class="form-group"><label class="mr-2">Size nodes by</label><select id="size_nodes_by"><option value="" selected>None</option></select></div>
                 <div class="form-group"><label class="mr-2">Color nodes by</label><select id="color_nodes_by"><option value="" selected>None</option></select></div>
+                <div class="form-group"><label class="mr-2">Outline nodes by</label><select id="outline_nodes_by"><option value="" selected>None</option></select></div>
                 <div class="form-group"><label class="mr-2">With color scheme</label><select id="node_color_scheme"><option value="Blue_White_Red" selected>Blue_White_Red</option></select></div>
 
+                <b><label>Edges</label></b>
                 <div class="form-group"><label class="mr-2">Edge Opacity</label><input type="range" id="edge_opacity" min="0" max="1" step="0.01" value="0.6"></div>
+                <div class="form-group"><label class="mr-2">Color edges by</label><select id="color_edges_by"><option value="" selected>None</option></select></div>
+                <div class="form-group"><label class="mr-2">Size edges by</label><select id="size_edges_by"><option value="" selected>None</option></select></div>
 
 
                 <div class="form-group"><label>⌘+Click a node to open GeneCards</label></div>

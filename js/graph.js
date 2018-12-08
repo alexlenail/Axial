@@ -61,14 +61,14 @@ function Graph(graph, nested_groups) {
                 '#6633cc', '#e67300', '#8b0707', '#651067', '#329262', '#5574a6', '#3b3eac'];
 
 
-    var node_color = _.object(Object.entries(continuous_node_attributes).map(([attr, domain]) => [attr, d3.scaleLinear().domain(domain).range(color_schemes[node_color_scheme])])
+    var node_color = _.fromPairs(Object.entries(continuous_node_attributes).map(([attr, domain]) => [attr, d3.scaleLinear().domain(domain).range(color_schemes[node_color_scheme])])
                       .concat(Object.keys(categorical_node_attributes).map(attr => [attr, d3.scaleOrdinal(schemeCategorical20)])));
-    var edge_color = _.object(Object.entries(continuous_edge_attributes).map(([attr, domain]) => [attr, d3.scaleLinear().domain(domain).range(color_schemes[node_color_scheme])])
+    var edge_color = _.fromPairs(Object.entries(continuous_edge_attributes).map(([attr, domain]) => [attr, d3.scaleLinear().domain(domain).range(color_schemes[node_color_scheme])])
                       .concat(Object.keys(categorical_edge_attributes).map(attr => [attr, d3.scaleOrdinal(schemeCategorical20)])));
 
-    var node_shape = _.object(Object.entries(categorical_node_attributes).map(([attr, domain]) => [attr, d3.scaleOrdinal(d3.symbols)]));
+    var node_shape = _.fromPairs(Object.entries(categorical_node_attributes).map(([attr, domain]) => [attr, d3.scaleOrdinal(d3.symbols)]));
 
-    var node_size  = _.object(Object.entries(continuous_node_attributes).map(([attr, domain]) => [attr, d3.scalePow().exponent(1).domain(domain).range([200, 1000]).clamp(true)]));
+    var node_size  = _.fromPairs(Object.entries(continuous_node_attributes).map(([attr, domain]) => [attr, d3.scalePow().exponent(1).domain(domain).range([200, 1000]).clamp(true)]));
 
     var color_nodes_by = null;
     var color_edges_by = null;
@@ -105,15 +105,29 @@ function Graph(graph, nested_groups) {
     var svg = d3.select('#graph-container').append('svg').attr('xmlns', 'http://www.w3.org/2000/svg').attr('xmlns:xlink', 'http://www.w3.org/1999/xlink');
     var g = svg.append('g');
 
-
-    groupings = _(categorical_node_attributes).mapObject((values, attr) => values.map(value => {
+    groupings = _.mapValues(categorical_node_attributes, (values, attr) => values.filter(v => v).map(value => {
         return {'id':value, 'leaves':graph.nodes.map((node, i) => node[attr] === value ? i : -1).filter(x => x > -1), 'groups':[], 'padding':group_padding}
     }));
+
+    console.log(groupings);
 
     // Nest location groups here.
     // console.log(nested_groups);
 
+    if ("location" in groupings) {
 
+        groupings.location = groupings.location.filter(loc => loc.id !== 'extracellular');
+
+        var plasma_membrane_index = _(groupings.location).findIndex(loc => loc.id === 'plasma_membrane');
+        var cytoplasm_index       = _(groupings.location).findIndex(loc => loc.id === 'cytoplasm');
+
+        groupings.location[plasma_membrane_index].groups.push(cytoplasm_index)
+
+        groupings.location.forEach((loc, i) => { if (loc.id !== 'plasma_membrane' && loc.id !== 'cytoplasm') { groupings.location[cytoplasm_index].groups.push(i) } });
+
+        // _(groupings.location).each(function (g) {g.padding = g.id === 'plasma_membrane' ? 0 : group_padding * (g.groups.length + 1);});
+
+    }
 
 
     var linked = {};
@@ -161,17 +175,18 @@ function Graph(graph, nested_groups) {
                      repulsion_strength_=repulsion_strength,
                      group_nodes_by_=group_nodes_by}={}) {
 
-        console.log('render with group_nodes_by transition: ', group_nodes_by, group_nodes_by_);
-
         if (group_nodes_by !== group_nodes_by_) {
 
             group_nodes_by = group_nodes_by_;
 
-            // force.on('tick', null);
-            // force.stop();
-            // remove drag handlers somehow
+            force.on('tick', null);
 
-            groups = (groupings[group_nodes_by] || []).map(group => Object.assign({}, group));
+            // this isn't doing a good enough job of stopping the cola force.
+            force.stop();
+            node.on(".drag", null);
+            // possibly need to add a line for removing cola drag handlers -- if they aren't under '.drag'
+
+            groups = _.cloneDeep(groupings[group_nodes_by]);
         }
 
         fix_nodes = fix_nodes_;
@@ -228,6 +243,7 @@ function Graph(graph, nested_groups) {
              .attr('rx',5)
              .attr('ry',5)
              .style('fill', d => node_color[group_nodes_by](d.id))
+             .style("opacity", 0.7)
              .style('opacity', group_opacity)
              .style('cursor', 'pointer')
              .merge(group);
@@ -242,18 +258,16 @@ function Graph(graph, nested_groups) {
 
         if (group_nodes_by) {
 
-            // console.log('set cola force', groups);
-
             force = cola_force.nodes(nodes)
-                               .links(links)
-                               .groups(groups)
-                               .jaccardLinkLengths(repulsion_strength, 0.7)
-                               .avoidOverlaps(true);
+                              .links(links)
+                              .groups(groups)
+                              .jaccardLinkLengths(repulsion_strength, 0.7)
+                              .avoidOverlaps(true);
 
             force.on('tick', ticked).start(50, 0, 50);
 
-            // node.call(cola_force.drag);
-            // group.call(cola_force.drag);
+            node.call(cola_force.drag);
+            group.call(cola_force.drag);
 
         } else {
 
@@ -264,7 +278,7 @@ function Graph(graph, nested_groups) {
                             .on('tick', ticked)
                             .alpha(1).restart();
 
-            // node.call(drag(force));
+            node.call(drag(force));
 
         }
 
