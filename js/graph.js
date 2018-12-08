@@ -323,8 +323,7 @@ function Graph(graph, nested_groups) {
 
         function dragended(d) {
             if (!d3.event.active) { force.alphaTarget(0); }
-            d.fx = null;
-            d.fy = null;
+            if (!fix_nodes) { d.fx = null; d.fy = null; }
         }
 
         return d3.drag()

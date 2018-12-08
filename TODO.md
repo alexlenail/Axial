@@ -3,9 +3,6 @@
 
 legends show default stuff, always render
 
-affix nodes
-
-
 only show some nodes (boolean attributes)
 only show some edges (boolean attributes)
 

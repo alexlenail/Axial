@@ -119,7 +119,7 @@ $("#size_nodes_by").append(Object.keys(continuous).map(attr => `<option value="$
 $("#search_for_node").on('input',      function() { g.set_focus_by_id(this.value) });
 $("#fix_nodes").change(                function() { g.render({'fix_nodes_': this.checked}) });
 $("#repulsion_strength").change(       function() { g.render({'repulsion_strength_': this.value}) });
-$("#group_nodes_by").change(           function() { g.render({'group_nodes_by_': this.value}) });
+$("#group_nodes_by").change(           function() { g.render({'group_nodes_by_': this.value}); $("#fix_nodes").attr('disabled', this.value ? true : false) });
 $("#shape_nodes_by").change(           function() { g.style({'shape_nodes_by_': this.value}) });
 $("#color_nodes_by").change(           function() { g.style({'color_nodes_by_': this.value}) });
 $("#node_color_scheme").change(        function() { g.style({'node_color_scheme_': this.value}) });
