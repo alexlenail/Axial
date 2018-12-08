@@ -48,7 +48,7 @@ third_party_scripts = [
     "https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.25.6/d3-legend.min.js",
 
     "https://cdnjs.cloudflare.com/ajax/libs/awesomplete/1.1.3/awesomplete.min.js",
-    "https://cdn.jsdelivr.net/npm/lodash@4.17.11/lodash.min.js"
+    "https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.9.1/underscore-min.js",
 ]
 
 templateEnv = jinja2.Environment(loader=jinja2.PackageLoader('axial', 'templates'))
@@ -190,7 +190,7 @@ def volcano(differential_df, title='Axial Volcano Plot', scripts_mode="CDN", dat
 
     # Scripts =======================
 
-    scripts = third_party_scripts + [CDN_url+"js/volcano.js", CDN_url+"js/GOrilla.js"]
+    scripts = third_party_scripts + [CDN_url+"js/volcano.js", CDN_url+"js/util.js", CDN_url+"js/GOrilla.js"]
 
     scripts_block = _scripts_block(scripts, scripts_mode, output_dir)
 

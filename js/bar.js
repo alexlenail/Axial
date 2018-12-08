@@ -188,6 +188,7 @@ function Bar(differential) {
 
     return {
         'restart': restart,
+        DEgenes  : () => _(data.filter(is_differential)).pluck('id'),
 
     }
 

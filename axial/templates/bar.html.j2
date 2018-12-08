@@ -57,7 +57,7 @@ var bar = Bar(differential);
 
 var chooseGeneSet = document.getElementById("chooseGeneSet");
 var chooseGeneSetform = new Awesomplete(chooseGeneSet, {
-    list: Object.entries(human_gene_sets),
+    list: Object.entries(gene_sets),
     maxItems: 30,
     replace: function (text) { this.input.value = text.label; }
 });
@@ -84,12 +84,7 @@ d3.select("#download").on("click", function() {
       .attr("download", "plot.svg")
 })
 
-$("#degenes").click(function() {
-
-    d3.select(this)
-      .attr("href", 'data:application/octet-stream;base64,' + btoa(_(data.filter(is_differential)).pluck('id').join("\n")))
-      .attr("download", "DE_Genes.txt")
-})
+$("#degenes").click(function() { d3.select(this).attr("href", 'data:application/octet-stream;base64,' + btoa(bar.DEgenes().join("\n"))).attr("download", "DE_Genes.txt") });
 
 $('#hide-show').click(function(e) { $('.menu').toggleClass('hidden'); });
 
