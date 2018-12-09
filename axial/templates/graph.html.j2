@@ -35,16 +35,16 @@
                 <div class="form-group"><label class="mr-2">Shape nodes by</label><select id="shape_nodes_by"><option value="" selected>None</option></select></div>
                 <div class="form-group"><label class="mr-2">Size nodes by</label><select id="size_nodes_by"><option value="" selected>None</option></select></div>
                 <div class="form-group"><label class="mr-2">Color nodes by</label><select id="color_nodes_by"><option value="" selected>None</option></select></div>
-                <div class="form-group"><label class="mr-2">Outline nodes by</label><select id="outline_nodes_by"><option value="" selected>None</option></select></div>
-                <div class="form-group"><label class="mr-2">With color scheme</label><select id="node_color_scheme"><option value="Blue_White_Red" selected>Blue_White_Red</option></select></div>
+                {# <div class="form-group"><label class="mr-2">Outline nodes by</label><select id="outline_nodes_by"><option value="" selected>None</option></select></div> #}
+                <div class="form-group"><label>⌘+Click a node to open GeneCards</label></div>
 
                 <b><label>Edges</label></b>
                 <div class="form-group"><label class="mr-2">Edge Opacity</label><input type="range" id="edge_opacity" min="0" max="1" step="0.01" value="0.6"></div>
                 <div class="form-group"><label class="mr-2">Color edges by</label><select id="color_edges_by"><option value="" selected>None</option></select></div>
                 <div class="form-group"><label class="mr-2">Size edges by</label><select id="size_edges_by"><option value="" selected>None</option></select></div>
+                <div class="form-group"><label class="mr-2">Only Show Edges</label><select id="only_show_edges"><option value="" selected>Show All Edges</option></select></div>
 
 
-                <div class="form-group"><label>⌘+Click a node to open GeneCards</label></div>
 
             </div>
 
@@ -69,32 +69,42 @@ g = Graph(graph);
 g.render();
 g.style();
 
-continuous = g.continuous_node_attributes();
-categorical = g.categorical_node_attributes();
+continuous_node_attributes = g.continuous_node_attributes();
+categorical_node_attributes = g.categorical_node_attributes();
 
-$("#color_nodes_by").append(Object.keys(continuous).map(attr => `<option value="${attr}">${attr}</option>`)
-                    .concat(Object.keys(categorical).map(attr => `<option value="${attr}">${attr}</option>`)));
-$("#shape_nodes_by").append(Object.keys(categorical).map(attr => `<option value="${attr}">${attr}</option>`));
-$("#group_nodes_by").append(Object.keys(categorical).map(attr => `<option value="${attr}">${attr}</option>`));
-$("#size_nodes_by").append(Object.keys(continuous).map(attr => `<option value="${attr}">${attr}</option>`));
+$("#color_nodes_by").append(Object.keys(continuous_node_attributes).map(attr => `<option value="${attr}">${attr}</option>`)
+                    .concat(Object.keys(categorical_node_attributes).map(attr => `<option value="${attr}">${attr}</option>`)));
+$("#shape_nodes_by").append(Object.keys(categorical_node_attributes).map(attr => `<option value="${attr}">${attr}</option>`));
+$("#group_nodes_by").append(Object.keys(categorical_node_attributes).map(attr => `<option value="${attr}">${attr}</option>`));
+$("#size_nodes_by").append(Object.keys(continuous_node_attributes).map(attr => `<option value="${attr}">${attr}</option>`));
+$("#outline_nodes_by").append(Object.keys(continuous_node_attributes).map(attr => `<option value="${attr}">${attr}</option>`));
 
+continuous_edge_attributes = g.continuous_edge_attributes();
+categorical_edge_attributes = g.categorical_edge_attributes();
+boolean_edge_attributes = g.boolean_edge_attributes();
 
-// $("#color_nodes_by").val()
+$("#color_edges_by").append(Object.keys(continuous_edge_attributes).map(attr => `<option value="${attr}">${attr}</option>`)
+                    .concat(Object.keys(categorical_edge_attributes).map(attr => `<option value="${attr}">${attr}</option>`)));
+$("#size_edges_by").append(Object.keys(continuous_edge_attributes).map(attr => `<option value="${attr}">${attr}</option>`));
+$("#only_show_edges").append(Object.keys(boolean_edge_attributes).map(attr => `<option value="${attr}">${attr}</option>`));
+
 
 /////////////////////////////////////////////////////////////////////////////
                 ///////    Additional Features    ///////
 /////////////////////////////////////////////////////////////////////////////
 
-$("#search_for_node").on('input',      function() { g.set_focus_by_id(this.value) });
-$("#fix_nodes").change(                function() { g.render({'fix_nodes_': this.checked}) });
-$("#repulsion_strength").change(       function() { g.render({'repulsion_strength_': this.value}) });
-$("#group_nodes_by").change(           function() { g.render({'group_nodes_by_': this.value}); $("#fix_nodes").attr('disabled', this.value ? true : false) });
-$("#shape_nodes_by").change(           function() { g.style({'shape_nodes_by_': this.value}) });
-$("#color_nodes_by").change(           function() { g.style({'color_nodes_by_': this.value}) });
-$("#node_color_scheme").change(        function() { g.style({'node_color_scheme_': this.value}) });
-$("#size_nodes_by").change(            function() { g.style({'size_nodes_by_': this.value}) });
-$("#edge_opacity").change(             function() { g.style({'edge_opacity_': this.value}) });
-
+$("#search_for_node").on('input',  function() { g.set_focus_by_id(this.value) });
+$("#fix_nodes").change(            function() { g.render({'fix_nodes_': this.checked}); });
+$("#repulsion_strength").change(   function() { g.render({'repulsion_strength_': this.value}); });
+$("#group_nodes_by").change(       function() { g.render({'group_nodes_by_': this.value}); g.style(); $("#fix_nodes").attr('disabled', this.value ? true : false); });
+$("#shape_nodes_by").change(       function() { g.style({'shape_nodes_by_': this.value}); });
+$("#color_nodes_by").change(       function() { g.style({'color_nodes_by_': this.value}); });
+// $("#outline_nodes_by").change(     function() { g.style({'outline_nodes_by_': this.value}); });
+$("#size_nodes_by").change(        function() { g.style({'size_nodes_by_': this.value}); });
+$("#edge_opacity").change(         function() { g.style({'edge_opacity_': this.value}); });
+$("#color_edges_by").change(       function() { g.style({'color_edges_by_': this.value}); });
+$("#size_edges_by").change(        function() { g.style({'size_edges_by_': this.value}); });
+$("#only_show_edges").change(      function() { g.render({'only_show_edges_': this.value}); });
 
 /////////////////////////////////////////////////////////////////////////////
                       ///////    Download    ///////

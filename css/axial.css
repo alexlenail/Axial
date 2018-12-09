@@ -132,10 +132,10 @@ input[type="range"] {
     position: relative;
     top: 3px;
 }
-input[disabled] + label {
+input[disabled] + label, select[disabled], select[disabled] + label {
     opacity: 0.3;
-
 }
+
 [contenteditable=true]:empty:before {
     content: attr(placeholder);
     display: block; /* For Firefox */

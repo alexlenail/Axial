@@ -1,13 +1,9 @@
 
+graph:
 
+focus
 
-legends show default stuff, always render
-
-only show some nodes (boolean attributes)
-only show some edges (boolean attributes)
-
-label text is bigger
-
+selects in a table
 
 ---
 
@@ -20,7 +16,9 @@ finish docs homepage
 
 window.location.hash in all vizzies
 
-horizontal scroll issues -- factor out scrolling of all vizzies
+factor out scrolling of all vizzies
+
+no horizontal scroll issues
 
 
 

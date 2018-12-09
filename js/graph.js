@@ -2,17 +2,16 @@
 
 function Graph(graph, nested_groups) {
 
-    // TODO assert that all the graph.nodes have IDs
+    if (!graph.nodes.every(node => node.id)) { window.alert("Every node must have an ID set, aborting."); return {}; }
 
     var node_attributes = {};
     graph.nodes.forEach(node => Object.entries(node).forEach(([key, val]) => { node_attributes[key] = node_attributes[key] || []; node_attributes[key].push(val) }))
-
-    // TODO remove attributes like ID, name which you don't want to color by
+    delete node_attributes['id'];
 
     var continuous_node_attributes = {};
     var categorical_node_attributes = {};
     Object.entries(node_attributes).forEach(([attr, vals]) => {
-        if (vals.every(val => _.isNumber(val) || _.isNaN(val))) { continuous_node_attributes[attr] = _(d3.extent(vals).concat([0])).sortBy(); }
+        if (vals.every(val => _.isNumber(val) || _.isNaN(val))) { continuous_node_attributes[attr] = d3.extent(vals)[0] > 0 ? d3.extent(vals) : _(d3.extent(vals).concat([0])).sortBy(); }
         else { categorical_node_attributes[attr] = _.uniq(vals); }
     });
 
@@ -23,13 +22,22 @@ function Graph(graph, nested_groups) {
         Object.assign(edge, {'source_name': edge.source, 'target_name': edge.target, 'source': edge_indices.get(edge.source), 'target': edge_indices.get(edge.target), 'id':_([edge.source, edge.target]).sortBy().join('--')})
     });
 
+    var blacklist = ['source', 'target', 'source_name', 'target_name', 'protein1', 'protein2', 'id'];
+    blacklist.forEach(attr => { delete edge_attributes[attr] });
+
     var continuous_edge_attributes = {};
     var categorical_edge_attributes = {};
+    var boolean_edge_attributes = {};
     Object.entries(edge_attributes).forEach(([attr, vals]) => {
-        if (vals.every(val => _.isNumber(val) || _.isNaN(val))) { continuous_edge_attributes[attr] = _(d3.extent(vals).concat([0])).sortBy(); }
+        if (vals.every(val => [NaN, null, false, true, 0, 1].includes(val))) { boolean_edge_attributes[attr] = ""; }
+        else if (vals.every(val => _.isNumber(val) || _.isNaN(val))) { continuous_edge_attributes[attr] = d3.extent(vals)[0] > 0 ? d3.extent(vals) : _(d3.extent(vals).concat([0])).sortBy(); }
         else { categorical_edge_attributes[attr] = _.uniq(vals); }
     });
 
+    if ('cost' in continuous_edge_attributes) {
+        graph.links.forEach(edge => Object.assign(edge, {'confidence': 1-edge.cost}));
+        continuous_edge_attributes['confidence'] = _(continuous_edge_attributes['cost'].map(cost => 1-cost)).reverse();
+    }
 
     /////////////////////////////////////////////////////////////////////////////
                     ///////    Styling Variables    ///////
@@ -37,6 +45,7 @@ function Graph(graph, nested_groups) {
 
     var fix_nodes = false;
     var repulsion_strength = 20;
+    var only_show_edges = "";
 
     var text_center = false;
     var text_styles = {
@@ -44,17 +53,18 @@ function Graph(graph, nested_groups) {
         'font-weight': 500,
         'cursor': 'pointer',
         'text-anchor': 'start',
-        'font-size': '10px',
+        'font-size': 10,
     };
 
-    var confidence_domain = [0, 1];
     var edge_width_range = [0.3, 5];
-    var edge_width = d3.scaleLinear().domain(confidence_domain).range(edge_width_range).clamp(true).nice();
 
     var color_schemes = {
-        'Blue_White_Red': ["blue","white","red"]
+        'Blue_White_Red': ["blue","white","red"],
+        'Purple_White_Orange': ["purple","white","orange"]
     }
     var node_color_scheme = 'Blue_White_Red';
+    var outline_color_scheme = 'Purple_White_Orange';
+    var edge_color_scheme = 'Blue_White_Red';
 
     var schemeCategorical20 = ['#3366cc', '#dc3912', '#ff9900', '#109618', '#990099', '#0099c6',
                 '#dd4477', '#66aa00', '#b82e2e', '#316395', '#994499', '#22aa99', '#aaaa11',
@@ -63,25 +73,31 @@ function Graph(graph, nested_groups) {
 
     var node_color = _.object(Object.entries(continuous_node_attributes).map(([attr, domain]) => [attr, d3.scaleLinear().domain(domain).range(color_schemes[node_color_scheme])])
                       .concat(Object.keys(categorical_node_attributes).map(attr => [attr, d3.scaleOrdinal(schemeCategorical20)])));
-    var edge_color = _.object(Object.entries(continuous_edge_attributes).map(([attr, domain]) => [attr, d3.scaleLinear().domain(domain).range(color_schemes[node_color_scheme])])
+    var edge_color = _.object(Object.entries(continuous_edge_attributes).map(([attr, domain]) => [attr, d3.scaleLinear().domain(domain).range(color_schemes[edge_color_scheme])])
                       .concat(Object.keys(categorical_edge_attributes).map(attr => [attr, d3.scaleOrdinal(schemeCategorical20)])));
 
     var node_shape = _.object(Object.entries(categorical_node_attributes).map(([attr, domain]) => [attr, d3.scaleOrdinal(d3.symbols)]));
 
     var node_size  = _.object(Object.entries(continuous_node_attributes).map(([attr, domain]) => [attr, d3.scalePow().exponent(1).domain(domain).range([200, 1000]).clamp(true)]));
 
+    var edge_width = _.object(Object.entries(continuous_edge_attributes).map(([attr, domain]) => [attr, d3.scaleLinear().domain(domain).range(edge_width_range).clamp(true).nice()]));
+
     var color_nodes_by = null;
-    var color_edges_by = null;
+    var outline_nodes_by = null;
     var shape_nodes_by = null;
     var size_nodes_by = null;
+    var color_edges_by = null;
+    var size_edges_by = null;
 
     var default_node_color = '#ccc';
+    var default_outline_color = '#fff';
     var default_edge_color = '#aaa';
     var default_node_shape = d3.symbolCircle;
     var default_node_size = 300;  // refers to node _area_.
+    var default_edge_size = 3;
 
     var group_nodes_by = null;
-    var group_padding = 8;
+    var group_padding = 14;
     var group_boundary_margin = 32;
     graph.nodes.forEach(node => { node.height = node.width = group_boundary_margin; });
     var group_compactness = 0.000001;
@@ -123,7 +139,7 @@ function Graph(graph, nested_groups) {
 
         groupings.location.forEach((loc, i) => { if (loc.id !== 'plasma_membrane' && loc.id !== 'cytoplasm') { groupings.location[cytoplasm_index].groups.push(i) } });
 
-        // _(groupings.location).each(function (g) {g.padding = g.id === 'plasma_membrane' ? 0 : group_padding * (g.groups.length + 1);});
+        _(groupings.location).each(function (g) {g.padding = g.id === 'plasma_membrane' ? 0 : group_padding;});
 
     }
 
@@ -152,10 +168,14 @@ function Graph(graph, nested_groups) {
 
     var legends = svg.append('g').attr('class', 'legends');
 
-    // var node_shape_legend = legends.append('g').styles(text_styles).call(d3.legendSymbol().scale(node_shape[shape_nodes_by]).orient('vertical').title(shape_nodes_by));
-    // var node_color_legend = legends.append('g').styles(text_styles).call(d3.legendColor().scale(node_color[color_nodes_by]).orient('vertical').title(color_nodes_by));
-    var edge_width_legend = legends.append('g').styles(text_styles).call(d3.legendSize().scale(edge_width).shape('line').orient('vertical').shapeWidth(40).labelAlign('start').shapePadding(10).title('Confidence'));
-    // var edge_color_legend = legends.append('g').styles(text_styles).call(d3.legendColor().scale(edge_color[color_edges_by]).orient('vertical').title(color_edges_by));
+    var group_color_legend = legends.append('g').styles(text_styles).style('font-size', 14);
+    var node_shape_legend = legends.append('g').styles(text_styles).style('font-size', 14);
+    var node_color_legend = legends.append('g').styles(text_styles).style('font-size', 14);
+    var outline_color_legend = legends.append('g').styles(text_styles).style('font-size', 14);
+    var edge_width_legend = legends.append('g').styles(text_styles).style('font-size', 14);
+    var edge_color_legend = legends.append('g').styles(text_styles).style('font-size', 14);
+
+
 
 
     /////////////////////////////////////////////////////////////////////////////
@@ -171,12 +191,15 @@ function Graph(graph, nested_groups) {
 
     function render({fix_nodes_=fix_nodes,
                      repulsion_strength_=repulsion_strength,
+                     only_show_edges_=only_show_edges,
                      group_nodes_by_=group_nodes_by}={}) {
 
 
         fix_nodes = fix_nodes_;
         repulsion_strength = repulsion_strength_;
+        only_show_edges = only_show_edges_;
         group_nodes_by = group_nodes_by_;
+
         groups = group_nodes_by ? clone(groupings[group_nodes_by]) : [];
 
         if (group_nodes_by) {
@@ -197,6 +220,8 @@ function Graph(graph, nested_groups) {
             d.fy = fix_nodes ? d.y : null;
         });
 
+        links = graph.links.filter(edge => only_show_edges ? edge[only_show_edges] : true);
+
         node = node.data(nodes, d => d.id);
         text = text.data(nodes, d => d.id);
         link = link.data(links, d => d.id);
@@ -216,8 +241,8 @@ function Graph(graph, nested_groups) {
             .style('cursor', 'pointer')
             .on('mouseover', set_highlight)
             .on('mouseout', remove_highlight)
-            // .on('mousedown', set_focus)
-            // .on('mouseup', remove_focus)
+            .on('mousedown', set_focus)
+            .on('mouseup', remove_focus)
             .on('click', d => { if (d3.event.metaKey) { window.open('http://www.genecards.org/cgi-bin/carddisp.pl?gene='+d.id); } })
             .merge(node)
 
@@ -233,9 +258,6 @@ function Graph(graph, nested_groups) {
         link = link.enter()
            .insert('line', '.node')
            .attr('class', 'link')
-           .style('stroke-width', d => edge_width(1-d.cost))
-           .style('stroke', d => d[color_edges_by] ? edge_color[color_edges_by](d[color_edges_by]) : default_edge_color)
-           .style('opacity', edge_opacity)
            .merge(link);
 
         group = group.enter()
@@ -251,6 +273,7 @@ function Graph(graph, nested_groups) {
              .insert('text', '.link')
              .attr('class', 'label')
              .styles(text_styles)
+             .style('font-size', 14)
              .text(d => d.id)
              .merge(label);
 
@@ -297,13 +320,13 @@ function Graph(graph, nested_groups) {
             .attr('cy', (d) => d.y );
 
         if (group_nodes_by) {
-            group.attr('x', (d) => d.bounds.x + d.padding / 2 )
-                 .attr('y', (d) => d.bounds.y + d.padding / 2 )
-                 .attr('width', (d) => d.bounds.width() - d.padding )
-                 .attr('height',(d) => d.bounds.height() - d.padding );
+            group.attr('x', (d) => d.bounds.x + d.padding )
+                 .attr('y', (d) => d.bounds.y + d.padding )
+                 .attr('width', (d) => d.bounds.width() - 2*d.padding )
+                 .attr('height',(d) => d.bounds.height() - 2*d.padding );
 
-            label.attr('x', (d) => d.bounds.x + d.padding / 2 )
-                 .attr('y', (d) => d.bounds.y + d.padding / 2 );
+            label.attr('x', (d) => d.bounds.x + d.padding )
+                 .attr('y', (d) => d.bounds.y + d.padding );
         }
 
     }
@@ -324,6 +347,7 @@ function Graph(graph, nested_groups) {
         function dragended(d) {
             if (!d3.event.active) { force.alphaTarget(0); }
             if (!fix_nodes) { d.fx = null; d.fy = null; }
+            remove_focus();
         }
 
         return d3.drag()
@@ -333,30 +357,39 @@ function Graph(graph, nested_groups) {
     }
 
     function style({color_nodes_by_=color_nodes_by,
-                    color_edges_by_=color_edges_by,
+                    outline_nodes_by_=outline_nodes_by,
                     size_nodes_by_=size_nodes_by,
-                    edge_opacity_=edge_opacity,
                     node_color_scheme_=node_color_scheme,
-                    shape_nodes_by_=shape_nodes_by}={}) {
+                    outline_color_scheme_=outline_color_scheme,
+                    shape_nodes_by_=shape_nodes_by,
+                    edge_opacity_=edge_opacity,
+                    color_edges_by_=color_edges_by,
+                    edge_color_scheme_=edge_color_scheme,
+                    size_edges_by_=size_edges_by,}={}) {
 
         color_nodes_by = color_nodes_by_;
-        color_edges_by = color_edges_by_;
+        outline_nodes_by = outline_nodes_by_;
         size_nodes_by = size_nodes_by_;
-        edge_opacity = edge_opacity_;
         node_color_scheme = node_color_scheme_;
+        outline_color_scheme = outline_color_scheme_;
         shape_nodes_by = shape_nodes_by_;
-
+        edge_opacity = edge_opacity_;
+        color_edges_by = color_edges_by_;
+        edge_color_scheme = edge_color_scheme_;
+        size_edges_by = size_edges_by_;
 
         node.attr('d', configure_shape)
             .style('fill', (d) => d[color_nodes_by] ? node_color[color_nodes_by](d[color_nodes_by]) : default_node_color)
-            .style('stroke', 'white')
+            .style('stroke', (d) => d[outline_nodes_by] ? node_color[outline_nodes_by](d[outline_nodes_by]) : default_outline_color)
             .style('stroke-width', node_border_width);
 
-        // color_legend.call(d3.legendColor().shapeWidth(30).orient('vertical').scale(color[color_nodes_by]).title(color_nodes_by));
-
-        link.style('opacity', edge_opacity);
+        link.style('opacity', edge_opacity)
+            .style('stroke', (d) => d[color_edges_by] ? edge_color[color_edges_by](d[color_edges_by]) : default_edge_color)
+            .style('stroke-width', (d) => d[size_edges_by] ? edge_width[size_edges_by](d[size_edges_by]) : default_edge_size);
 
         text.attr('dx', d => (text_center ? 0 : Math.sqrt(node_size[size_nodes_by] ? node_size[size_nodes_by](d[size_nodes_by]) : default_node_size))/2 );
+
+        show_legends();
 
     }
 
@@ -366,6 +399,40 @@ function Graph(graph, nested_groups) {
         var shape = d[shape_nodes_by] ? node_shape[shape_nodes_by](d[shape_nodes_by]) : default_node_shape;
 
         return d3.symbol().type(shape).size(size)();
+
+    }
+
+    function show_legends() {
+
+        var next_legend_pos = 0;
+        shown_legends = [];
+
+        if (group_nodes_by) {
+            shown_legends.push(group_color_legend.call(d3.legendColor().scale(node_color[group_nodes_by]).orient('vertical').title(group_nodes_by))); } else { group_color_legend.selectAll('*').remove(); }
+
+        if (shape_nodes_by) {
+            scale = node_shape[shape_nodes_by].copy().range(d3.symbols.map(shape => d3.symbol().type(shape).size(100)()));
+            shown_legends.push(node_shape_legend.call(d3.legendSymbol().scale(scale).orient('vertical').title(shape_nodes_by))); } else { node_shape_legend.selectAll('*').remove(); }
+
+        if (color_nodes_by && color_nodes_by !== group_nodes_by) {
+            shown_legends.push(node_color_legend.call(d3.legendColor().scale(node_color[color_nodes_by]).orient('vertical').title(color_nodes_by))); } else { node_color_legend.selectAll('*').remove(); }
+
+        if (outline_nodes_by && outline_nodes_by !== color_nodes_by && outline_nodes_by !== group_nodes_by) {
+            shown_legends.push(outline_color_legend.call(d3.legendColor().scale(node_color[outline_nodes_by]).orient('vertical').title(outline_nodes_by))); } else { outline_color_legend.selectAll('*').remove(); }
+
+        edge_width_legend.selectAll('*').remove();  // compensating for a bug in d3-legend
+        if (size_edges_by) {
+            shown_legends.push(edge_width_legend.call(d3.legendSize().scale(edge_width[size_edges_by]).shape('line').orient('vertical').shapeWidth(40).labelAlign('start').shapePadding(10).title(size_edges_by))); edge_width_legend.selectAll(".swatch").style("stroke", "black"); } else { edge_width_legend.selectAll('*').remove(); }
+
+        if (color_edges_by) {
+            shown_legends.push(edge_color_legend.call(d3.legendColor().scale(edge_color[color_edges_by]).orient('vertical').title(color_edges_by))); } else { edge_color_legend.selectAll('*').remove(); }
+
+        shown_legends.forEach(legend => {
+
+            legend.attr('transform', 'translate(20,'+(next_legend_pos+20)+')');
+            next_legend_pos += legend.node().getBBox().height+20;
+
+        });
 
     }
 
@@ -383,8 +450,8 @@ function Graph(graph, nested_groups) {
     function remove_highlight() {
         if (focus_node === null) {
             node.style('stroke', 'white');
-            text.style('font-weight', 'normal');
-            link.style('stroke', default_edge_color);
+            text.style('font-weight', text_styles['font-weight']);
+            link.style('stroke', (d) => d[color_edges_by] ? edge_color[color_edges_by](d[color_edges_by]) : default_edge_color);
         }
     }
 
@@ -393,8 +460,12 @@ function Graph(graph, nested_groups) {
                           ///////    Focus    ///////
     /////////////////////////////////////////////////////////////////////////////
 
+    function set_focus_by_id(id) { d3.select(`#node-${id}`).dispatch('mousedown'); }
+
     function set_focus(d) {
-        d3.event.stopPropagation();
+
+        console.log(d);
+
         focus_node = d3.select(this);
 
         if (highlight_trans < 1) {
@@ -408,16 +479,14 @@ function Graph(graph, nested_groups) {
         }
     }
 
-    function set_focus_by_id(id) { set_focus(d3.select(`#node-${id}`)); }
-
     function remove_focus() {
-        d3.event.stopPropagation();
+
         focus_node = null;
 
         g.selectAll('.node').style('opacity', 1);
         g.selectAll('.text').style('opacity', 1);
         g.selectAll('.link').style('opacity', edge_opacity);
-        g.selectAll('.group').style('opacity', 0.6);
+        g.selectAll('.group').style('opacity', group_opacity);
         g.selectAll('.label').style('opacity', 1);
 
         remove_highlight();
@@ -452,8 +521,12 @@ function Graph(graph, nested_groups) {
         'style' : style,
         'set_focus_by_id': set_focus_by_id,
 
-        continuous_node_attributes: () => continuous_node_attributes,  // should be making a copy to be safe
-        categorical_node_attributes: () => categorical_node_attributes,  // should be making a copy to be safe
+        continuous_node_attributes: () => clone(continuous_node_attributes),
+        categorical_node_attributes: () => clone(categorical_node_attributes),
+
+        continuous_edge_attributes: () => clone(continuous_edge_attributes),
+        categorical_edge_attributes: () => clone(categorical_edge_attributes),
+        boolean_edge_attributes: () => clone(boolean_edge_attributes),
 
 
     }
