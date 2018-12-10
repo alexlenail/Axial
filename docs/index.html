@@ -12,38 +12,23 @@
         h1 {
             font-weight: 100;
             font-size: 72px;
-            /*margin-bottom: 2rem;*/
-        }
-        h4 {
-            /*margin-bottom: 1rem;*/
-
         }
 
-        .abcd1-container {
-            margin-top: 4rem;
-            margin-bottom: 4rem;
+        .card {
+            border-radius: 0;
+            border: none;
+            border-bottom: 5px solid #fff;
+        }
+        .card:hover { border-bottom: 5px solid #eee; }
+
+        a h5 {
+            color: black;
+            font-weight: 200;
+        }
+        a:hover {
+            text-decoration: none;
         }
 
-        .abcd1-column-left {
-            border-right: 1px solid lightgrey;
-            padding: 2rem;
-            padding-right: 4rem;
-        }
-
-
-        .abcd1-column-right {
-            padding: 2rem;
-            padding-left: 4rem;
-            padding-right: 4rem;
-
-        }
-
-        .link-unstyled, .link-unstyled:link, .link-unstyled:hover {
-            color: inherit;
-        }
-        .card-img-top {
-            padding: 1rem;
-        }
 
     </style>
 
@@ -56,51 +41,55 @@
 
         <div class="row">
 
-            <div class="col-12 ">
+            <div class="col-12">
 
-            	<h1>Axial</h1>
+                <div class=" col-6 offset-3" style="border-bottom: 4px solid #eee">
+                    <h1>Axial</h1>
 
-        	  	<a href="html/index.html">Python Docs</a>
+                </div>
 
+                <div class="card-deck my-5">
 
-                <br>
-                <br>
-                <br>
+                    <div class="card text-center mx-1"><a href="example/volcano.html">
+                        <img class="card-img-top" src="img/volcano.png">
+                        <div class="card-body"><h5 class="card-title">Volcano</h5></div>
+                    </a></div>
 
-                <a href="example/volcano.html" class="link-unstyled"><div class="card text-center mb-3 col-4">
-                    <img class="card-img-top" src="img/volcano.png" alt="Volcano Plot">
-                    <div class="card-body">
-                        <h5 class="card-title">Interactive Volcano Plot</h5>
-                    </div>
-                </div></a>
+                    <div class="card text-center mx-1"><a href="example/bar.html">
+                        <img class="card-img-top" src="img/bar.png">
+                        <div class="card-body"><h5 class="card-title">Pathway Bar Plot</h5></div>
+                    </a></div>
 
-                <a href="example/bar.html" class="link-unstyled"><div class="card text-center mb-3 col-4">
-                    <img class="card-img-top" src="img/bar.png" alt="Pathway Bar Plot">
-                    <div class="card-body">
-                        <h5 class="card-title">Interactive Pathway Bar Plot</h5>
-                    </div>
-                </div></a>
+                    <div class="card text-center mx-1"><a href="example/graph.html">
+                        <img class="card-img-top" src="img/graph.png">
+                        <div class="card-body"><h5 class="card-title">Graph <br>(Network)</h5></div>
+                    </a></div>
 
-                <a href="example/graph.html" class="link-unstyled"><div class="card text-center mb-3 col-4">
-                    <img class="card-img-top" src="img/graph.png" alt="Graph Visualization">
-                    <div class="card-body">
-                        <h5 class="card-title">Interactive Graph Visualization</h5>
-                    </div>
-                </div></a>
+                    <div class="card text-center mx-1"><a href="example/braid.html">
+                        <img class="card-img-top" src="img/braid.png">
+                        <div class="card-body"><h5 class="card-title">Braid <br>(Parallel Coordinates)</h5></div>
+                    </a></div>
 
-                <a href="example/braid.html" class="link-unstyled"><div class="card text-center mb-3 col-4">
-                    <img class="card-img-top" src="img/braid.png" alt="Pathway Parallel Coordinates">
-                    <div class="card-body">
-                        <h5 class="card-title">Interactive Pathway Parallel Coordinates Visualization</h5>
-                    </div>
-                </div></a>
+                    <div class="card text-center mx-1"><a href="example/heatmap.html">
+                        <img class="card-img-top" src="img/heatmap.png">
+                        <div class="card-body"><h5 class="card-title">Heatmap</h5></div>
+                    </a></div>
 
-                <a href="example/heatmap.html" class="link-unstyled"><div class="card text-center mb-3 col-4">
-                    <img class="card-img-top" src="img/heatmap.png" alt="Pathway Heatmaps">
-                    <div class="card-body">
-                        <h5 class="card-title">Interactive Pathway Heatmaps Visualization</h5>
-                    </div>
-                </div></a>
+                </div>
+
+                <div class=" col-6 offset-3">
+
+                    <p>Axial is a data visualization library.</p>
+
+                    <p>Unlike other data visualization libraries, <b>Axial returns interactive html</b> instead of png or svg.
+                    Many of the figure configuration parameters can be dynamically set in the browser.
+                    This makes it easier to explore one's dataset with low friction.</p>
+
+                    <p>Axial was <b>built with high dimensional genomics data in mind</b>, but can readily be adapted to other data types which can suitably be visualized by one of the visualization types Axial provides.</p>
+
+                    <p>Axial plots can be generated via python (see the <a href="html/index.html">Python Docs</a>). Support for R is coming.</p>
+
+                </div>
 
             </div>
 
