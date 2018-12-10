@@ -37,6 +37,16 @@ h1 { font-weight: 100; }
 .card {
     border-radius: 0;
 }
+.tab-content {
+    overflow: scroll !important;
+}
+.card-footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    background-color: #f2f2f2;
+}
+
 
 .menu.hidden {
     transform: translate(-330px);
