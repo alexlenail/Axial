@@ -184,6 +184,7 @@ def volcano(differential_df, title='Axial Volcano Plot', scripts_mode="CDN", dat
     df = differential_df[[q_value_column_name, log2FC_column_name]]
     df.columns = ['q', 'logFC']
     _verify_differential_df(df)
+    df = df.round(2)
 
     differential = f"var differential = {df.to_json(orient='index')};"
 
@@ -236,6 +237,7 @@ def bar(differential_df, title='Axial Pathway Bar Plot', scripts_mode="CDN", dat
     df = differential_df[[q_value_column_name, log2FC_column_name]]
     df.columns = ['q', 'logFC']
     _verify_differential_df(df)
+    df = df.round(2)
 
     differential = f"var differential = {df.to_json(orient='index')};"
 
@@ -284,6 +286,7 @@ def braid(genes_by_samples_matrix, sample_attributes, title='Axial Braid Plot', 
 
     _verify_sample_by_genes_matrix(genes_by_samples_matrix)
     _verify_sample_attributes(genes_by_samples_matrix, sample_attributes)
+    genes_by_samples_matrix = genes_by_samples_matrix.round(2)
 
     matrix = f"var matrix = {genes_by_samples_matrix.to_json(orient='columns')};"
     classes = f"var classes = {sample_attributes.to_json(orient='index')};"
@@ -335,6 +338,7 @@ def heatmap(genes_by_samples_matrix, sample_attributes, title='Axial Heatmap', s
 
     _verify_sample_by_genes_matrix(genes_by_samples_matrix)
     _verify_sample_attributes(genes_by_samples_matrix, sample_attributes)
+    genes_by_samples_matrix = genes_by_samples_matrix.round(2)
 
     matrix = f"var matrix = {genes_by_samples_matrix.to_json(orient='columns')};"
     classes = f"var classes = {sample_attributes.to_json(orient='index')};"

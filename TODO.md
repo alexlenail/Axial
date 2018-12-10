@@ -1,8 +1,4 @@
 
-rounding in the python
-
-click & drag broken on braid and heatmap
-
 finish docs homepage
 
 window.location.hash in all vizzies
