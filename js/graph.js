@@ -120,6 +120,10 @@ function Graph(graph, nested_groups) {
 
     var svg = d3.select('#graph-container').append('svg').attr('xmlns', 'http://www.w3.org/2000/svg').attr('xmlns:xlink', 'http://www.w3.org/1999/xlink');
     var g = svg.append('g');
+    svg.on('click', function() { if (d3.event.target.localName === 'svg') { remove_focus(); } });
+
+
+    var in_drag = false;
 
     groupings = _(categorical_node_attributes).mapObject((values, attr) => values.filter(v => v).map(value => {
         return {'id':value, 'leaves':graph.nodes.map((node, i) => node[attr] === value ? i : -1).filter(x => x > -1), 'groups':[], 'padding':group_padding}
@@ -241,9 +245,7 @@ function Graph(graph, nested_groups) {
             .style('cursor', 'pointer')
             .on('mouseover', set_highlight)
             .on('mouseout', remove_highlight)
-            .on('mousedown', set_focus)
-            .on('mouseup', remove_focus)
-            .on('click', d => { if (d3.event.metaKey) { window.open('http://www.genecards.org/cgi-bin/carddisp.pl?gene='+d.id); } })
+            .on('click', set_focus)
             .merge(node)
 
         text = text.enter()
@@ -334,6 +336,7 @@ function Graph(graph, nested_groups) {
     function drag(force) {
 
         function dragstarted(d) {
+            in_drag = true;
             if (!d3.event.active) { force.alphaTarget(0.3).restart(); }
             d.fx = d.x;
             d.fy = d.y;
@@ -348,6 +351,7 @@ function Graph(graph, nested_groups) {
             if (!d3.event.active) { force.alphaTarget(0); }
             if (!fix_nodes) { d.fx = null; d.fy = null; }
             remove_focus();
+            in_drag = false;
         }
 
         return d3.drag()
@@ -407,23 +411,28 @@ function Graph(graph, nested_groups) {
         var next_legend_pos = 0;
         shown_legends = [];
 
+        group_color_legend.selectAll('*').remove();
         if (group_nodes_by) {
             shown_legends.push(group_color_legend.call(d3.legendColor().scale(node_color[group_nodes_by]).orient('vertical').title(group_nodes_by))); } else { group_color_legend.selectAll('*').remove(); }
 
+        node_shape_legend.selectAll('*').remove();
         if (shape_nodes_by) {
             scale = node_shape[shape_nodes_by].copy().range(d3.symbols.map(shape => d3.symbol().type(shape).size(100)()));
             shown_legends.push(node_shape_legend.call(d3.legendSymbol().scale(scale).orient('vertical').title(shape_nodes_by))); } else { node_shape_legend.selectAll('*').remove(); }
 
+        node_color_legend.selectAll('*').remove();
         if (color_nodes_by && color_nodes_by !== group_nodes_by) {
             shown_legends.push(node_color_legend.call(d3.legendColor().scale(node_color[color_nodes_by]).orient('vertical').title(color_nodes_by))); } else { node_color_legend.selectAll('*').remove(); }
 
+        outline_color_legend.selectAll('*').remove();
         if (outline_nodes_by && outline_nodes_by !== color_nodes_by && outline_nodes_by !== group_nodes_by) {
             shown_legends.push(outline_color_legend.call(d3.legendColor().scale(node_color[outline_nodes_by]).orient('vertical').title(outline_nodes_by))); } else { outline_color_legend.selectAll('*').remove(); }
 
-        edge_width_legend.selectAll('*').remove();  // compensating for a bug in d3-legend
+        edge_width_legend.selectAll('*').remove();
         if (size_edges_by) {
             shown_legends.push(edge_width_legend.call(d3.legendSize().scale(edge_width[size_edges_by]).shape('line').orient('vertical').shapeWidth(40).labelAlign('start').shapePadding(10).title(size_edges_by))); edge_width_legend.selectAll(".swatch").style("stroke", "black"); } else { edge_width_legend.selectAll('*').remove(); }
 
+        edge_color_legend.selectAll('*').remove();
         if (color_edges_by) {
             shown_legends.push(edge_color_legend.call(d3.legendColor().scale(edge_color[color_edges_by]).orient('vertical').title(color_edges_by))); } else { edge_color_legend.selectAll('*').remove(); }
 
@@ -442,13 +451,15 @@ function Graph(graph, nested_groups) {
     /////////////////////////////////////////////////////////////////////////////
 
     function set_highlight(d) {
-        node.style('stroke', (o) => (isConnected(d, o) ? highlight_color : 'white'));
-        text.style('font-weight', (o) => (isConnected(d, o) ? 'bold' : 'normal'));
-        link.style('stroke', (o) => (o.source.index == d.index || o.target.index == d.index ? highlight_color : default_edge_color));
+        if (focus_node === null && !in_drag) {
+            node.style('stroke', (o) => (isConnected(d, o) ? highlight_color : 'white'));
+            text.style('font-weight', (o) => (isConnected(d, o) ? 'bold' : 'normal'));
+            link.style('stroke', (o) => (o.source.index == d.index || o.target.index == d.index ? highlight_color : default_edge_color));
+        }
     }
 
     function remove_highlight() {
-        if (focus_node === null) {
+        if (focus_node === null && !in_drag) {
             node.style('stroke', 'white');
             text.style('font-weight', text_styles['font-weight']);
             link.style('stroke', (d) => d[color_edges_by] ? edge_color[color_edges_by](d[color_edges_by]) : default_edge_color);
@@ -460,12 +471,16 @@ function Graph(graph, nested_groups) {
                           ///////    Focus    ///////
     /////////////////////////////////////////////////////////////////////////////
 
-    function set_focus_by_id(id) { d3.select(`#node-${id}`).dispatch('mousedown'); }
+    function set_focus_by_id(id) {
+        if (!_.isNull(focus_node) && d3.select(`#node-${id}`).empty()) { remove_focus(); }
+        else { d3.select(`#node-${id}`).dispatch('mousedown'); }
+    }
 
     function set_focus(d) {
 
-        console.log(d);
+        if (d3.event.metaKey) { window.open('http://www.genecards.org/cgi-bin/carddisp.pl?gene='+d.id); }
 
+        set_highlight(d);
         focus_node = d3.select(this);
 
         if (highlight_trans < 1) {
@@ -482,14 +497,13 @@ function Graph(graph, nested_groups) {
     function remove_focus() {
 
         focus_node = null;
+        remove_highlight();
 
         g.selectAll('.node').style('opacity', 1);
         g.selectAll('.text').style('opacity', 1);
         g.selectAll('.link').style('opacity', edge_opacity);
         g.selectAll('.group').style('opacity', group_opacity);
         g.selectAll('.label').style('opacity', 1);
-
-        remove_highlight();
     }
 
 

@@ -1,13 +1,4 @@
 
-graph:
-
-focus
-
-selects in a table
-
----
-
-
 rounding in the python
 
 click & drag broken on braid and heatmap

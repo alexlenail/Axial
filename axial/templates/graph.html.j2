@@ -30,21 +30,23 @@
 
                 <div class="form-group"><label class="mr-2">Force</label><input type="range" id="repulsion_strength" min="1" max="100" step="1" value="20"></div>
 
-                <b><label>Nodes</label></b>
-                <div class="form-group"><label class="mr-2">Group nodes by</label><select id="group_nodes_by"><option value="" selected>None</option></select></div>
-                <div class="form-group"><label class="mr-2">Shape nodes by</label><select id="shape_nodes_by"><option value="" selected>None</option></select></div>
-                <div class="form-group"><label class="mr-2">Size nodes by</label><select id="size_nodes_by"><option value="" selected>None</option></select></div>
-                <div class="form-group"><label class="mr-2">Color nodes by</label><select id="color_nodes_by"><option value="" selected>None</option></select></div>
-                {# <div class="form-group"><label class="mr-2">Outline nodes by</label><select id="outline_nodes_by"><option value="" selected>None</option></select></div> #}
+                <table class="table table-borderless table-sm pl-0" style="margin-left: -5px;">
+                  <tbody>
+                    <tr><th>Nodes</th></tr>
+                    <tr><td>Group nodes by</td><td><select id="group_nodes_by"><option value="" selected>None</option></select></td></tr>
+                    <tr><td>Shape nodes by</td><td><select id="shape_nodes_by"><option value="" selected>None</option></select></td></tr>
+                    <tr><td>Size nodes by</td><td><select id="size_nodes_by"><option value="" selected>None</option></select></td></tr>
+                    <tr><td>Color nodes by</td><td><select id="color_nodes_by"><option value="" selected>None</option></select></td></tr>
+                    {# <tr><td>Outline nodes by</td><td><select id="outline_nodes_by"><option value="" selected>None</option></select></td></tr> #}
+                    <tr><th>Edges</th></tr>
+                    <tr><td>Group nodes by</td><td><input type="range" id="edge_opacity" min="0" max="1" step="0.01" value="0.6"></td></tr>
+                    <tr><td>Shape nodes by</td><td><select id="color_edges_by"><option value="" selected>None</option></select></td></tr>
+                    <tr><td>Size nodes by</td><td><select id="size_edges_by"><option value="" selected>None</option></select></td></tr>
+                    <tr><td>Color nodes by</td><td><select id="only_show_edges"><option value="" selected>Show All Edges</option></select></td></tr>
+                  </tbody>
+                </table>
+
                 <div class="form-group"><label>⌘+Click a node to open GeneCards</label></div>
-
-                <b><label>Edges</label></b>
-                <div class="form-group"><label class="mr-2">Edge Opacity</label><input type="range" id="edge_opacity" min="0" max="1" step="0.01" value="0.6"></div>
-                <div class="form-group"><label class="mr-2">Color edges by</label><select id="color_edges_by"><option value="" selected>None</option></select></div>
-                <div class="form-group"><label class="mr-2">Size edges by</label><select id="size_edges_by"><option value="" selected>None</option></select></div>
-                <div class="form-group"><label class="mr-2">Only Show Edges</label><select id="only_show_edges"><option value="" selected>Show All Edges</option></select></div>
-
-
 
             </div>
 
@@ -77,7 +79,7 @@ $("#color_nodes_by").append(Object.keys(continuous_node_attributes).map(attr => 
 $("#shape_nodes_by").append(Object.keys(categorical_node_attributes).map(attr => `<option value="${attr}">${attr}</option>`));
 $("#group_nodes_by").append(Object.keys(categorical_node_attributes).map(attr => `<option value="${attr}">${attr}</option>`));
 $("#size_nodes_by").append(Object.keys(continuous_node_attributes).map(attr => `<option value="${attr}">${attr}</option>`));
-$("#outline_nodes_by").append(Object.keys(continuous_node_attributes).map(attr => `<option value="${attr}">${attr}</option>`));
+// $("#outline_nodes_by").append(Object.keys(continuous_node_attributes).map(attr => `<option value="${attr}">${attr}</option>`));
 
 continuous_edge_attributes = g.continuous_edge_attributes();
 categorical_edge_attributes = g.categorical_edge_attributes();
