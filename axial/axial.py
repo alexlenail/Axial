@@ -161,20 +161,31 @@ def volcano(differential_df, title='Axial Volcano Plot', scripts_mode="CDN", dat
     """
     Arguments:
         differential_df (pandas.DataFrame): a dataframe indexed by gene symbols which must have columns named log2FC and qval.
-        scripts_mode (str): Choose from ["CDN", "directory", "inline"]:
-                "CDN" compiles a single HTML page with links to scripts hosted on a CDN,
-                "directory" compiles a directory with all scripts locally cached,
-                "inline" compiles a single HTML file with all scripts/styles inlined.
+        title (str): The title of the plot (to be embedded in the html).
+        scripts_mode (str): Choose from [`"CDN"`, `"directory"`, `"inline"`]:
+
+            - `"CDN"` compiles a single HTML page with links to scripts hosted on a CDN,
+
+            - `"directory"` compiles a directory with all scripts locally cached,
+
+            - `"inline"` compiles a single HTML file with all scripts/styles inlined.
+
         data_mode (str): Choose from ["directory", "inline"]:
-                "directory" compiles a directory with all data locally cached,
-                "inline" compiles a single HTML file with all data inlined.
-        organism (str): "human" or "mouse"
+
+            - "directory" compiles a directory with all data locally cached,
+
+            - "inline" compiles a single HTML file with all data inlined.
+
+        organism (str): `"human"` or `"mouse"`
         q_value_column_name (str):
         log2FC_column_name (str):
         output_dir (str): the directory in which to output the file
         filename (str): the filename of the output file
+        version (str): the version of the javascripts to use.
+            Leave the default to pin the version, or choose "latest" to get updates,
+            or choose part of the version string to get minor updates.
     Returns:
-        Path: the filepath which was outputted to
+        Path: The filepath which the html was outputted to.
     """
 
     output_dir = Path(output_dir)
@@ -215,20 +226,31 @@ def bar(differential_df, title='Axial Pathway Bar Plot', scripts_mode="CDN", dat
     """
     Arguments:
         differential_df (pandas.DataFrame): a dataframe indexed by gene symbols which must have columns named log2FC and qval.
-        scripts_mode (str): Choose from ["CDN", "directory", "inline"]:
-                "CDN" compiles a single HTML page with links to scripts hosted on a CDN,
-                "directory" compiles a directory with all scripts locally cached,
-                "inline" compiles a single HTML file with all scripts/styles inlined.
+        title (str): The title of the plot (to be embedded in the html).
+        scripts_mode (str): Choose from [`"CDN"`, `"directory"`, `"inline"`]:
+
+            - `"CDN"` compiles a single HTML page with links to scripts hosted on a CDN,
+
+            - `"directory"` compiles a directory with all scripts locally cached,
+
+            - `"inline"` compiles a single HTML file with all scripts/styles inlined.
+
         data_mode (str): Choose from ["directory", "inline"]:
-                "directory" compiles a directory with all data locally cached,
-                "inline" compiles a single HTML file with all data inlined.
-        organism (str): "human" or "mouse"
+
+            - "directory" compiles a directory with all data locally cached,
+
+            - "inline" compiles a single HTML file with all data inlined.
+
+        organism (str): `"human"` or `"mouse"`
         q_value_column_name (str):
         log2FC_column_name (str):
         output_dir (str): the directory in which to output the file
         filename (str): the filename of the output file
+        version (str): the version of the javascripts to use.
+            Leave the default to pin the version, or choose "latest" to get updates,
+            or choose part of the version string to get minor updates.
     Returns:
-        Path: the filepath which was outputted to
+        Path: The filepath which the html was outputted to.
     """
 
     output_dir = Path(output_dir)
@@ -268,18 +290,29 @@ def braid(genes_by_samples_matrix, sample_attributes, title='Axial Braid Plot', 
     Arguments:
         genes_by_samples_matrix (pandas.DataFrame): dataframe indexed by genes, columns are samples
         sample_attributes (pandas.DataFrame): dataframe indexed by samples, columns are sample attributes (e.g. classes)
-        scripts_mode (str): Choose from ["CDN", "directory", "inline"]:
-                "CDN" compiles a single HTML page with links to scripts hosted on a CDN,
-                "directory" compiles a directory with all scripts locally cached,
-                "inline" compiles a single HTML file with all scripts/styles inlined.
+        title (str): The title of the plot (to be embedded in the html).
+        scripts_mode (str): Choose from [`"CDN"`, `"directory"`, `"inline"`]:
+
+            - `"CDN"` compiles a single HTML page with links to scripts hosted on a CDN,
+
+            - `"directory"` compiles a directory with all scripts locally cached,
+
+            - `"inline"` compiles a single HTML file with all scripts/styles inlined.
+
         data_mode (str): Choose from ["directory", "inline"]:
-                "directory" compiles a directory with all data locally cached,
-                "inline" compiles a single HTML file with all data inlined.
-        organism (str): "human" or "mouse"
+
+            - "directory" compiles a directory with all data locally cached,
+
+            - "inline" compiles a single HTML file with all data inlined.
+
+        organism (str): `"human"` or `"mouse"`
         output_dir (str): the directory in which to output the file
         filename (str): the filename of the output file
+        version (str): the version of the javascripts to use.
+            Leave the default to pin the version, or choose "latest" to get updates,
+            or choose part of the version string to get minor updates.
     Returns:
-        Path: the filepath which was outputted to
+        Path: The filepath which the html was outputted to.
     """
 
     output_dir = Path(output_dir)
@@ -319,19 +352,30 @@ def heatmap(genes_by_samples_matrix, sample_attributes, title='Axial Heatmap', s
     Arguments:
         genes_by_samples_matrix (pandas.DataFrame): dataframe indexed by genes, columns are samples
         sample_attributes (pandas.DataFrame): dataframe indexed by samples, columns are sample attributes (e.g. classes)
-        scripts_mode (str): Choose from ["CDN", "directory", "inline"]:
-                "CDN" compiles a single HTML page with links to scripts hosted on a CDN,
-                "directory" compiles a directory with all scripts locally cached,
-                "inline" compiles a single HTML file with all scripts/styles inlined.
+        title (str): The title of the plot (to be embedded in the html).
+        scripts_mode (str): Choose from [`"CDN"`, `"directory"`, `"inline"`]:
+
+            - `"CDN"` compiles a single HTML page with links to scripts hosted on a CDN,
+
+            - `"directory"` compiles a directory with all scripts locally cached,
+
+            - `"inline"` compiles a single HTML file with all scripts/styles inlined.
+
         data_mode (str): Choose from ["directory", "inline"]:
-                "directory" compiles a directory with all data locally cached,
-                "inline" compiles a single HTML file with all data inlined.
-        organism (str): "human" or "mouse"
+
+            - "directory" compiles a directory with all data locally cached,
+
+            - "inline" compiles a single HTML file with all data inlined.
+
+        organism (str): `"human"` or `"mouse"`
         separate_zscore_by (list):
         output_dir (str): the directory in which to output the file
         filename (str): the filename of the output file
+        version (str): the version of the javascripts to use.
+            Leave the default to pin the version, or choose "latest" to get updates,
+            or choose part of the version string to get minor updates.
     Returns:
-        Path: the filepath which was outputted to
+        Path: The filepath which the html was outputted to.
     """
 
 
@@ -372,18 +416,28 @@ def graph(networkx_graph, title='Axial Graph Visualization', scripts_mode="CDN",
     """
     Arguments:
         networkx_graph (networkx.Graph): any instance of networkx.Graph
-        scripts_mode (str): Choose from ["CDN", "directory", "inline"]:
-                "CDN" compiles a single HTML page with links to scripts hosted on a CDN,
-                "directory" compiles a directory with all scripts locally cached,
-                "inline" compiles a single HTML file with all scripts/styles inlined.
+        title (str): The title of the plot (to be embedded in the html).
+        scripts_mode (str): Choose from [`"CDN"`, `"directory"`, `"inline"`]:
+
+            - `"CDN"` compiles a single HTML page with links to scripts hosted on a CDN,
+
+            - `"directory"` compiles a directory with all scripts locally cached,
+
+            - `"inline"` compiles a single HTML file with all scripts/styles inlined.
+
         data_mode (str): Choose from ["directory", "inline"]:
-                "directory" compiles a directory with all data locally cached,
-                "inline" compiles a single HTML file with all data inlined.
-        organism (str): "human" or "mouse"
+
+            - "directory" compiles a directory with all data locally cached,
+
+            - "inline" compiles a single HTML file with all data inlined.
+
         output_dir (str): the directory in which to output the file
         filename (str): the filename of the output file
+        version (str): the version of the javascripts to use.
+            Leave the default to pin the version, or choose "latest" to get updates,
+            or choose part of the version string to get minor updates.
     Returns:
-        Path: the filepath which was outputted to
+        Path: The filepath which the html was outputted to.
     """
 
     # TODO comment
