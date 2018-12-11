@@ -1,4 +1,13 @@
+pin version
 
+do release of v0.1.0
+
+npm publish
+python setup.py sdist bdist_wheel upload -r pypi
+
+
+
+---
 
 volcano font size should be editable
 
@@ -26,4 +35,6 @@ scroll behavior on other vizzies
 disable apple scroll dragging behavior on my vizzies
 
 
+
+npm publish.
 
