@@ -1,28 +1,12 @@
 
 
-handoff between layout algorithms
-
-legends show default stuff, always render
-
-affix nodes
-
-
----
-
-
-
-
-finish docs homepage
-
-
-
-
----
-
+volcano font size should be editable
 
 window.location.hash in all vizzies
 
-horizontal scroll issues
+factor out scrolling of all vizzies
+
+---
 
 
 loading UI

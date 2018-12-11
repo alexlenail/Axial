@@ -4,7 +4,7 @@ setup(
     name='axial',
     packages=['axial'],
     package_data={'axial': ['templates/*', 'go/*']},
-    version='0.0.5',
+    version='0.1.0',
     url='https://github.com/zfrenchee/axial',
     classifiers=[
         'Programming Language :: Python :: 3.5',
@@ -13,7 +13,7 @@ setup(
     license='MIT',
     author='zfrenchee',
     author_email='alex@lenail.org',
-    description='',
+    description='Interactive Visualizations for High Dimensional Genomics Data',
     install_requires=[
         "pandas>=0.23.4",
         "networkx>=2.1",

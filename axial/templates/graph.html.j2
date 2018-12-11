@@ -12,7 +12,7 @@
         <div class="card">
             <div class="card-header">
                 <a class="pull-right" role="button"><i class="fa" id="hide-show"></i></a>
-                <h1><a href="index.html" class="link-unstyled">Axial Graph Visualization</a></h1>
+                <h1><a href="index.html" class="link-unstyled">{{ title }}</a></h1>
                 <p><a id="download" href="#">Download SVG</a></p>
 
             </div>
@@ -22,29 +22,36 @@
                 <div class="form-group">
                     <input type="text" class="input" id="search_for_node" list="nodes" placeholder="search..." />
                     <datalist id="nodes">
-                        <option value="MGP">MGP</option><option value="SEMA3A">SEMA3A</option><option value="GAPDH">GAPDH</option><option value="RHOH">RHOH</option><option value="EI24">EI24</option><option value="IGFBP7">IGFBP7</option><option value="CTTN">CTTN</option><option value="ARHGDIB">ARHGDIB</option><option value="GLMN">GLMN</option><option value="LRP6">LRP6</option><option value="IQCF1">IQCF1</option><option value="TGFB1">TGFB1</option><option value="PGF">PGF</option><option value="VEGFA">VEGFA</option><option value="FSTL1">FSTL1</option><option value="GUCY1A2">GUCY1A2</option><option value="ADD3">ADD3</option><option value="AMOTL2">AMOTL2</option><option value="TGFB3">TGFB3</option><option value="RHOB">RHOB</option><option value="KCNA2">KCNA2</option><option value="JAK2">JAK2</option><option value="TGFBR2">TGFBR2</option><option value="BMPR1B">BMPR1B</option><option value="DKK1">DKK1</option><option value="SCARA3">SCARA3</option><option value="EPHA4">EPHA4</option><option value="REPS1">REPS1</option><option value="ENDOD1">ENDOD1</option><option value="RALB">RALB</option><option value="IL5RA">IL5RA</option><option value="UHMK1">UHMK1</option><option value="STAT5A">STAT5A</option><option value="DLG1">DLG1</option><option value="SDCBP">SDCBP</option><option value="IL6R">IL6R</option><option value="MAP1A">MAP1A</option><option value="SLC39A6">SLC39A6</option><option value="FKBP1A">FKBP1A</option><option value="SDC4">SDC4</option><option value="JAK1">JAK1</option><option value="EXTL3">EXTL3</option><option value="NRP1">NRP1</option><option value="OSMR">OSMR</option><option value="KCNA3">KCNA3</option><option value="BSG">BSG</option><option value="EXT2">EXT2</option><option value="IFNGR2">IFNGR2</option><option value="RALBP1">RALBP1</option><option value="SAT1">SAT1</option><option value="ANKRD1">ANKRD1</option><option value="KCNA5">KCNA5</option><option value="ABCD1">ABCD1</option><option value="NRG1">NRG1</option><option value="NGEF">NGEF</option><option value="TGFB2">TGFB2</option><option value="IL5">IL5</option><option value="IL6ST">IL6ST</option><option value="CAV1">CAV1</option><option value="GDF15">GDF15</option><option value="ARPC2">ARPC2</option><option value="FZD4">FZD4</option><option value="CXCL10">CXCL10</option><option value="STOM">STOM</option><option value="CNTF">CNTF</option><option value="ARHGDIG">ARHGDIG</option><option value="BMP2">BMP2</option><option value="CSF2RB">CSF2RB</option><option value="DPP4">DPP4</option><option value="KCNA4">KCNA4</option><option value="CIT">CIT</option><option value="CAMK2D">CAMK2D</option><option value="RND3">RND3</option><option value="ZNRF3">ZNRF3</option><option value="FBN1">FBN1</option><option value="EFNA4">EFNA4</option><option value="EPHA2">EPHA2</option>
+                        {% for node in nodes %}<option value="{{ node }}">{{ node }}</option>{% endfor %}
                     </datalist>
                 </div>
 
                 <div class="form-group"><label><input type="checkbox" id="fix_nodes" name="fix_nodes" value="fix_nodes">Fix Nodes</label></div>
 
-                <div class="form-group"><label class="mr-2">Force</label><input type="range" id="repulsion_strength" min="-1" max="800" step="1" value="100"></div>
+                <div class="form-group"><label class="mr-2">Force</label><input type="range" id="repulsion_strength" min="1" max="100" step="1" value="20"></div>
 
-                <div class="form-group"><label><input type="checkbox" id="show_only_solution_edges" name="show_only_solution_edges">Only show PCSF solution edges</label></div>
-
-                <div class="form-group"><label class="mr-2">Group nodes by</label><select id="group_nodes_by"><option value="" selected>None</option></select></div>
-                <div class="form-group"><label class="mr-2">Shape nodes by</label><select id="shape_nodes_by"><option value="" selected>None</option></select></div>
-                <div class="form-group"><label class="mr-2">Size nodes by</label><select id="size_nodes_by"><option value="" selected>None</option></select></div>
-                <div class="form-group"><label class="mr-2">Color nodes by</label><select id="color_nodes_by"><option value="" selected>None</option></select></div>
-                <div class="form-group"><label class="mr-2">With color scheme</label><select id="node_color_scheme"><option value="Blue_White_Red" selected>Blue_White_Red</option></select></div>
-
-                <div class="form-group"><label class="mr-2">Edge Opacity</label><input type="range" id="edge_opacity" min="0" max="1" step="0.01" value="0.6"></div>
-
+                <table class="table table-borderless table-sm pl-0" style="margin-left: -5px;">
+                  <tbody>
+                    <tr><th>Nodes</th></tr>
+                    <tr><td>Group nodes by</td><td><select id="group_nodes_by"><option value="" selected>None</option></select></td></tr>
+                    <tr><td>Shape nodes by</td><td><select id="shape_nodes_by"><option value="" selected>None</option></select></td></tr>
+                    <tr><td>Size nodes by</td><td><select id="size_nodes_by"><option value="" selected>None</option></select></td></tr>
+                    <tr><td>Color nodes by</td><td><select id="color_nodes_by"><option value="" selected>None</option></select></td></tr>
+                    {# <tr><td>Outline nodes by</td><td><select id="outline_nodes_by"><option value="" selected>None</option></select></td></tr> #}
+                    <tr><th>Edges</th></tr>
+                    <tr><td>Group nodes by</td><td><input type="range" id="edge_opacity" min="0" max="1" step="0.01" value="0.6"></td></tr>
+                    <tr><td>Shape nodes by</td><td><select id="color_edges_by"><option value="" selected>None</option></select></td></tr>
+                    <tr><td>Size nodes by</td><td><select id="size_edges_by"><option value="" selected>None</option></select></td></tr>
+                    <tr><td>Color nodes by</td><td><select id="only_show_edges"><option value="" selected>Show All Edges</option></select></td></tr>
+                  </tbody>
+                </table>
 
                 <div class="form-group"><label>⌘+Click a node to open GeneCards</label></div>
 
             </div>
-
+            <div class="card-footer">
+                <small class="text-muted">This page generated by <a href="https://github.com/zfrenchee/Axial" target="_blank">Axial</a></small>
+            </div>
         </div>
     </div>
 
@@ -66,33 +73,42 @@ g = Graph(graph);
 g.render();
 g.style();
 
-continuous = g.continuous_node_attributes();
-categorical = g.categorical_node_attributes();
+continuous_node_attributes = g.continuous_node_attributes();
+categorical_node_attributes = g.categorical_node_attributes();
 
-$("#color_nodes_by").append(Object.keys(continuous).map(attr => `<option value="${attr}">${attr}</option>`)
-                    .concat(Object.keys(categorical).map(attr => `<option value="${attr}">${attr}</option>`)));
-$("#shape_nodes_by").append(Object.keys(categorical).map(attr => `<option value="${attr}">${attr}</option>`));
-$("#group_nodes_by").append(Object.keys(categorical).map(attr => `<option value="${attr}">${attr}</option>`));
-$("#size_nodes_by").append(Object.keys(continuous).map(attr => `<option value="${attr}">${attr}</option>`));
+$("#color_nodes_by").append(Object.keys(continuous_node_attributes).map(attr => `<option value="${attr}">${attr}</option>`)
+                    .concat(Object.keys(categorical_node_attributes).map(attr => `<option value="${attr}">${attr}</option>`)));
+$("#shape_nodes_by").append(Object.keys(categorical_node_attributes).map(attr => `<option value="${attr}">${attr}</option>`));
+$("#group_nodes_by").append(Object.keys(categorical_node_attributes).map(attr => `<option value="${attr}">${attr}</option>`));
+$("#size_nodes_by").append(Object.keys(continuous_node_attributes).map(attr => `<option value="${attr}">${attr}</option>`));
+// $("#outline_nodes_by").append(Object.keys(continuous_node_attributes).map(attr => `<option value="${attr}">${attr}</option>`));
 
+continuous_edge_attributes = g.continuous_edge_attributes();
+categorical_edge_attributes = g.categorical_edge_attributes();
+boolean_edge_attributes = g.boolean_edge_attributes();
 
-// $("#color_nodes_by").val()
+$("#color_edges_by").append(Object.keys(continuous_edge_attributes).map(attr => `<option value="${attr}">${attr}</option>`)
+                    .concat(Object.keys(categorical_edge_attributes).map(attr => `<option value="${attr}">${attr}</option>`)));
+$("#size_edges_by").append(Object.keys(continuous_edge_attributes).map(attr => `<option value="${attr}">${attr}</option>`));
+$("#only_show_edges").append(Object.keys(boolean_edge_attributes).map(attr => `<option value="${attr}">${attr}</option>`));
+
 
 /////////////////////////////////////////////////////////////////////////////
                 ///////    Additional Features    ///////
 /////////////////////////////////////////////////////////////////////////////
 
-$("#search_for_node").on('input',      function() { g.set_focus_by_id(this.value) });
-$("#show_only_solution_edges").change( function() { g.render({'show_only_solution_edges_': this.checked}) });
-$("#fix_nodes").change(                function() { g.render({'fix_nodes_': this.checked}) });
-$("#repulsion_strength").change(       function() { g.render({'repulsion_strength_': this.value}) });
-$("#group_nodes_by").change(           function() { g.render({'group_nodes_by_': this.value}) });
-$("#shape_nodes_by").change(           function() { g.style({'shape_nodes_by_': this.value}) });
-$("#color_nodes_by").change(           function() { g.style({'color_nodes_by_': this.value}) });
-$("#node_color_scheme").change(        function() { g.style({'node_color_scheme_': this.value}) });
-$("#size_nodes_by").change(            function() { g.style({'size_nodes_by_': this.value}) });
-$("#edge_opacity").change(             function() { g.style({'edge_opacity_': this.value}) });
-
+$("#search_for_node").on('input',  function() { g.set_focus_by_id(this.value) });
+$("#fix_nodes").change(            function() { g.render({'fix_nodes_': this.checked}); });
+$("#repulsion_strength").change(   function() { g.render({'repulsion_strength_': this.value}); });
+$("#group_nodes_by").change(       function() { g.render({'group_nodes_by_': this.value}); g.style(); $("#fix_nodes").attr('disabled', this.value ? true : false); });
+$("#shape_nodes_by").change(       function() { g.style({'shape_nodes_by_': this.value}); });
+$("#color_nodes_by").change(       function() { g.style({'color_nodes_by_': this.value}); });
+// $("#outline_nodes_by").change(     function() { g.style({'outline_nodes_by_': this.value}); });
+$("#size_nodes_by").change(        function() { g.style({'size_nodes_by_': this.value}); });
+$("#edge_opacity").change(         function() { g.style({'edge_opacity_': this.value}); });
+$("#color_edges_by").change(       function() { g.style({'color_edges_by_': this.value}); });
+$("#size_edges_by").change(        function() { g.style({'size_edges_by_': this.value}); });
+$("#only_show_edges").change(      function() { g.render({'only_show_edges_': this.value}); });
 
 /////////////////////////////////////////////////////////////////////////////
                       ///////    Download    ///////
@@ -102,7 +118,10 @@ d3.select("#download").on("click", function() {
     d3.select(this)
       .attr("href", 'data:application/octet-stream;base64,' + btoa(unescape(encodeURIComponent(d3.select("#graph-container").html()))))
       .attr("download", "interactome.svg")
-})
+});
+
+$('#hide-show').click(function(e) { $('.menu').toggleClass('hidden'); });
+
 
 </script>
 

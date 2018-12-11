@@ -49,6 +49,7 @@ third_party_scripts = [
 
     "https://cdnjs.cloudflare.com/ajax/libs/awesomplete/1.1.3/awesomplete.min.js",
     "https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.9.1/underscore-min.js",
+    "https://unpkg.com/clone@2.1.2/clone.js",
 ]
 
 templateEnv = jinja2.Environment(loader=jinja2.PackageLoader('axial', 'templates'))
@@ -183,6 +184,7 @@ def volcano(differential_df, title='Axial Volcano Plot', scripts_mode="CDN", dat
     df = differential_df[[q_value_column_name, log2FC_column_name]]
     df.columns = ['q', 'logFC']
     _verify_differential_df(df)
+    df = df.round(2)
 
     differential = f"var differential = {df.to_json(orient='index')};"
 
@@ -190,7 +192,7 @@ def volcano(differential_df, title='Axial Volcano Plot', scripts_mode="CDN", dat
 
     # Scripts =======================
 
-    scripts = third_party_scripts + [CDN_url+"js/volcano.js", CDN_url+"js/GOrilla.js"]
+    scripts = third_party_scripts + [CDN_url+"js/volcano.js", CDN_url+"js/util.js", CDN_url+"js/GOrilla.js"]
 
     scripts_block = _scripts_block(scripts, scripts_mode, output_dir)
 
@@ -235,6 +237,7 @@ def bar(differential_df, title='Axial Pathway Bar Plot', scripts_mode="CDN", dat
     df = differential_df[[q_value_column_name, log2FC_column_name]]
     df.columns = ['q', 'logFC']
     _verify_differential_df(df)
+    df = df.round(2)
 
     differential = f"var differential = {df.to_json(orient='index')};"
 
@@ -283,6 +286,7 @@ def braid(genes_by_samples_matrix, sample_attributes, title='Axial Braid Plot', 
 
     _verify_sample_by_genes_matrix(genes_by_samples_matrix)
     _verify_sample_attributes(genes_by_samples_matrix, sample_attributes)
+    genes_by_samples_matrix = genes_by_samples_matrix.round(2)
 
     matrix = f"var matrix = {genes_by_samples_matrix.to_json(orient='columns')};"
     classes = f"var classes = {sample_attributes.to_json(orient='index')};"
@@ -334,6 +338,7 @@ def heatmap(genes_by_samples_matrix, sample_attributes, title='Axial Heatmap', s
 
     _verify_sample_by_genes_matrix(genes_by_samples_matrix)
     _verify_sample_attributes(genes_by_samples_matrix, sample_attributes)
+    genes_by_samples_matrix = genes_by_samples_matrix.round(2)
 
     matrix = f"var matrix = {genes_by_samples_matrix.to_json(orient='columns')};"
     classes = f"var classes = {sample_attributes.to_json(orient='index')};"
