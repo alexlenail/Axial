@@ -13,7 +13,7 @@ setup(
     license='MIT',
     author='zfrenchee',
     author_email='alex@lenail.org',
-    description='',
+    description='Interactive Visualizations for High Dimensional Genomics Data',
     install_requires=[
         "pandas>=0.23.4",
         "networkx>=2.1",
