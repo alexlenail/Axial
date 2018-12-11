@@ -30,13 +30,14 @@ handler.setLevel(logging.INFO)
 handler.setFormatter(logging.Formatter('%(asctime)s - Axial: %(levelname)s - %(message)s', "%I:%M:%S"))
 logger.addHandler(handler)
 
+this_version = pkg_resources.get_distribution('axial').version
 
 gene_ontology = {
     'human': pkg_resources.resource_filename('axial', 'go/human_gene_sets.js'),
     'mouse': pkg_resources.resource_filename('axial', 'go/mouse_gene_sets.js'),
 }
 
-CDN_url = 'https://unpkg.com/axialjs@latest/'
+def CDN_url(version): return f'https://unpkg.com/axialjs@{version}/'
 
 third_party_scripts = [
     "https://code.jquery.com/jquery-3.2.1.slim.min.js",
@@ -156,7 +157,7 @@ def _flatten(list_of_lists): return [item for sublist in list_of_lists for item 
 
 def volcano(differential_df, title='Axial Volcano Plot', scripts_mode="CDN", data_mode="directory",
             organism="human", q_value_column_name="q", log2FC_column_name="logFC",
-            output_dir=".", filename="volcano.html"):
+            output_dir=".", filename="volcano.html", version=this_version):
     """
     Arguments:
         differential_df (pandas.DataFrame): a dataframe indexed by gene symbols which must have columns named log2FC and qval.
@@ -192,7 +193,7 @@ def volcano(differential_df, title='Axial Volcano Plot', scripts_mode="CDN", dat
 
     # Scripts =======================
 
-    scripts = third_party_scripts + [CDN_url+"js/volcano.js", CDN_url+"js/util.js", CDN_url+"js/GOrilla.js"]
+    scripts = third_party_scripts + [CDN_url(version)+"js/volcano.js", CDN_url(version)+"js/util.js", CDN_url(version)+"js/GOrilla.js"]
 
     scripts_block = _scripts_block(scripts, scripts_mode, output_dir)
 
@@ -209,7 +210,7 @@ def volcano(differential_df, title='Axial Volcano Plot', scripts_mode="CDN", dat
 
 def bar(differential_df, title='Axial Pathway Bar Plot', scripts_mode="CDN", data_mode="directory",
         organism="human", q_value_column_name="q", log2FC_column_name="logFC",
-        output_dir=".", filename="bar.html"):
+        output_dir=".", filename="bar.html", version=this_version):
     """
     Arguments:
         differential_df (pandas.DataFrame): a dataframe indexed by gene symbols which must have columns named log2FC and qval.
@@ -245,7 +246,7 @@ def bar(differential_df, title='Axial Pathway Bar Plot', scripts_mode="CDN", dat
 
     # Scripts =======================
 
-    scripts = third_party_scripts + [CDN_url+"js/bar.js"]
+    scripts = third_party_scripts + [CDN_url(version)+"js/bar.js"]
 
     scripts_block = _scripts_block(scripts, scripts_mode, output_dir)
 
@@ -260,7 +261,7 @@ def bar(differential_df, title='Axial Pathway Bar Plot', scripts_mode="CDN", dat
 
 
 def braid(genes_by_samples_matrix, sample_attributes, title='Axial Braid Plot', scripts_mode="CDN", data_mode="directory",
-          organism="human", output_dir=".", filename="braid.html"):
+          organism="human", output_dir=".", filename="braid.html", version=this_version):
     """
     Arguments:
         genes_by_samples_matrix (pandas.DataFrame): dataframe indexed by genes, columns are samples
@@ -295,7 +296,7 @@ def braid(genes_by_samples_matrix, sample_attributes, title='Axial Braid Plot', 
 
     # Scripts =======================
 
-    scripts = third_party_scripts + [CDN_url+"js/util.js", CDN_url+"js/reorder.js", CDN_url+"js/braid.js"]
+    scripts = third_party_scripts + [CDN_url(version)+"js/util.js", CDN_url(version)+"js/reorder.js", CDN_url(version)+"js/braid.js"]
 
     scripts_block = _scripts_block(scripts, scripts_mode, output_dir)
 
@@ -310,7 +311,7 @@ def braid(genes_by_samples_matrix, sample_attributes, title='Axial Braid Plot', 
 
 def heatmap(genes_by_samples_matrix, sample_attributes, title='Axial Heatmap', scripts_mode="CDN", data_mode="directory",
             organism="human", separate_zscore_by=["system"],
-            output_dir=".", filename="heatmap.html"):
+            output_dir=".", filename="heatmap.html", version=this_version):
     """
     Arguments:
         genes_by_samples_matrix (pandas.DataFrame): dataframe indexed by genes, columns are samples
@@ -347,7 +348,7 @@ def heatmap(genes_by_samples_matrix, sample_attributes, title='Axial Heatmap', s
 
     # Scripts =======================
 
-    scripts = third_party_scripts + [CDN_url+"js/util.js", CDN_url+"js/reorder.js", CDN_url+"js/heatmap.js"]
+    scripts = third_party_scripts + [CDN_url(version)+"js/util.js", CDN_url(version)+"js/reorder.js", CDN_url(version)+"js/heatmap.js"]
 
     scripts_block = _scripts_block(scripts, scripts_mode, output_dir)
 
@@ -363,7 +364,7 @@ def heatmap(genes_by_samples_matrix, sample_attributes, title='Axial Heatmap', s
 
 
 def graph(networkx_graph, title='Axial Graph Visualization', scripts_mode="CDN", data_mode="directory",
-          output_dir=".", filename="graph.html"):
+          output_dir=".", filename="graph.html", version=this_version):
     """
     Arguments:
         networkx_graph (networkx.Graph): any instance of networkx.Graph
@@ -387,7 +388,7 @@ def graph(networkx_graph, title='Axial Graph Visualization', scripts_mode="CDN",
 
     # Scripts =======================
 
-    scripts = third_party_scripts + [CDN_url+"js/cola.min.js", CDN_url+"js/graph.js"]
+    scripts = third_party_scripts + [CDN_url(version)+"js/cola.min.js", CDN_url(version)+"js/graph.js"]
 
     scripts_block = _scripts_block(scripts, scripts_mode, output_dir)
 

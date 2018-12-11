@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>axial &mdash; Axial 0.0.1 documentation</title>
+  <title>axial &mdash; Axial 0.1.1 documentation</title>
   
 
   
@@ -56,7 +56,7 @@
             
             
               <div class="version">
-                0.0.1
+                0.1.1
               </div>
             
           
@@ -161,7 +161,6 @@
 <span class="kn">import</span> <span class="nn">requests</span>
 
 <span class="c1"># python external libraries</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
 <span class="kn">from</span> <span class="nn">networkx.readwrite</span> <span class="k">import</span> <span class="n">json_graph</span> <span class="k">as</span> <span class="n">nx_json</span>
@@ -176,17 +175,14 @@
 <span class="n">handler</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%(asctime)s</span><span class="s1"> - Axial: </span><span class="si">%(levelname)s</span><span class="s1"> - </span><span class="si">%(message)s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s2">&quot;%I:%M:%S&quot;</span><span class="p">))</span>
 <span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">handler</span><span class="p">)</span>
 
+<span class="n">this_version</span> <span class="o">=</span> <span class="n">pkg_resources</span><span class="o">.</span><span class="n">get_distribution</span><span class="p">(</span><span class="s1">&#39;axial&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">version</span>
+
 <span class="n">gene_ontology</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;human&#39;</span><span class="p">:</span> <span class="s1">&#39;/Users/alex/Documents/Axial/axial/go/human_gene_sets.js&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;mouse&#39;</span><span class="p">:</span> <span class="s1">&#39;/Users/alex/Documents/Axial/axial/go/mouse_gene_sets.js&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;human&#39;</span><span class="p">:</span> <span class="n">pkg_resources</span><span class="o">.</span><span class="n">resource_filename</span><span class="p">(</span><span class="s1">&#39;axial&#39;</span><span class="p">,</span> <span class="s1">&#39;go/human_gene_sets.js&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;mouse&#39;</span><span class="p">:</span> <span class="n">pkg_resources</span><span class="o">.</span><span class="n">resource_filename</span><span class="p">(</span><span class="s1">&#39;axial&#39;</span><span class="p">,</span> <span class="s1">&#39;go/mouse_gene_sets.js&#39;</span><span class="p">),</span>
 <span class="p">}</span>
 
-<span class="c1"># gene_ontology = {</span>
-<span class="c1">#     &#39;human&#39;: pkg_resources.resource_filename(&#39;axial&#39;, &#39;go/human_gene_sets.js&#39;),</span>
-<span class="c1">#     &#39;mouse&#39;: pkg_resources.resource_filename(&#39;axial&#39;, &#39;go/mouse_gene_sets.js&#39;),</span>
-<span class="c1"># }</span>
-
-<span class="n">CDN_url</span> <span class="o">=</span> <span class="s1">&#39;https://unpkg.com/axialjs@latest/&#39;</span>
+<span class="k">def</span> <span class="nf">CDN_url</span><span class="p">(</span><span class="n">version</span><span class="p">):</span> <span class="k">return</span> <span class="n">f</span><span class="s1">&#39;https://unpkg.com/axialjs@</span><span class="si">{version}</span><span class="s1">/&#39;</span>
 
 <span class="n">third_party_scripts</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s2">&quot;https://code.jquery.com/jquery-3.2.1.slim.min.js&quot;</span><span class="p">,</span>
@@ -199,12 +195,10 @@
 
     <span class="s2">&quot;https://cdnjs.cloudflare.com/ajax/libs/awesomplete/1.1.3/awesomplete.min.js&quot;</span><span class="p">,</span>
     <span class="s2">&quot;https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.9.1/underscore-min.js&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;https://unpkg.com/clone@2.1.2/clone.js&quot;</span><span class="p">,</span>
 <span class="p">]</span>
 
-
-<span class="n">templateEnv</span> <span class="o">=</span> <span class="n">jinja2</span><span class="o">.</span><span class="n">Environment</span><span class="p">(</span><span class="n">loader</span><span class="o">=</span><span class="n">jinja2</span><span class="o">.</span><span class="n">FileSystemLoader</span><span class="p">(</span> <span class="s2">&quot;/Users/alex/Documents/Axial/axial/templates&quot;</span> <span class="p">))</span>
-
-<span class="c1"># templateEnv = jinja2.Environment(loader=jinja2.PackageLoader(&#39;axial&#39;, &#39;templates&#39;))</span>
+<span class="n">templateEnv</span> <span class="o">=</span> <span class="n">jinja2</span><span class="o">.</span><span class="n">Environment</span><span class="p">(</span><span class="n">loader</span><span class="o">=</span><span class="n">jinja2</span><span class="o">.</span><span class="n">PackageLoader</span><span class="p">(</span><span class="s1">&#39;axial&#39;</span><span class="p">,</span> <span class="s1">&#39;templates&#39;</span><span class="p">))</span>
 
 
 <span class="c1">###############################################################################</span>
@@ -221,15 +215,15 @@
         <span class="k">for</span> <span class="n">script</span> <span class="ow">in</span> <span class="n">scripts</span><span class="p">:</span>
             <span class="p">(</span><span class="n">output_dir</span> <span class="o">/</span> <span class="s2">&quot;scripts&quot;</span> <span class="o">/</span> <span class="n">script</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">script</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
 
-        <span class="n">script_block</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">f</span><span class="s2">&quot;&lt;script type=&#39;text/javascript&#39; src=&#39;scripts/{script.rsplit(&#39;/&#39;, 1)[1]}&#39;&gt;&lt;/script&gt;&quot;</span> <span class="k">for</span> <span class="n">script</span> <span class="ow">in</span> <span class="n">scripts</span><span class="p">])</span>
+        <span class="n">script_block</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">f</span><span class="s2">&quot;&lt;script src=&#39;scripts/{script.rsplit(&#39;/&#39;, 1)[1]}&#39;&gt;&lt;/script&gt;&quot;</span> <span class="k">for</span> <span class="n">script</span> <span class="ow">in</span> <span class="n">scripts</span><span class="p">])</span>
 
     <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;CDN&quot;</span><span class="p">:</span>
 
-        <span class="n">script_block</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">f</span><span class="s2">&quot;&lt;script type=&#39;text/javascript&#39; src=&#39;</span><span class="si">{script}</span><span class="s2">&#39;&gt;&lt;/script&gt;&quot;</span> <span class="k">for</span> <span class="n">script</span> <span class="ow">in</span> <span class="n">scripts</span><span class="p">])</span>
+        <span class="n">script_block</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">f</span><span class="s2">&quot;&lt;script src=&#39;</span><span class="si">{script}</span><span class="s2">&#39;&gt;&lt;/script&gt;&quot;</span> <span class="k">for</span> <span class="n">script</span> <span class="ow">in</span> <span class="n">scripts</span><span class="p">])</span>
 
     <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;inline&quot;</span><span class="p">:</span>
 
-        <span class="n">script_block</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">f</span><span class="s2">&quot;&lt;script type=&#39;text/javascript&#39;&gt;{requests.get(script).text}&lt;/script&gt;&quot;</span> <span class="k">for</span> <span class="n">script</span> <span class="ow">in</span> <span class="n">scripts</span><span class="p">])</span>
+        <span class="n">script_block</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">f</span><span class="s2">&quot;&lt;script&gt;{requests.get(script).text}&lt;/script&gt;&quot;</span> <span class="k">for</span> <span class="n">script</span> <span class="ow">in</span> <span class="n">scripts</span><span class="p">])</span>
 
     <span class="k">else</span><span class="p">:</span> <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;scripts_mode must be one of [&quot;CDN&quot;, &quot;directory&quot;, &quot;inline&quot;]&#39;</span><span class="p">)</span>
 
@@ -247,24 +241,24 @@
 
         <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">json</span> <span class="ow">in</span> <span class="n">names_and_jsons</span><span class="p">:</span>
             <span class="p">(</span><span class="n">output_dir</span> <span class="o">/</span> <span class="s2">&quot;data&quot;</span> <span class="o">/</span> <span class="n">f</span><span class="s2">&quot;</span><span class="si">{name}</span><span class="s2">.js&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">json</span><span class="p">)</span>
-            <span class="n">data_block</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;&lt;script type=&#39;text/javascript&#39; src=&#39;data/</span><span class="si">{name}</span><span class="s2">.js&#39;&gt;&lt;/script&gt;&quot;</span><span class="p">)</span>
+            <span class="n">data_block</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;&lt;script src=&#39;data/</span><span class="si">{name}</span><span class="s2">.js&#39;&gt;&lt;/script&gt;&quot;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">include_gene_sets</span><span class="p">:</span>
             <span class="n">copyfile</span><span class="p">(</span><span class="n">gene_ontology</span><span class="p">[</span><span class="n">organism</span><span class="p">],</span> <span class="n">output_dir</span> <span class="o">/</span> <span class="s2">&quot;data&quot;</span> <span class="o">/</span> <span class="s2">&quot;gene_sets.js&quot;</span><span class="p">)</span>
-            <span class="n">data_block</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;&lt;script type=&#39;text/javascript&#39; src=&#39;data/gene_sets.js&#39;&gt;&lt;/script&gt;&quot;</span><span class="p">)</span>
+            <span class="n">data_block</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;&lt;script src=&#39;data/gene_sets.js&#39;&gt;&lt;/script&gt;&quot;</span><span class="p">)</span>
 
     <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;inline&quot;</span><span class="p">:</span>
 
         <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">json</span> <span class="ow">in</span> <span class="n">names_and_jsons</span><span class="p">:</span>
-            <span class="n">data_block</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;&lt;script type=&#39;text/javascript&#39;&gt;</span><span class="si">{json}</span><span class="s2">&lt;/script&gt;&quot;</span><span class="p">)</span>
+            <span class="n">data_block</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;&lt;script&gt;</span><span class="si">{json}</span><span class="s2">&lt;/script&gt;&quot;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">include_gene_sets</span><span class="p">:</span>
-            <span class="n">data_block</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;&lt;script type=&#39;text/javascript&#39;&gt;{Path(gene_ontology[organism]).read_text()}&lt;/script&gt;&quot;</span><span class="p">)</span>
+            <span class="n">data_block</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;&lt;script&gt;{Path(gene_ontology[organism]).read_text()}&lt;/script&gt;&quot;</span><span class="p">)</span>
 
 
     <span class="k">else</span><span class="p">:</span> <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;data_mode must be one of [&quot;directory&quot;, &quot;inline&quot;]&#39;</span><span class="p">)</span>
 
-    <span class="n">data_block</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_block</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">data_block</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_block</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">data_block</span>
 
 
@@ -272,30 +266,32 @@
 <span class="k">def</span> <span class="nf">_verify_differential_df</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># make sure all q values are positive</span>
-    <span class="c1"># make sure it looks like the -log transform has been taken.</span>
-    <span class="c1"># make sure the logFCs sum to zero, are all less than 5ish</span>
-
-    <span class="k">pass</span>
+    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">q</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">):</span> <span class="n">logger</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="s1">&#39;Negative q-values not allowed&#39;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="nb">all</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">q</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">q</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">):</span> <span class="n">logger</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="s1">&#39;Q-values must be -log</span><span class="se">\&#39;</span><span class="s1">d -- raw q-values not accepted&#39;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="nb">any</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">q</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">logFC</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">10</span><span class="p">):</span> <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;some logFC exceed 10 -- please make sure log transform was appropriately taken.&#39;</span><span class="p">)</span>
 
 
 <span class="k">def</span> <span class="nf">_verify_sample_by_genes_matrix</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">any</span><span class="p">([</span><span class="n">df</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">kind</span> <span class="ow">not</span> <span class="ow">in</span> <span class="s1">&#39;bifc&#39;</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">]):</span> <span class="n">logger</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="s1">&#39;All values in sample by genes matrix must be numeric&#39;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="nb">all</span><span class="p">([</span><span class="n">df</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">kind</span> <span class="ow">in</span> <span class="s1">&#39;bifc&#39;</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">])</span>
 
-    <span class="k">pass</span>
-
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">):</span> <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Genes must be on the index, not in the columns&#39;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">)</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
 
 
 <span class="k">def</span> <span class="nf">_verify_sample_attributes</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">attributes</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">set</span><span class="p">(</span><span class="n">matrix</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span> <span class="o">!=</span> <span class="nb">set</span><span class="p">(</span><span class="n">attributes</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">tolist</span><span class="p">()):</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Given sample metadata does not perfectly overlap with given sample data:&#39;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Samples with data: &#39;</span><span class="p">,</span> <span class="n">matrix</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Samples with metadata: &#39;</span><span class="p">,</span> <span class="n">attributes</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
 
-    <span class="k">pass</span>
-
-<span class="k">def</span> <span class="nf">_verify_attribute_metadata</span><span class="p">(</span><span class="n">attribute_metadata</span><span class="p">):</span>
-
-    <span class="k">pass</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">matrix</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">attributes</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">tolist</span><span class="p">()))</span> <span class="o">&gt;</span> <span class="mi">0</span>
 
 
 <span class="k">def</span> <span class="nf">_flatten</span><span class="p">(</span><span class="n">list_of_lists</span><span class="p">):</span> <span class="k">return</span> <span class="p">[</span><span class="n">item</span> <span class="k">for</span> <span class="n">sublist</span> <span class="ow">in</span> <span class="n">list_of_lists</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">sublist</span><span class="p">]</span>
@@ -306,7 +302,7 @@
 
 <div class="viewcode-block" id="volcano"><a class="viewcode-back" href="../index.html#axial.volcano">[docs]</a><span class="k">def</span> <span class="nf">volcano</span><span class="p">(</span><span class="n">differential_df</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Axial Volcano Plot&#39;</span><span class="p">,</span> <span class="n">scripts_mode</span><span class="o">=</span><span class="s2">&quot;CDN&quot;</span><span class="p">,</span> <span class="n">data_mode</span><span class="o">=</span><span class="s2">&quot;directory&quot;</span><span class="p">,</span>
             <span class="n">organism</span><span class="o">=</span><span class="s2">&quot;human&quot;</span><span class="p">,</span> <span class="n">q_value_column_name</span><span class="o">=</span><span class="s2">&quot;q&quot;</span><span class="p">,</span> <span class="n">log2FC_column_name</span><span class="o">=</span><span class="s2">&quot;logFC&quot;</span><span class="p">,</span>
-            <span class="n">output_dir</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;volcano.html&quot;</span><span class="p">):</span>
+            <span class="n">output_dir</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;volcano.html&quot;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">this_version</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Arguments:</span>
 <span class="sd">        differential_df (pandas.DataFrame): a dataframe indexed by gene symbols which must have columns named log2FC and qval.</span>
@@ -334,6 +330,7 @@
     <span class="n">df</span> <span class="o">=</span> <span class="n">differential_df</span><span class="p">[[</span><span class="n">q_value_column_name</span><span class="p">,</span> <span class="n">log2FC_column_name</span><span class="p">]]</span>
     <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;q&#39;</span><span class="p">,</span> <span class="s1">&#39;logFC&#39;</span><span class="p">]</span>
     <span class="n">_verify_differential_df</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 
     <span class="n">differential</span> <span class="o">=</span> <span class="n">f</span><span class="s2">&quot;var differential = {df.to_json(orient=&#39;index&#39;)};&quot;</span>
 
@@ -341,24 +338,24 @@
 
     <span class="c1"># Scripts =======================</span>
 
-    <span class="n">scripts</span> <span class="o">=</span> <span class="n">third_party_scripts</span> <span class="o">+</span> <span class="p">[</span><span class="n">CDN_url</span><span class="o">+</span><span class="s2">&quot;js/volcano.js&quot;</span><span class="p">,</span> <span class="n">CDN_url</span><span class="o">+</span><span class="s2">&quot;js/GOrilla.js&quot;</span><span class="p">]</span>
+    <span class="n">scripts</span> <span class="o">=</span> <span class="n">third_party_scripts</span> <span class="o">+</span> <span class="p">[</span><span class="n">CDN_url</span><span class="p">(</span><span class="n">version</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;js/volcano.js&quot;</span><span class="p">,</span> <span class="n">CDN_url</span><span class="p">(</span><span class="n">version</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;js/util.js&quot;</span><span class="p">,</span> <span class="n">CDN_url</span><span class="p">(</span><span class="n">version</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;js/GOrilla.js&quot;</span><span class="p">]</span>
 
     <span class="n">scripts_block</span> <span class="o">=</span> <span class="n">_scripts_block</span><span class="p">(</span><span class="n">scripts</span><span class="p">,</span> <span class="n">scripts_mode</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">)</span>
 
 
-    <span class="n">html</span> <span class="o">=</span> <span class="n">templateEnv</span><span class="o">.</span><span class="n">get_template</span><span class="p">(</span><span class="s1">&#39;volcano.html.j2&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> <span class="n">scripts_block</span><span class="o">=</span><span class="n">scripts_block</span><span class="o">+</span><span class="n">data_block</span><span class="p">,</span> <span class="n">organism</span><span class="o">=</span><span class="s2">&quot;HOMO_SAPIENS&quot;</span><span class="p">)</span>
+    <span class="n">html</span> <span class="o">=</span> <span class="n">templateEnv</span><span class="o">.</span><span class="n">get_template</span><span class="p">(</span><span class="s1">&#39;volcano.html.j2&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> <span class="n">scripts_block</span><span class="o">=</span><span class="n">scripts_block</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">+</span><span class="n">data_block</span><span class="p">,</span> <span class="n">organism</span><span class="o">=</span><span class="s2">&quot;HOMO_SAPIENS&quot;</span><span class="p">)</span>
 
     <span class="p">(</span><span class="n">output_dir</span> <span class="o">/</span> <span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">html</span><span class="p">)</span>
 
 
-    <span class="k">return</span> <span class="p">(</span><span class="n">output_dir</span> <span class="o">/</span> <span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">absolute</span><span class="p">()</span></div>
+    <span class="k">return</span> <span class="p">(</span><span class="n">output_dir</span> <span class="o">/</span> <span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span></div>
 
 
 
 
 <div class="viewcode-block" id="bar"><a class="viewcode-back" href="../index.html#axial.bar">[docs]</a><span class="k">def</span> <span class="nf">bar</span><span class="p">(</span><span class="n">differential_df</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Axial Pathway Bar Plot&#39;</span><span class="p">,</span> <span class="n">scripts_mode</span><span class="o">=</span><span class="s2">&quot;CDN&quot;</span><span class="p">,</span> <span class="n">data_mode</span><span class="o">=</span><span class="s2">&quot;directory&quot;</span><span class="p">,</span>
         <span class="n">organism</span><span class="o">=</span><span class="s2">&quot;human&quot;</span><span class="p">,</span> <span class="n">q_value_column_name</span><span class="o">=</span><span class="s2">&quot;q&quot;</span><span class="p">,</span> <span class="n">log2FC_column_name</span><span class="o">=</span><span class="s2">&quot;logFC&quot;</span><span class="p">,</span>
-        <span class="n">output_dir</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;bar.html&quot;</span><span class="p">):</span>
+        <span class="n">output_dir</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;bar.html&quot;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">this_version</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Arguments:</span>
 <span class="sd">        differential_df (pandas.DataFrame): a dataframe indexed by gene symbols which must have columns named log2FC and qval.</span>
@@ -386,6 +383,7 @@
     <span class="n">df</span> <span class="o">=</span> <span class="n">differential_df</span><span class="p">[[</span><span class="n">q_value_column_name</span><span class="p">,</span> <span class="n">log2FC_column_name</span><span class="p">]]</span>
     <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;q&#39;</span><span class="p">,</span> <span class="s1">&#39;logFC&#39;</span><span class="p">]</span>
     <span class="n">_verify_differential_df</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 
     <span class="n">differential</span> <span class="o">=</span> <span class="n">f</span><span class="s2">&quot;var differential = {df.to_json(orient=&#39;index&#39;)};&quot;</span>
 
@@ -393,22 +391,22 @@
 
     <span class="c1"># Scripts =======================</span>
 
-    <span class="n">scripts</span> <span class="o">=</span> <span class="n">third_party_scripts</span> <span class="o">+</span> <span class="p">[</span><span class="n">CDN_url</span><span class="o">+</span><span class="s2">&quot;js/bar.js&quot;</span><span class="p">]</span>
+    <span class="n">scripts</span> <span class="o">=</span> <span class="n">third_party_scripts</span> <span class="o">+</span> <span class="p">[</span><span class="n">CDN_url</span><span class="p">(</span><span class="n">version</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;js/bar.js&quot;</span><span class="p">]</span>
 
     <span class="n">scripts_block</span> <span class="o">=</span> <span class="n">_scripts_block</span><span class="p">(</span><span class="n">scripts</span><span class="p">,</span> <span class="n">scripts_mode</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">)</span>
 
 
-    <span class="n">html</span> <span class="o">=</span> <span class="n">templateEnv</span><span class="o">.</span><span class="n">get_template</span><span class="p">(</span><span class="s1">&#39;bar.html.j2&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> <span class="n">scripts_block</span><span class="o">=</span><span class="n">scripts_block</span><span class="o">+</span><span class="n">data_block</span><span class="p">)</span>
+    <span class="n">html</span> <span class="o">=</span> <span class="n">templateEnv</span><span class="o">.</span><span class="n">get_template</span><span class="p">(</span><span class="s1">&#39;bar.html.j2&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> <span class="n">scripts_block</span><span class="o">=</span><span class="n">scripts_block</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">+</span><span class="n">data_block</span><span class="p">)</span>
 
     <span class="p">(</span><span class="n">output_dir</span> <span class="o">/</span> <span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">html</span><span class="p">)</span>
 
 
-    <span class="k">return</span> <span class="p">(</span><span class="n">output_dir</span> <span class="o">/</span> <span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">absolute</span><span class="p">()</span></div>
+    <span class="k">return</span> <span class="p">(</span><span class="n">output_dir</span> <span class="o">/</span> <span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span></div>
 
 
 
 <div class="viewcode-block" id="braid"><a class="viewcode-back" href="../index.html#axial.braid">[docs]</a><span class="k">def</span> <span class="nf">braid</span><span class="p">(</span><span class="n">genes_by_samples_matrix</span><span class="p">,</span> <span class="n">sample_attributes</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Axial Braid Plot&#39;</span><span class="p">,</span> <span class="n">scripts_mode</span><span class="o">=</span><span class="s2">&quot;CDN&quot;</span><span class="p">,</span> <span class="n">data_mode</span><span class="o">=</span><span class="s2">&quot;directory&quot;</span><span class="p">,</span>
-          <span class="n">organism</span><span class="o">=</span><span class="s2">&quot;human&quot;</span><span class="p">,</span> <span class="n">output_dir</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;braid.html&quot;</span><span class="p">):</span>
+          <span class="n">organism</span><span class="o">=</span><span class="s2">&quot;human&quot;</span><span class="p">,</span> <span class="n">output_dir</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;braid.html&quot;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">this_version</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Arguments:</span>
 <span class="sd">        genes_by_samples_matrix (pandas.DataFrame): dataframe indexed by genes, columns are samples</span>
@@ -434,6 +432,7 @@
 
     <span class="n">_verify_sample_by_genes_matrix</span><span class="p">(</span><span class="n">genes_by_samples_matrix</span><span class="p">)</span>
     <span class="n">_verify_sample_attributes</span><span class="p">(</span><span class="n">genes_by_samples_matrix</span><span class="p">,</span> <span class="n">sample_attributes</span><span class="p">)</span>
+    <span class="n">genes_by_samples_matrix</span> <span class="o">=</span> <span class="n">genes_by_samples_matrix</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 
     <span class="n">matrix</span> <span class="o">=</span> <span class="n">f</span><span class="s2">&quot;var matrix = {genes_by_samples_matrix.to_json(orient=&#39;columns&#39;)};&quot;</span>
     <span class="n">classes</span> <span class="o">=</span> <span class="n">f</span><span class="s2">&quot;var classes = {sample_attributes.to_json(orient=&#39;index&#39;)};&quot;</span>
@@ -442,22 +441,22 @@
 
     <span class="c1"># Scripts =======================</span>
 
-    <span class="n">scripts</span> <span class="o">=</span> <span class="n">third_party_scripts</span> <span class="o">+</span> <span class="p">[</span><span class="n">CDN_url</span><span class="o">+</span><span class="s2">&quot;js/util.js&quot;</span><span class="p">,</span> <span class="n">CDN_url</span><span class="o">+</span><span class="s2">&quot;js/reorder.js&quot;</span><span class="p">,</span> <span class="n">CDN_url</span><span class="o">+</span><span class="s2">&quot;js/braid.js&quot;</span><span class="p">]</span>
+    <span class="n">scripts</span> <span class="o">=</span> <span class="n">third_party_scripts</span> <span class="o">+</span> <span class="p">[</span><span class="n">CDN_url</span><span class="p">(</span><span class="n">version</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;js/util.js&quot;</span><span class="p">,</span> <span class="n">CDN_url</span><span class="p">(</span><span class="n">version</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;js/reorder.js&quot;</span><span class="p">,</span> <span class="n">CDN_url</span><span class="p">(</span><span class="n">version</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;js/braid.js&quot;</span><span class="p">]</span>
 
     <span class="n">scripts_block</span> <span class="o">=</span> <span class="n">_scripts_block</span><span class="p">(</span><span class="n">scripts</span><span class="p">,</span> <span class="n">scripts_mode</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">)</span>
 
 
-    <span class="n">html</span> <span class="o">=</span> <span class="n">templateEnv</span><span class="o">.</span><span class="n">get_template</span><span class="p">(</span><span class="s1">&#39;braid.html.j2&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> <span class="n">scripts_block</span><span class="o">=</span><span class="n">scripts_block</span><span class="o">+</span><span class="n">data_block</span><span class="p">)</span>
+    <span class="n">html</span> <span class="o">=</span> <span class="n">templateEnv</span><span class="o">.</span><span class="n">get_template</span><span class="p">(</span><span class="s1">&#39;braid.html.j2&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> <span class="n">scripts_block</span><span class="o">=</span><span class="n">scripts_block</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">+</span><span class="n">data_block</span><span class="p">)</span>
 
     <span class="p">(</span><span class="n">output_dir</span> <span class="o">/</span> <span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">html</span><span class="p">)</span>
 
 
-    <span class="k">return</span> <span class="p">(</span><span class="n">output_dir</span> <span class="o">/</span> <span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">absolute</span><span class="p">()</span></div>
+    <span class="k">return</span> <span class="p">(</span><span class="n">output_dir</span> <span class="o">/</span> <span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="heatmap"><a class="viewcode-back" href="../index.html#axial.heatmap">[docs]</a><span class="k">def</span> <span class="nf">heatmap</span><span class="p">(</span><span class="n">genes_by_samples_matrix</span><span class="p">,</span> <span class="n">sample_attributes</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Axial Heatmap&#39;</span><span class="p">,</span> <span class="n">scripts_mode</span><span class="o">=</span><span class="s2">&quot;CDN&quot;</span><span class="p">,</span> <span class="n">data_mode</span><span class="o">=</span><span class="s2">&quot;directory&quot;</span><span class="p">,</span>
             <span class="n">organism</span><span class="o">=</span><span class="s2">&quot;human&quot;</span><span class="p">,</span> <span class="n">separate_zscore_by</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;system&quot;</span><span class="p">],</span>
-            <span class="n">output_dir</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;heatmap.html&quot;</span><span class="p">):</span>
+            <span class="n">output_dir</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;heatmap.html&quot;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">this_version</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Arguments:</span>
 <span class="sd">        genes_by_samples_matrix (pandas.DataFrame): dataframe indexed by genes, columns are samples</span>
@@ -485,6 +484,7 @@
 
     <span class="n">_verify_sample_by_genes_matrix</span><span class="p">(</span><span class="n">genes_by_samples_matrix</span><span class="p">)</span>
     <span class="n">_verify_sample_attributes</span><span class="p">(</span><span class="n">genes_by_samples_matrix</span><span class="p">,</span> <span class="n">sample_attributes</span><span class="p">)</span>
+    <span class="n">genes_by_samples_matrix</span> <span class="o">=</span> <span class="n">genes_by_samples_matrix</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 
     <span class="n">matrix</span> <span class="o">=</span> <span class="n">f</span><span class="s2">&quot;var matrix = {genes_by_samples_matrix.to_json(orient=&#39;columns&#39;)};&quot;</span>
     <span class="n">classes</span> <span class="o">=</span> <span class="n">f</span><span class="s2">&quot;var classes = {sample_attributes.to_json(orient=&#39;index&#39;)};&quot;</span>
@@ -493,23 +493,23 @@
 
     <span class="c1"># Scripts =======================</span>
 
-    <span class="n">scripts</span> <span class="o">=</span> <span class="n">third_party_scripts</span> <span class="o">+</span> <span class="p">[</span><span class="n">CDN_url</span><span class="o">+</span><span class="s2">&quot;js/util.js&quot;</span><span class="p">,</span> <span class="n">CDN_url</span><span class="o">+</span><span class="s2">&quot;js/reorder.js&quot;</span><span class="p">,</span> <span class="n">CDN_url</span><span class="o">+</span><span class="s2">&quot;js/heatmap.js&quot;</span><span class="p">]</span>
+    <span class="n">scripts</span> <span class="o">=</span> <span class="n">third_party_scripts</span> <span class="o">+</span> <span class="p">[</span><span class="n">CDN_url</span><span class="p">(</span><span class="n">version</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;js/util.js&quot;</span><span class="p">,</span> <span class="n">CDN_url</span><span class="p">(</span><span class="n">version</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;js/reorder.js&quot;</span><span class="p">,</span> <span class="n">CDN_url</span><span class="p">(</span><span class="n">version</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;js/heatmap.js&quot;</span><span class="p">]</span>
 
     <span class="n">scripts_block</span> <span class="o">=</span> <span class="n">_scripts_block</span><span class="p">(</span><span class="n">scripts</span><span class="p">,</span> <span class="n">scripts_mode</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">)</span>
 
 
-    <span class="n">html</span> <span class="o">=</span> <span class="n">templateEnv</span><span class="o">.</span><span class="n">get_template</span><span class="p">(</span><span class="s1">&#39;heatmap.html.j2&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> <span class="n">scripts_block</span><span class="o">=</span><span class="n">scripts_block</span><span class="o">+</span><span class="n">data_block</span><span class="p">,</span> <span class="n">separate_zscore_by</span><span class="o">=</span><span class="n">separate_zscore_by</span><span class="p">)</span>
+    <span class="n">html</span> <span class="o">=</span> <span class="n">templateEnv</span><span class="o">.</span><span class="n">get_template</span><span class="p">(</span><span class="s1">&#39;heatmap.html.j2&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> <span class="n">scripts_block</span><span class="o">=</span><span class="n">scripts_block</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">+</span><span class="n">data_block</span><span class="p">,</span> <span class="n">separate_zscore_by</span><span class="o">=</span><span class="n">separate_zscore_by</span><span class="p">)</span>
 
     <span class="p">(</span><span class="n">output_dir</span> <span class="o">/</span> <span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">html</span><span class="p">)</span>
 
 
-    <span class="k">return</span> <span class="p">(</span><span class="n">output_dir</span> <span class="o">/</span> <span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">absolute</span><span class="p">()</span></div>
+    <span class="k">return</span> <span class="p">(</span><span class="n">output_dir</span> <span class="o">/</span> <span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span></div>
 
 
 
 
 <div class="viewcode-block" id="graph"><a class="viewcode-back" href="../index.html#axial.graph">[docs]</a><span class="k">def</span> <span class="nf">graph</span><span class="p">(</span><span class="n">networkx_graph</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Axial Graph Visualization&#39;</span><span class="p">,</span> <span class="n">scripts_mode</span><span class="o">=</span><span class="s2">&quot;CDN&quot;</span><span class="p">,</span> <span class="n">data_mode</span><span class="o">=</span><span class="s2">&quot;directory&quot;</span><span class="p">,</span>
-          <span class="n">attribute_metadata</span><span class="o">=</span><span class="nb">dict</span><span class="p">(),</span> <span class="n">output_dir</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;graph.html&quot;</span><span class="p">):</span>
+          <span class="n">output_dir</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;graph.html&quot;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">this_version</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Arguments:</span>
 <span class="sd">        networkx_graph (networkx.Graph): any instance of networkx.Graph</span>
@@ -521,7 +521,6 @@
 <span class="sd">                &quot;directory&quot; compiles a directory with all data locally cached,</span>
 <span class="sd">                &quot;inline&quot; compiles a single HTML file with all data inlined.</span>
 <span class="sd">        organism (str): &quot;human&quot; or &quot;mouse&quot;</span>
-<span class="sd">        attribute_metadata (dict):</span>
 <span class="sd">        output_dir (str): the directory in which to output the file</span>
 <span class="sd">        filename (str): the filename of the output file</span>
 <span class="sd">    Returns:</span>
@@ -534,56 +533,32 @@
 
     <span class="c1"># Scripts =======================</span>
 
-    <span class="n">scripts</span> <span class="o">=</span> <span class="n">third_party_scripts</span> <span class="o">+</span> <span class="p">[</span><span class="n">CDN_url</span><span class="o">+</span><span class="s2">&quot;js/graph.js&quot;</span><span class="p">]</span>
+    <span class="n">scripts</span> <span class="o">=</span> <span class="n">third_party_scripts</span> <span class="o">+</span> <span class="p">[</span><span class="n">CDN_url</span><span class="p">(</span><span class="n">version</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;js/cola.min.js&quot;</span><span class="p">,</span> <span class="n">CDN_url</span><span class="p">(</span><span class="n">version</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;js/graph.js&quot;</span><span class="p">]</span>
 
     <span class="n">scripts_block</span> <span class="o">=</span> <span class="n">_scripts_block</span><span class="p">(</span><span class="n">scripts</span><span class="p">,</span> <span class="n">scripts_mode</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">)</span>
 
     <span class="c1"># Data    =======================</span>
 
-    <span class="n">graph_json</span> <span class="o">=</span> <span class="n">nx_json</span><span class="o">.</span><span class="n">node_link_data</span><span class="p">(</span><span class="n">networkx_graph</span><span class="p">,</span> <span class="n">attrs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="s1">&#39;source_name&#39;</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="s1">&#39;target_name&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s1">&#39;key&#39;</span><span class="p">,</span> <span class="n">link</span><span class="o">=</span><span class="s1">&#39;links&#39;</span><span class="p">))</span>
-    <span class="c1"># unfortunately CoLa still uses the D3V3 graph format, requiring the following two lines.</span>
-    <span class="k">def</span> <span class="nf">indexOf</span><span class="p">(</span><span class="n">node_id</span><span class="p">):</span> <span class="k">return</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">node</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">graph_json</span><span class="p">[</span><span class="s1">&#39;nodes&#39;</span><span class="p">])</span> <span class="k">if</span> <span class="n">node</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">node_id</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
-    <span class="n">graph_json</span><span class="p">[</span><span class="s2">&quot;links&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[{</span><span class="o">**</span><span class="n">link</span><span class="p">,</span> <span class="o">**</span><span class="p">{</span><span class="s2">&quot;source&quot;</span><span class="p">:</span><span class="n">indexOf</span><span class="p">(</span><span class="n">link</span><span class="p">[</span><span class="s1">&#39;source_name&#39;</span><span class="p">]),</span> <span class="s2">&quot;target&quot;</span><span class="p">:</span><span class="n">indexOf</span><span class="p">(</span><span class="n">link</span><span class="p">[</span><span class="s1">&#39;target_name&#39;</span><span class="p">])}}</span> <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="n">graph_json</span><span class="p">[</span><span class="s2">&quot;links&quot;</span><span class="p">]]</span>
-    <span class="n">graph_json</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">graph_json</span><span class="p">)</span>
+    <span class="n">graph_json</span> <span class="o">=</span> <span class="n">nx_json</span><span class="o">.</span><span class="n">node_link_data</span><span class="p">(</span><span class="n">networkx_graph</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">graph_json</span><span class="p">[</span><span class="s1">&#39;nodes&#39;</span><span class="p">]:</span>
+        <span class="k">for</span> <span class="n">attr</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">numbers</span><span class="o">.</span><span class="n">Number</span><span class="p">):</span>
+                <span class="n">node</span><span class="p">[</span><span class="n">attr</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="n">graph_json</span><span class="p">[</span><span class="s1">&#39;links&#39;</span><span class="p">]:</span>
+        <span class="k">for</span> <span class="n">attr</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">link</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">numbers</span><span class="o">.</span><span class="n">Number</span><span class="p">):</span>
+                <span class="n">link</span><span class="p">[</span><span class="n">attr</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+    <span class="n">graph_json</span> <span class="o">=</span> <span class="n">f</span><span class="s2">&quot;var graph = {json.dumps(graph_json)};&quot;</span>
 
     <span class="n">data_block</span> <span class="o">=</span> <span class="n">_data_block</span><span class="p">(</span><span class="n">data_mode</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;graph&#39;</span><span class="p">,</span> <span class="n">graph_json</span><span class="p">)])</span>
 
-    <span class="c1"># Other   =======================</span>
-
-    <span class="n">_verify_attribute_metadata</span><span class="p">(</span><span class="n">attribute_metadata</span><span class="p">)</span>
-
-    <span class="c1"># TODO comment</span>
-    <span class="n">unaccounted_for_attributes</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">_flatten</span><span class="p">([</span><span class="n">attrs</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">for</span> <span class="n">node_id</span><span class="p">,</span> <span class="n">attrs</span> <span class="ow">in</span> <span class="n">networkx_graph</span><span class="o">.</span><span class="n">nodes</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">True</span><span class="p">)]))</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">attribute_metadata</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
-    <span class="n">inferred_attribute_metadata</span> <span class="o">=</span> <span class="p">{}</span>
-
-    <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">unaccounted_for_attributes</span><span class="p">:</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Inferring display parameters for </span><span class="si">{attr}</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="n">values</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">nx</span><span class="o">.</span><span class="n">get_node_attributes</span><span class="p">(</span><span class="n">networkx_graph</span><span class="p">,</span> <span class="n">attr</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span>
-
-        <span class="k">if</span> <span class="nb">all</span><span class="p">([</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">numbers</span><span class="o">.</span><span class="n">Number</span><span class="p">)</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">values</span><span class="p">]):</span>
-            <span class="k">if</span> <span class="nb">min</span><span class="p">(</span><span class="n">values</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">inferred_attribute_metadata</span><span class="p">[</span><span class="n">attr</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;display&#39;</span><span class="p">:</span> <span class="s1">&#39;color_scale&#39;</span><span class="p">,</span> <span class="s1">&#39;domain&#39;</span><span class="p">:</span> <span class="n">f</span><span class="s1">&#39;[{min(values)},0,{max(values)}]&#39;</span><span class="p">,</span> <span class="s1">&#39;range&#39;</span><span class="p">:</span><span class="s1">&#39;[&quot;blue&quot;,&quot;white&quot;,&quot;red&quot;]&#39;</span><span class="p">}</span>
-            <span class="k">elif</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="nb">min</span><span class="p">(</span><span class="n">values</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.1</span><span class="p">:</span>
-                <span class="n">inferred_attribute_metadata</span><span class="p">[</span><span class="n">attr</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;display&#39;</span><span class="p">:</span> <span class="s1">&#39;color_scale&#39;</span><span class="p">,</span> <span class="s1">&#39;domain&#39;</span><span class="p">:</span> <span class="n">f</span><span class="s1">&#39;[0,{max(values)}]&#39;</span><span class="p">,</span> <span class="s1">&#39;range&#39;</span><span class="p">:</span><span class="s1">&#39;[&quot;white&quot;,&quot;red&quot;]&#39;</span><span class="p">}</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">inferred_attribute_metadata</span><span class="p">[</span><span class="n">attr</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;display&#39;</span><span class="p">:</span> <span class="s1">&#39;color_scale&#39;</span><span class="p">,</span> <span class="s1">&#39;domain&#39;</span><span class="p">:</span> <span class="n">f</span><span class="s1">&#39;[{min(values)},{max(values)}]&#39;</span><span class="p">,</span> <span class="s1">&#39;range&#39;</span><span class="p">:</span><span class="s1">&#39;[&quot;purple&quot;,&quot;orange&quot;]&#39;</span><span class="p">}</span>
-
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">inferred_attribute_metadata</span><span class="p">[</span><span class="n">attr</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;display&#39;</span><span class="p">:</span> <span class="s1">&#39;color_category&#39;</span> <span class="p">}</span>
-
-    <span class="c1"># TODO comment</span>
-    <span class="n">attribute_metadata</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">inferred_attribute_metadata</span><span class="p">,</span> <span class="o">**</span><span class="n">attribute_metadata</span><span class="p">}</span>
-
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Final display parameters:&#39;</span><span class="p">)</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">+</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">attribute_metadata</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">))</span>
-
-    <span class="c1"># TODO cast attribute_metadata to list?</span>
-
-    <span class="n">html</span> <span class="o">=</span> <span class="n">templateEnv</span><span class="o">.</span><span class="n">get_template</span><span class="p">(</span><span class="s1">&#39;graph.html.j2&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> <span class="n">scripts_block</span><span class="o">=</span><span class="n">scripts_block</span><span class="o">+</span><span class="n">data_block</span><span class="p">,</span> <span class="n">nodes</span><span class="o">=</span><span class="n">networkx_graph</span><span class="o">.</span><span class="n">nodes</span><span class="p">(),</span> <span class="n">attributes</span><span class="o">=</span><span class="n">attribute_metadata</span><span class="p">)</span>
+    <span class="n">html</span> <span class="o">=</span> <span class="n">templateEnv</span><span class="o">.</span><span class="n">get_template</span><span class="p">(</span><span class="s1">&#39;graph.html.j2&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> <span class="n">scripts_block</span><span class="o">=</span><span class="n">scripts_block</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">+</span><span class="n">data_block</span><span class="p">,</span> <span class="n">nodes</span><span class="o">=</span><span class="n">networkx_graph</span><span class="o">.</span><span class="n">nodes</span><span class="p">())</span>
 
     <span class="p">(</span><span class="n">output_dir</span> <span class="o">/</span> <span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">html</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="p">(</span><span class="n">output_dir</span> <span class="o">/</span> <span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">absolute</span><span class="p">()</span></div>
+    <span class="k">return</span> <span class="p">(</span><span class="n">output_dir</span> <span class="o">/</span> <span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span></div>
 
 </pre></div>
 
@@ -597,7 +572,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, Alexander LeNail.
+        &copy; Copyright 2018, Alexander LeNail
 
     </p>
   </div>
@@ -616,21 +591,13 @@
 
   
 
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../',
-            VERSION:'0.0.1',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="../_static/jquery.js"></script>
-      <script type="text/javascript" src="../_static/underscore.js"></script>
-      <script type="text/javascript" src="../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+    
 
   
 
