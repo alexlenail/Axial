@@ -38,7 +38,8 @@ h1 { font-weight: 100; }
     border-radius: 0;
 }
 .tab-content {
-    overflow: scroll !important;
+    overflow: scroll;
+    padding-bottom: 60px;
 }
 .card-footer {
     position: absolute;
@@ -46,6 +47,7 @@ h1 { font-weight: 100; }
     width: 100%;
     background-color: #f2f2f2;
 }
+
 
 
 .menu.hidden {
@@ -72,6 +74,13 @@ h1 { font-weight: 100; }
 
 .awesomplete {
     display: block !important;
+    overflow: visible;
+}
+.awesomplete>ul {
+    position: static !important;
+}
+.awesomplete>ul::before {
+    display: none;
 }
 
 #chooseGenes, #chooseGeneSets {

@@ -473,7 +473,7 @@ function Graph(graph, nested_groups) {
 
     function set_focus_by_id(id) {
         if (!_.isNull(focus_node) && d3.select(`#node-${id}`).empty()) { remove_focus(); }
-        else { d3.select(`#node-${id}`).dispatch('mousedown'); }
+        else { d3.select(`#node-${id}`).dispatch('click'); }
     }
 
     function set_focus(d) {
