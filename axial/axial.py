@@ -85,7 +85,7 @@ def _scripts_block(scripts, mode, output_dir):
     return script_block
 
 
-def _data_block(mode, names_and_jsons, include_gene_sets=True, organism="human"):
+def _data_block(mode, names_and_jsons, output_dir, include_gene_sets=True, organism="human"):
     """
     """
     data_block = []
