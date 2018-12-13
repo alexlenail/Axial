@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>axial &mdash; Axial 0.1.5 documentation</title>
+  <title>axial &mdash; Axial 0.1.8 documentation</title>
   
 
   
@@ -56,7 +56,7 @@
             
             
               <div class="version">
-                0.1.5
+                0.1.8
               </div>
             
           
@@ -346,7 +346,7 @@
 
     <span class="n">differential</span> <span class="o">=</span> <span class="n">f</span><span class="s2">&quot;var differential = {df.to_json(orient=&#39;index&#39;)};&quot;</span>
 
-    <span class="n">data_block</span> <span class="o">=</span> <span class="n">_data_block</span><span class="p">(</span><span class="n">data_mode</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;differential&#39;</span><span class="p">,</span> <span class="n">differential</span><span class="p">)],</span> <span class="n">include_gene_sets</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">organism</span><span class="o">=</span><span class="n">organism</span><span class="p">)</span>
+    <span class="n">data_block</span> <span class="o">=</span> <span class="n">_data_block</span><span class="p">(</span><span class="n">data_mode</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;differential&#39;</span><span class="p">,</span> <span class="n">differential</span><span class="p">)],</span> <span class="n">output_dir</span><span class="p">,</span> <span class="n">include_gene_sets</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">organism</span><span class="o">=</span><span class="n">organism</span><span class="p">)</span>
 
     <span class="c1"># Scripts =======================</span>
 
@@ -411,7 +411,7 @@
 
     <span class="n">differential</span> <span class="o">=</span> <span class="n">f</span><span class="s2">&quot;var differential = {df.to_json(orient=&#39;index&#39;)};&quot;</span>
 
-    <span class="n">data_block</span> <span class="o">=</span> <span class="n">_data_block</span><span class="p">(</span><span class="n">data_mode</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;differential&#39;</span><span class="p">,</span> <span class="n">differential</span><span class="p">)],</span> <span class="n">organism</span><span class="o">=</span><span class="n">organism</span><span class="p">)</span>
+    <span class="n">data_block</span> <span class="o">=</span> <span class="n">_data_block</span><span class="p">(</span><span class="n">data_mode</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;differential&#39;</span><span class="p">,</span> <span class="n">differential</span><span class="p">)],</span> <span class="n">output_dir</span><span class="p">,</span> <span class="n">organism</span><span class="o">=</span><span class="n">organism</span><span class="p">)</span>
 
     <span class="c1"># Scripts =======================</span>
 
@@ -473,7 +473,7 @@
     <span class="n">matrix</span> <span class="o">=</span> <span class="n">f</span><span class="s2">&quot;var matrix = {genes_by_samples_matrix.to_json(orient=&#39;columns&#39;)};&quot;</span>
     <span class="n">classes</span> <span class="o">=</span> <span class="n">f</span><span class="s2">&quot;var classes = {sample_attributes.to_json(orient=&#39;index&#39;)};&quot;</span>
 
-    <span class="n">data_block</span> <span class="o">=</span> <span class="n">_data_block</span><span class="p">(</span><span class="n">data_mode</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;matrix&#39;</span><span class="p">,</span> <span class="n">matrix</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;classes&#39;</span><span class="p">,</span> <span class="n">classes</span><span class="p">)],</span> <span class="n">organism</span><span class="o">=</span><span class="n">organism</span><span class="p">)</span>
+    <span class="n">data_block</span> <span class="o">=</span> <span class="n">_data_block</span><span class="p">(</span><span class="n">data_mode</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;matrix&#39;</span><span class="p">,</span> <span class="n">matrix</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;classes&#39;</span><span class="p">,</span> <span class="n">classes</span><span class="p">)],</span> <span class="n">output_dir</span><span class="p">,</span> <span class="n">organism</span><span class="o">=</span><span class="n">organism</span><span class="p">)</span>
 
     <span class="c1"># Scripts =======================</span>
 
@@ -537,7 +537,7 @@
     <span class="n">matrix</span> <span class="o">=</span> <span class="n">f</span><span class="s2">&quot;var matrix = {genes_by_samples_matrix.to_json(orient=&#39;columns&#39;)};&quot;</span>
     <span class="n">classes</span> <span class="o">=</span> <span class="n">f</span><span class="s2">&quot;var classes = {sample_attributes.to_json(orient=&#39;index&#39;)};&quot;</span>
 
-    <span class="n">data_block</span> <span class="o">=</span> <span class="n">_data_block</span><span class="p">(</span><span class="n">data_mode</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;matrix&#39;</span><span class="p">,</span> <span class="n">matrix</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;classes&#39;</span><span class="p">,</span> <span class="n">classes</span><span class="p">)],</span> <span class="n">organism</span><span class="o">=</span><span class="n">organism</span><span class="p">)</span>
+    <span class="n">data_block</span> <span class="o">=</span> <span class="n">_data_block</span><span class="p">(</span><span class="n">data_mode</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;matrix&#39;</span><span class="p">,</span> <span class="n">matrix</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;classes&#39;</span><span class="p">,</span> <span class="n">classes</span><span class="p">)],</span> <span class="n">output_dir</span><span class="p">,</span> <span class="n">organism</span><span class="o">=</span><span class="n">organism</span><span class="p">)</span>
 
     <span class="c1"># Scripts =======================</span>
 
@@ -610,7 +610,7 @@
 
     <span class="n">graph_json</span> <span class="o">=</span> <span class="n">f</span><span class="s2">&quot;var graph = {json.dumps(graph_json)};&quot;</span>
 
-    <span class="n">data_block</span> <span class="o">=</span> <span class="n">_data_block</span><span class="p">(</span><span class="n">data_mode</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;graph&#39;</span><span class="p">,</span> <span class="n">graph_json</span><span class="p">)])</span>
+    <span class="n">data_block</span> <span class="o">=</span> <span class="n">_data_block</span><span class="p">(</span><span class="n">data_mode</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;graph&#39;</span><span class="p">,</span> <span class="n">graph_json</span><span class="p">)],</span> <span class="n">output_dir</span><span class="p">)</span>
 
     <span class="n">html</span> <span class="o">=</span> <span class="n">templateEnv</span><span class="o">.</span><span class="n">get_template</span><span class="p">(</span><span class="s1">&#39;graph.html.j2&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> <span class="n">scripts_block</span><span class="o">=</span><span class="n">scripts_block</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">+</span><span class="n">data_block</span><span class="p">,</span> <span class="n">nodes</span><span class="o">=</span><span class="n">networkx_graph</span><span class="o">.</span><span class="n">nodes</span><span class="p">())</span>
 

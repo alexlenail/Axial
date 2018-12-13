@@ -201,7 +201,7 @@ def volcano(differential_df, title='Axial Volcano Plot', scripts_mode="CDN", dat
 
     differential = f"var differential = {df.to_json(orient='index')};"
 
-    data_block = _data_block(data_mode, [('differential', differential)], include_gene_sets=False, organism=organism)
+    data_block = _data_block(data_mode, [('differential', differential)], output_dir, include_gene_sets=False, organism=organism)
 
     # Scripts =======================
 
@@ -266,7 +266,7 @@ def bar(differential_df, title='Axial Pathway Bar Plot', scripts_mode="CDN", dat
 
     differential = f"var differential = {df.to_json(orient='index')};"
 
-    data_block = _data_block(data_mode, [('differential', differential)], organism=organism)
+    data_block = _data_block(data_mode, [('differential', differential)], output_dir, organism=organism)
 
     # Scripts =======================
 
@@ -328,7 +328,7 @@ def braid(genes_by_samples_matrix, sample_attributes, title='Axial Braid Plot', 
     matrix = f"var matrix = {genes_by_samples_matrix.to_json(orient='columns')};"
     classes = f"var classes = {sample_attributes.to_json(orient='index')};"
 
-    data_block = _data_block(data_mode, [('matrix', matrix), ('classes', classes)], organism=organism)
+    data_block = _data_block(data_mode, [('matrix', matrix), ('classes', classes)], output_dir, organism=organism)
 
     # Scripts =======================
 
@@ -392,7 +392,7 @@ def heatmap(genes_by_samples_matrix, sample_attributes, title='Axial Heatmap', s
     matrix = f"var matrix = {genes_by_samples_matrix.to_json(orient='columns')};"
     classes = f"var classes = {sample_attributes.to_json(orient='index')};"
 
-    data_block = _data_block(data_mode, [('matrix', matrix), ('classes', classes)], organism=organism)
+    data_block = _data_block(data_mode, [('matrix', matrix), ('classes', classes)], output_dir, organism=organism)
 
     # Scripts =======================
 
@@ -465,7 +465,7 @@ def graph(networkx_graph, title='Axial Graph Visualization', scripts_mode="CDN",
 
     graph_json = f"var graph = {json.dumps(graph_json)};"
 
-    data_block = _data_block(data_mode, [('graph', graph_json)])
+    data_block = _data_block(data_mode, [('graph', graph_json)], output_dir)
 
     html = templateEnv.get_template('graph.html.j2').render(title=title, scripts_block=scripts_block+'\n'+data_block, nodes=networkx_graph.nodes())
 

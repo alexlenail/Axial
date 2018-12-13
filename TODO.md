@@ -6,6 +6,8 @@ window.location.hash in all vizzies
 
 factor out scrolling of all vizzies
 
+heatmap continuous metadata attributes
+
 ---
 
 

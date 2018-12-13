@@ -43,7 +43,7 @@ function Heatmap(samples_by_genes_matrix, gene_sets, classes, separate_zscore_by
     var focused_node = null;
     var unfocused_opacity = 0.2;
 
-    var category_colors = _.object(categories.map((category) => [category, d3.scaleOrdinal(d3.schemeCategory10)]))
+    var category_colors = _.object(categories.map((category) => [category, d3.scaleOrdinal(d3.schemeCategory10)]));
 
     var color_style = 'interpolateTriplet'
     var colors = null;
@@ -234,7 +234,7 @@ function Heatmap(samples_by_genes_matrix, gene_sets, classes, separate_zscore_by
         samples.each(node => {
             node.data['id'] = node.ancestors().reverse().map(d => safeStr(d.data.key)).join('-');
             node.data['name'] = node.data.key;
-            if (0 < node.depth < categories.length) { node.data['category'] = categories[node.depth-1]; }
+            if (0 < node.depth <= categories.length) { node.data['category'] = categories[node.depth-1]; }
             node.data['order'] = node.data.id in previous_sample_order ? previous_sample_order[node.data.id] : (node.parent ? node.parent.children.indexOf(node) : 0);
         });
 
