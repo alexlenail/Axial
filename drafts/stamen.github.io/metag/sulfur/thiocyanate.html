@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<link rel="stylesheet" href="style.css" />
+<style></style>
+<body>
+<h1>Toxic Wastewater Remediation Genome Summary</h1>
+<!-- <input id="cellSizeSlider" type="range" min="4" max="40" step="1" oninput="console.log(value)"> -->
+<div id="genome-summary">
+  <div id="partition"></div>
+  <div id="matrix"></div>
+</div>
+<p>
+<script src="https://d3js.org/d3.v4.js"></script>
+<script src="http://stamen.github.io/metag/lib/colorbrewer.min.js"></script>
+<script src="http://stamen.github.io/metag/lib/underscore-min.js"></script>
+<script src="js/colors.js"></script>
+<script src="js/partition.js"></script>
+<script src="js/matrix.js"></script>
+<script src="traditionalColorLookup.js"></script>
+<script>
+
+// set current dataset - only relevant for prototype
+var currentDataSet = 'thiocyanate';
+
+var dataSets = {
+  'thiocyanate': {
+    summary: 'thiocyanate-bioreactor.tsv',
+    organisms: 'thiocyanate-organisms.tsv'
+  },
+    'ley': {
+      summary: 'ley3.tsv',
+      organisms: 'ley3_organisms.tsv'
+    },
+    'cpr': {
+      summary: 'CPR-complete-draft.tsv',
+      organisms: 'CPR-complete-draft_organisms.tsv'
+    },
+    'anderson': {
+      summary: 'andersonSmall.csv',
+      organisms: 'anderson_organisms.tsv'
+    }
+}
+
+// set a max and minimum cell size - perhaps should let users override this
+var cellSizeExtent = {min: 4, max: 30}
+// create variable to contain user defined cell size
+var userCellSize = false;
+var frozenState = false;
+var frozenOrganism;
+var frozenList;
+
+//////////////////////////
+// sets size parameters //
+//////////////////////////
+var partition_cell_width = 15;
+var margins = {
+  partition: {
+    top: 200,
+    // right: 15,
+    right: 100,
+    bottom: 12,
+    left: 4
+  },
+  matrix: {
+    top: 200,
+    right: 90,
+    bottom: 12,
+    left: 4
+  }
+}
+
+var tooltipHeight = 60;
+
+// set up color scheme related variables
+var colorScheme;
+var defaultColorScheme = 'bluesAndOrangesOnBlack';
+
+// get color and cell size from hash
+// TODO: drive this from selections in the UI
+var hash = window.location.hash.split("&")
+if(hash.length > 0){
+  for (var i = 0; i < hash.length; i++) {
+    var k = hash[i].replace('#', '').split('=');
+    if(k[0] == 'color'){
+      colorScheme = k[1];
+    }
+    if(k[0] == 'data'){
+      currentDataSet = k[1];
+    }
+    if(k[0] == 'frozenOrganism'){
+      frozenState = true;
+      frozenOrganism = k[1];
+    }
+    if(k[0] == 'frozenList'){
+      frozenState = true;
+      frozenList = k[1]
+    }
+    if(k[0] == 'cellsize'){
+      // if cellsize is between min & max, return that - otherwise return max or min
+      userCellSize = +k[1] > cellSizeExtent.min ? (+k[1] < cellSizeExtent.max ? k[1]: cellSizeExtent.max) : cellSizeExtent.min;
+    }
+  }
+}
+
+// hardcoded list of color scheme options, based on what is defined in color.js
+var colorSchemeOptions = [
+  'bluesAndOrangesOnWhite',
+  'bluesAndOrangesOnBlack',
+  'greensAndPurplesOnBlack',
+  'greensAndPurplesOnWhite',
+  'bluesAndGreensOnBlack',
+  'bluesAndGreensOnWhite',
+  'nightrider',
+  'classic',
+  'lightrider'
+];
+
+var isLightColorScheme = function (scheme) {
+  switch (scheme) {
+    case 'bluesAndOrangesOnWhite':
+    case 'greensAndPurplesOnWhite':
+    case 'bluesAndGreensOnWhite':
+    case 'classic':
+    case 'lightrider':
+      return true;
+  }
+  return false;
+}
+
+// check if user selected color scheme is an option, if yes - use that. Otherwise, use default
+// defineColors is defined in colors.js
+var currentScheme = colorSchemeOptions.indexOf(colorScheme) > -1 ? defineColors(colorScheme) : defineColors(defaultColorScheme);
+
+// get window width
+function windowWidth(){
+   return window.innerWidth||document.documentElement.clientWidth||document.body.clientWidth||0;
+}
+
+// get reasonable cell size based on number of columns, number of rows, and window width
+var calcCellSize = function(columnCount, rowCount, width){
+  // use width first, based on screen width to determine cell size... then check height -- goal is to give a decent default
+  var size = Math.floor(width / columnCount);
+  var tall = rowCount > 100 ? Math.floor((cellSizeExtent.max + cellSizeExtent.min) / 3) : (rowCount > 50 ? Math.floor(cellSizeExtent.max + cellSizeExtent.min) / 3 * 2 :cellSizeExtent.max);
+  return size > cellSizeExtent.min ? (size < cellSizeExtent.max ? size : Math.min(tall, cellSizeExtent.max)) : cellSizeExtent.min;
+}
+
+// read in data & get going! -- in real version this comes from server instead of static file
+d3.tsv("../summary/data/" + dataSets[currentDataSet].summary, function(error, summary) {
+d3.tsv("../summary/data/" + dataSets[currentDataSet].organisms, function(error, organisms) {
+  if (error) throw error;
+
+  // get names of all lists
+  var columns = d3.keys(summary[0])
+    .filter(function(d) {
+      return d !== "name";
+    });
+
+  // set cell size based on num lists/colums and window width, if not already defined by the user
+  var cell_size = +(userCellSize ? userCellSize : calcCellSize(columns.length, organisms.length,  windowWidth() - partition_cell_width * 8));
+
+  // use cell size to set other parameters
+  var height = cell_size * organisms.length;
+
+  // set up configuration information for partition plot on left and call
+  var partitionConfig = {
+    rootLabel: "",
+    data: organisms,
+    margin: margins.partition,
+    width: partition_cell_width * 8,
+    cellsize: cell_size,
+    height: cell_size * organisms.length,
+    cellwidth: partition_cell_width,
+    padding: 1,
+    container: "#partition"
+  }
+
+  var partition = Partition(partitionConfig);
+
+  // set up matrix configuration and create
+  var matrixConfig = {
+    data: summary,
+    rows: partition.root.leaves().map(function(d) { return d.data.name; }),
+    margin: margins.matrix,
+    cellsize: cell_size,
+    container: "#matrix",
+    width: cell_size * columns.length,
+    columns: columns,
+    getColor: currentScheme.matrixColorFunction,
+    background: currentScheme.background,
+    textColor: currentScheme.color,
+    // to be used to determine list color
+    listTextColor: currentScheme.listTextColor
+  }
+
+  var matrix = Matrix(matrixConfig);
+
+  // set up genome-summary and partition objects in DOM
+  var totalWidth = partitionConfig.width + margins.partition.right + margins.partition.left + matrixConfig.width + margins.matrix.left + margins.matrix.right;
+
+  d3.select("#genome-summary")
+    .style("width", totalWidth + "px")
+    .style("height", (margins.partition.top + margins.partition.bottom + partitionConfig.height + tooltipHeight) + "px")
+    .style("background",currentScheme.background)
+    .style("fill", currentScheme.fill)
+    .style("color", currentScheme.color)
+
+  d3.select("#partition svg")
+    .append("g")
+    .attr("class", "x axis")
+    .append("text")
+    .text("Taxonomic Depth")
+    .attr("x", -130)
+    .attr("y", 130)
+    .style("font-size", "10px")
+    .style("fill", currentScheme.text);
+
+  ///////////////////////////////////////////////////////
+  // set up tooltips for count, listname, and organism //
+  ///////////////////////////////////////////////////////
+  var tooltipCount = d3.select("#matrix").append("div")
+      .style("pointer-events", "none")
+      .style("font-size", "16px")
+      .style("position", "absolute")
+      .style("text-align", "left")
+      .style("padding-top", "8px")
+      .style("left", "0px");
+
+  var tooltipListName = d3.select("#matrix").append("div")
+      .style("transform", "rotate(-90deg)")
+      .style("pointer-events", "none")
+      .style("font-size", "16px")
+      .style("position", "absolute")
+      .style("text-align", "left")
+      .style("padding-top", "8px")
+      .style("left", "0px");
+
+  var tooltipOrganism = d3.select("#matrix").append("div")
+    .attr("class", "organism-tooltip")
+    .style("pointer-events", "none")
+    .style("position", "absolute")
+
+  var organism_label = tooltipOrganism.append("div")
+    .attr("class", "organism-label");
+
+  var ancestors_label = tooltipOrganism.append("div")
+    .attr("class", "ancestors-label");
+
+  var list_label = tooltipCount.append("div");
+  var count_label = tooltipCount.append("div");
+
+  initLegends();
+
+  function initLegends(){
+    var legend = d3.select("#genome-summary").append("div").attr("class", "gs-legend"),
+      scgLegend = legend.append("div").attr("class", "legend-scg"),
+      multiLegend = legend.append("div").attr("class", "legend-multi");
+
+    // TODO: may have to switch these up based on colorScheme
+    var scgValues = [
+      { count: 0, label: '0' },
+      { count: 1, label: '1' },
+      { count: 2, label: '2-3' },
+      { count: 4, label: '> 3' }
+    ];
+    var multiValues = [
+      { count: 0, label: '0' },
+      { count: 1, label: '1' },
+      { count: 2, label: '2-3' },
+      { count: [4, 10], label: ['4', '10+'] }
+    ];
+
+    function initLegend(isSCG){
+      var legend = isSCG ? scgLegend : multiLegend,
+        values = isSCG ? scgValues : multiValues,
+        title = isSCG ? "Single-Copy Genes" : "Gene Abundance";
+
+      legend.append("h4").text(title);
+      var legendItems = legend.selectAll('.gs-legend-item')
+        .data(values)
+        .enter().append("div")
+        .attr("class", "gs-legend-item");
+      legendItems
+        .append("div").attr("class", "cell")
+        .classed("empty", function(d) { return !d.count; })
+        .classed("range", function(d) { return Array.isArray(d.count); })
+        .style("background", function(d){
+          if (Array.isArray(d.count)) {
+            var leftStop = matrixConfig.getColor(d.count[0]),
+              rightStop = matrixConfig.getColor(d.count[1]);
+            return "linear-gradient(to right," + leftStop + "," + rightStop + ")";
+          } else {
+            return d.count ? matrixConfig.getColor(d.count, isSCG) : "transparent";
+          }
+        });
+      legendItems
+        .append("div").attr("class", "label")
+        .html(function(d){
+          if (Array.isArray(d.label)) {
+            return "<span>" + d.label[0] + "</span>" + "<span>" + d.label[1] + "</span>";
+          } else {
+            return d.label;
+          }
+        });
+    }
+
+    initLegend(true);
+    initLegend(false)
+  }
+
+  function showOrganismTooltip(leftPos, topPos, width, organismName, ancestors){
+    var isLight = isLightColorScheme(colorScheme);
+      tooltipOrganism
+        .style("top", topPos + "px")
+        .style("left", leftPos + "px")
+        .style("display", "block")
+        .style("background-color", (isLight ? "rgba(255,255,255,0.65)" : "rgba(0,0,0,0.5)"))
+      organism_label
+        .text(organismName);
+      ancestors_label
+        .html(ancestors);
+  }
+
+  function hideOrganismTooltip() {
+    tooltipOrganism.style("display", "none")
+  }
+
+  // initial render
+  updateMatrix(partition.root.leaves().map(function(d) { return d.data.name; }));
+
+  if(frozenOrganism){
+    if(frozenList){
+      matrix.highlight(frozenOrganism,frozenList, false);
+    } else {
+      frozenOrganisms = frozenOrganism.split(",")
+      matrix.highlightBars(frozenOrganism, false)
+    }
+  } else if(frozenList){
+    matrix.highlightColumns(frozenList, false)
+  }
+
+  function onClick() {
+    frozenState = !frozenState;
+    if(frozenState){
+      // updateURL
+      var hash = '#cellsize=' + cell_size + '&color=' + defaultColorScheme;
+      if(frozenList != undefined){
+        hash += '&frozenList=' + frozenList
+      }
+      if(frozenOrganism != undefined){
+        hash += '&frozenOrganism=' + frozenOrganism;
+      }
+      window.location.hash = hash;
+    }
+  }
+
+  matrix.dispatch
+    .on("click", function(d){
+      onClick()
+    })
+    .on("hoverList", function(d){
+      // update list/organism information for hash if needed
+      frozenList = d;
+      frozenOrganism = undefined;
+
+      matrix.highlightColumns(d, frozenState);
+    })
+    .on("hover", function(d) {
+      // update list/organism information for hash if needed
+      frozenList = d.list;
+      frozenOrganism = d.organism;
+
+      // if we're off the map, there's no tooltip to show...
+      if (!frozenList || !frozenOrganism) return;
+
+      matrix.highlight(d.organism, d.list, frozenState);
+
+      var ancestorsComplete = partition.highlight(d.organism).ancestors().map(function(d) { return d.data.name });
+      var ancestors = ancestorsComplete.slice(1,ancestorsComplete.length -1 ).reverse().join(" &rarr; ");
+
+      // position and label count and listname tooltips
+      tooltipCount
+        .style("top", (d.pos[1] - 52) + "px")
+        .style("left", (10 + d.pos[0] + cell_size)  + "px")
+        .style("width", 500 + "px")
+        .style("line-height", "1.1em")
+        .style("height", tooltipHeight + "px")
+        .style("display", "block");
+      count_label
+        .text("Count " + d.count);
+
+      tooltipListName
+        .style("top", (d.pos[1] - 294 - cell_size) + "px")
+        .style("left", (-250 + d.pos[0] - cell_size)  + "px")
+        .style("width", 500 + "px")
+        .style("line-height", "1.1em")
+        .style("height", tooltipHeight + "px")
+        .style("display", "block")
+        .style("font-size", '10px')
+        .text(d.list);
+
+      // position and name organism tooltip
+      showOrganismTooltip(Math.max(5, window.scrollX - partitionConfig.width - margins.partition.left - margins.partition.right), d.pos[1] + cell_size, matrix.config.width, d.organism, ancestors)
+
+    })
+    .on("mouseout", function() {
+        // update list/organism information for hash if needed
+        frozenList = undefined;
+        frozenOrganism = undefined;
+
+        // clear tooltips
+        tooltipCount
+          .style("display", "none")
+        tooltipListName
+          .style("display", "none")
+        hideOrganismTooltip();
+
+        // clear matrix highlight
+        matrix.unhighlight(frozenState);
+        partition.unhighlight(frozenState);
+    });
+
+  partition.dispatch
+    .on("click", function(d){
+      onClick()
+    })
+    .on("hover", function(leaves) {
+      if(leaves.length == 1){
+        // if just one organism is hovered, show that organism's full taxonomy
+        var organism = leaves[0].data.name;
+        var ancestorsComplete = partition.getAncestors(organism);
+        var ancestors = ancestorsComplete.slice(1,ancestorsComplete.length -1 ).reverse().join(" &rarr; ");
+
+        showOrganismTooltip(5, margins.matrix.top + leaves[0].x0 + cell_size, matrix.config.width, organism, ancestors)
+      } else {
+        // if multiple organisms are hovered, identify and show the shared taxonomy
+        var sharedTaxonomy;
+        leaves.forEach(function(d,i){
+          var ancestors = partition.getAncestors(d.data.name);
+          if(i == 0){
+            sharedTaxonomy = ancestors;
+          } else {
+            sharedTaxonomy = _.intersection(ancestors, sharedTaxonomy)
+          }
+        })
+        showOrganismTooltip(5, margins.matrix.top + leaves[leaves.length - 1].x0 + cell_size, matrix.config.width, "", sharedTaxonomy.slice(0,sharedTaxonomy.length - 1).reverse().join(" &rarr; "))
+      }
+
+      // update list/organism information for hash if needed
+      var organismsSet = leaves.map(function(d) { return d.data.name; });
+      frozenList = undefined;
+      frozenOrganism = organismsSet.toString();
+
+      // highlight the organisms in the matrix
+      matrix.highlightBars(organismsSet, frozenState);
+    })
+    .on("mouseout", function() {
+      hideOrganismTooltip();
+      matrix.unhighlight(frozenState);
+    });
+
+  function updateMatrix(orglist) {
+    matrix.clear();
+    matrix.yscale.domain(orglist);
+    matrix.render();
+  };
+
+
+});
+});
+</script>

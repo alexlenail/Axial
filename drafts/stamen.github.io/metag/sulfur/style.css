@@ -1,0 +1,193 @@
+
+html {
+  background: #ff00cc;
+}
+
+body {
+  width: 1880px;
+  height: 1040px;
+  padding: 20px;
+  margin: 20px auto;
+  font-family: "Avenir Book", "Avenir-Book", Avenir, Helvetica, Arial, sans-serif;
+  font-size: 13px;
+  color: #f9f9f9;
+  background: #000;
+}
+
+h1 {
+  margin-bottom: 60px;
+}
+
+text {
+  font: 9px sans-serif;
+}
+
+a, a:visited {
+  text-decoration: none;
+  color: #fb835f;
+  font-weight: bold;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+#matrix .axis text:hover {
+  opacity: 1;
+}
+
+p {
+  width: 600px;
+}
+#genome-summary {
+  position: relative;
+  margin-top: -12px;
+}
+
+#partition,
+#matrix {
+  float: left;
+  position: relative;
+}
+#partition {
+  position: relative;
+  z-index: 10;
+}
+#partition .node rect {
+  fill: transparent;
+  stroke: transparent;
+  stroke-width: 1;
+}
+
+#partition .hovered .node {
+  opacity: 0.25;
+}
+
+#partition .hovered .node.active {
+  opacity: 1;
+}
+
+#partition .hovered .node--leaf.active rect {
+  opacity: 0.5;
+  /*fill: #bbb !important;*/
+  fill: rgba(0,0,0,0) !important;
+}
+
+#partition .hovered .node--leaf.active text{
+}
+
+#partition .node text {
+  fill: #000;
+  pointer-events: none;
+}
+
+#partition .node--internal {
+  /*cursor: ns-resize;*/
+}
+
+#partition .node--internal text {
+  font-weight: bold;
+}
+
+#partition .node--leaf text {
+  fill: grey;
+  opacity: 0.25;
+}
+
+#partition .node--leaf.active text {
+  fill: grey;
+  opacity: 1;
+}
+
+#matrix {
+  z-index: 5;
+}
+
+#partition .x.axis text,
+#matrix .x.axis text {
+  transform: rotate(-50deg) translate(4px,4px);
+}
+/*
+#matrix .x.axis rect {
+  transform: rotate(-50deg) translate(4px,4px);
+}
+*/
+
+#matrix .y.axis text {
+}
+
+#matrix .axis line {
+  fill: none;
+  stroke: #888;
+  stroke-opacity: 0.2;
+}
+#matrix .axis path {
+  display: none;
+}
+#matrix .axis text {
+  opacity: 0.3;
+}
+.organism-tooltip {
+  padding: 8px;
+  white-space: nowrap;
+}
+.organism-label {
+  font-size: 15px;
+  white-space: nowrap;
+}
+.ancestors-label {
+  font-size: 13px;
+  white-space: nowrap;
+}
+.hovercanvas {
+  opacity: 0;
+  transition: opacity 0.8s;
+}
+.hovercanvas.active {
+  opacity: 1;
+}
+
+.gs-legend {
+  position: absolute;
+  left: 10px;
+  top: 10px;
+}
+.gs-legend h4 {
+  display: inline-block;
+  position: relative;
+  top: -14px;
+  width: 150px;
+  margin: 0 10px 0 0;
+  font-size: 16px;
+  font-weight: normal;
+}
+.gs-legend-item {
+  display: inline-block;
+  margin: 0 20px 10px 0;
+}
+.gs-legend-item .cell {
+  width: 20px;
+  height: 20px;
+  box-sizing: border-box;
+}
+.gs-legend-item .cell.empty {
+  border: solid 1px grey;
+  opacity: 0.5;
+}
+.gs-legend-item .cell.range {
+  width: 60px;
+}
+.gs-legend-item .label {
+  font-size: 12px;
+  color: grey;
+  text-align: center;
+}
+.gs-legend-item .label > span:first-child {
+  margin-right: 30%;
+}
+.gs-legend-item .label > span:last-child {
+  margin-left: 30%;
+}
+
+
+
