@@ -440,7 +440,6 @@ def graph(networkx_graph, title='Axial Graph Visualization', scripts_mode="CDN",
         Path: The filepath which the html was outputted to.
     """
 
-    # TODO comment
     output_dir = Path(output_dir)
     output_dir.mkdir(exist_ok=True, parents=True)
 

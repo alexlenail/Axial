@@ -139,6 +139,9 @@ function Graph(graph, nested_groups) {
         var plasma_membrane_index = _(groupings.location).findIndex(loc => loc.id === 'plasma_membrane');
         var cytoplasm_index       = _(groupings.location).findIndex(loc => loc.id === 'cytoplasm');
 
+        if (plasma_membrane_index === -1) { groupings.location.push({'id':'plasma_membrane', 'leaves':[], 'groups':[], 'padding':group_padding}) }
+        if (cytoplasm_index === -1) { groupings.location.push({'id':'cytoplasm', 'leaves':[], 'groups':[], 'padding':group_padding}) }
+
         groupings.location[plasma_membrane_index].groups.push(cytoplasm_index)
 
         groupings.location.forEach((loc, i) => { if (loc.id !== 'plasma_membrane' && loc.id !== 'cytoplasm') { groupings.location[cytoplasm_index].groups.push(i) } });

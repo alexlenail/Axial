@@ -4,7 +4,7 @@ setup(
     name='axial',
     packages=['axial'],
     package_data={'axial': ['templates/*', 'go/*']},
-    version='0.1.8',
+    version='0.1.9',
     url='https://github.com/zfrenchee/axial',
     python_requires='>3.5.2',
     classifiers=[
