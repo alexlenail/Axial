@@ -1,6 +1,6 @@
 {
   "name": "axialjs",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "description": "Interactive Visualizations for High Dimensional Data",
   "main": "distjs/axial.min.js",
   "files": [
