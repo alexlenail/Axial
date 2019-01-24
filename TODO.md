@@ -1,6 +1,6 @@
 
 
-volcano font size should be editable
+volcano axis font size should be editable
 
 window.location.hash in all vizzies
 

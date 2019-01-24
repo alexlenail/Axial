@@ -1,5 +1,5 @@
 
-function Bar(differential) {
+function Bar(data) {
 
     /////////////////////////////////////////////////////////////////////////////
                           ///////    Variables    ///////
@@ -76,7 +76,7 @@ function Bar(differential) {
                       q_threshold_=q_threshold,
                       fc_threshold_=fc_threshold}={}) {
 
-        logFCs = _.pick(differential, selected_genes);
+        logFCs = _.pick(data, selected_genes);
         title_text = selected_gene_set_name;
         q_threshold = q_threshold_;
         fc_threshold = fc_threshold_;
