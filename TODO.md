@@ -1,5 +1,17 @@
 
 
+bar plot:
+
+multiple datasets
+
+your own gene list
+
+search for a gene
+
+
+---
+
+
 volcano axis font size should be editable
 
 window.location.hash in all vizzies

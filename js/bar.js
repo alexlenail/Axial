@@ -67,15 +67,22 @@ function Bar(data) {
     var logFCs = [];
     var title_text = "";
 
+    var selected_datasets = Object.keys(data);
+    var selected_gene_set_name = "";
+    var selected_genes = [];
+
+
     /////////////////////////////////////////////////////////////////////////////
                           ///////    Re-Draw Chart    ///////
     /////////////////////////////////////////////////////////////////////////////
 
-    function restart({selected_gene_set_name_=selected_gene_set_name,
+    function restart({selected_datasets_=selected_datasets,
+                      selected_gene_set_name_=selected_gene_set_name,
                       selected_genes_=selected_genes,
                       q_threshold_=q_threshold,
                       fc_threshold_=fc_threshold}={}) {
 
+        selected_datasets = selected_datasets_;
         logFCs = _.pick(data, selected_genes);
         title_text = selected_gene_set_name;
         q_threshold = q_threshold_;
@@ -188,7 +195,10 @@ function Bar(data) {
 
     return {
         'restart': restart,
+
         DEgenes  : () => _(data.filter(is_differential)).pluck('id'),
+
+        get_sorted_gene_list : () => _(data.filter(is_differential)).pluck('id'),  // TODO
 
     }
 
