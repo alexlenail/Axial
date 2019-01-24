@@ -11,14 +11,12 @@ function Bar(names_and_differentials) {
     var w = $('#graph-container').innerWidth() - (margin.left + margin.right);
     var h = $('#graph-container').innerHeight() - (margin.top + margin.bottom);
 
-    // function idFunc(d) { return d ? d.id : this.id; }
-
-    var bar_thickness = 10;
+    var row_thickness = 24;
     var margin_between_bars = 4;
     var margin_between_rows = 10;
+    var offset_from_top = 10;
 
-    var animation_out_duration = 700;
-    var animation_in_duration = 700;
+    var animation_duration = 1000;
 
     var minLogFC = -6;
     var maxLogFC = 6;
@@ -95,22 +93,19 @@ function Bar(names_and_differentials) {
                              .filter(selected_gene_and_levels => Object.values(selected_gene_and_levels.levels).some(is_differential))
                              .sort((a,b) => b.levels[index_of_sort_by_dataset].logFC - a.levels[index_of_sort_by_dataset].logFC);
 
-
-        console.log(data);
-
         title.text(selected_gene_set_name)
 
-        var t = d3.transition().duration(1000);  // why not using variable here?
+        var t = d3.transition().duration(animation_duration);
 
-        rows = g.selectAll('.row').data(data, d => d.id);
+        var rows = g.selectAll('.row').data(data, d => d.id);
 
+        var indexer = _.object(data.map((gene, i) => [gene.id, i]));
 
+        var bar_thickness = (row_thickness - ((selected_datasets.length-1) * margin_between_bars)) / selected_datasets.length;
 
-        indexer = _.object(data.map((gene, i) => [gene.id, i]));
+        var y_max = (data.length * (row_thickness + margin_between_rows)) + margin.top;
 
-        y_max = (data.length - 1) * ((bar_thickness + margin_between_bars) * Object.keys(names_and_differentials).length + margin_between_rows) + margin.top;
-
-        let y = (id) => (indexer[id]+0.5) * (bar_thickness + margin_between_bars);
+        let y = (id) => indexer[id] * (row_thickness + margin_between_rows) + offset_from_top;
         let x_start = (x) => x > 0 ? x_pos(0) : x_neg(x);
         let x_width = (x) => x > 0 ? x_pos(x)-x_pos(0) : x_neg(0)-x_neg(x);
         let x_start_before_animation = (x) => x > 0 ? x_pos(0) : x_neg(0);
@@ -142,7 +137,7 @@ function Bar(names_and_differentials) {
                     .attr('dy', '1em')
                 .select(function() { return this.parentNode; })
             .select(function() { return this.parentNode; })
-            .selectAll('.bar').data(gene_and_levels => console.log(gene_and_levels) || gene_and_levels.levels).enter()
+            .selectAll('.bar').data(gene_and_levels => gene_and_levels.levels).enter()
                 .append('rect')
                 .attr('class', 'bar')
                 .attr('y', (d, i) => (bar_thickness + margin_between_bars) * i )
