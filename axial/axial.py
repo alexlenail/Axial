@@ -274,9 +274,9 @@ def bar(differential_dfs, title='Axial Pathway Bar Plot', scripts_mode="CDN", da
         del differential_dfs[name]
         differential_dfs[_sanitize(name)] = df
 
-    data = f"var data = { '{'+ ','.join([_quote(name)+': '+df.to_json(orient='index') for name, df in differential_dfs.items()]) +'}' };"
+    names_and_differentials = f"var names_and_differentials = { '{'+ ','.join([_quote(name)+': '+df.to_json(orient='index') for name, df in differential_dfs.items()]) +'}' };"
 
-    data_block = _data_block(data_mode, [('data', data)], output_dir, organism=organism)
+    data_block = _data_block(data_mode, [('names_and_differentials', names_and_differentials)], output_dir, organism=organism)
 
     # Scripts =======================
 

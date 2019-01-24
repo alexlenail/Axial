@@ -77,10 +77,10 @@
 
 <script type="text/javascript">
 
-Object.keys(data).forEach(key => $("#datasets").append(`<label><input type="checkbox" name="data" value="${key}" id="${key}" checked>${key}</label>`));
+Object.keys(names_and_differentials).forEach(name => $("#datasets").append(`<label><input type="checkbox" name="data" value="${name}" id="${name}" checked>${name}</label>`));
 
 
-var bar = Bar(data);
+var bar = Bar(names_and_differentials);
 
 /////////////////////////////////////////////////////////////////////////////
              ///////    Select Gene Set / Thresholds   ///////
