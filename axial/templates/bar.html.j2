@@ -189,7 +189,7 @@ chooseGeneSet.addEventListener('awesomplete-selectcomplete', function(e) {
 
 function manual_gene_list_edit(e) {
     new_list = $(this).text().split(/[\s,;\t\n]+/).filter(n => n);
-    if (!equal(new_list, bar.get_sorted_gene_list())) {
+    if (!array_shallow_equal(new_list, bar.get_sorted_gene_list())) {
         bar.restart({'selected_gene_set_name_':'', 'selected_genes_':new_list});
     }
 }
@@ -215,7 +215,7 @@ d3.select("#download").on("click", function() {
       .attr("download", "plot.svg")
 })
 
-$("#degenes").click(function() { d3.select(this).attr("href", 'data:application/octet-stream;base64,' + btoa(bar.DEgenes().join("\n"))).attr("download", "DE_Genes.txt") });
+$("#degenes").click(function() { d3.select(this).attr("href", 'data:application/octet-stream;base64,' + btoa(bar.get_sorted_gene_list().join("\n"))).attr("download", "DE_Genes.txt") });
 
 $('#hide-show').click(function(e) { $('.menu').toggleClass('hidden'); });
 

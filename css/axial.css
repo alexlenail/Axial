@@ -87,6 +87,7 @@ h1 { font-weight: 100; }
     white-space: pre-wrap;
     overflow: scroll;
     min-height: 5em;
+    height: auto !important;
     max-height: calc(100vh - 200px);
 }
 

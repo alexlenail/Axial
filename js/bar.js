@@ -1,4 +1,3 @@
-let clamp = (min, max) => ((x) => Math.min(Math.max(x, min), max));
 
 function Bar(names_and_differentials) {
 
@@ -63,6 +62,7 @@ function Bar(names_and_differentials) {
     var sort_by = selected_datasets[0];
     var selected_gene_set_name = '';
     var selected_genes = [];
+    var data;
 
 
     /////////////////////////////////////////////////////////////////////////////
@@ -217,9 +217,7 @@ function Bar(names_and_differentials) {
         'restart': restart,
         'style'  : style,
 
-        DEgenes  : () => _(data.filter(is_differential)).pluck('id'),
-
-        get_sorted_gene_list : () => _(data.filter(is_differential)).pluck('id'),  // TODO
+        get_sorted_gene_list : () => data.map(d => d.id),
 
         colors: () => _.clone(colors),
 

@@ -208,7 +208,7 @@ def volcano(differential_df, title='Axial Volcano Plot', scripts_mode="CDN", dat
 
     # Scripts =======================
 
-    scripts = third_party_scripts + [CDN_url(version)+"js/volcano.js", CDN_url(version)+"js/util.js", CDN_url(version)+"js/GOrilla.js"]
+    scripts = third_party_scripts + [CDN_url(version)+"js/util.js", CDN_url(version)+"js/GOrilla.js", CDN_url(version)+"js/volcano.js"]
 
     scripts_block = _scripts_block(scripts, scripts_mode, output_dir)
 
@@ -219,7 +219,6 @@ def volcano(differential_df, title='Axial Volcano Plot', scripts_mode="CDN", dat
 
 
     return (output_dir / filename).resolve()
-
 
 
 
@@ -280,7 +279,7 @@ def bar(differential_dfs, title='Axial Pathway Bar Plot', scripts_mode="CDN", da
 
     # Scripts =======================
 
-    scripts = third_party_scripts + [CDN_url(version)+"js/bar.js"]
+    scripts = third_party_scripts + [ CDN_url(version)+"js/util.js", CDN_url(version)+"js/bar.js"]
 
     scripts_block = _scripts_block(scripts, scripts_mode, output_dir)
 

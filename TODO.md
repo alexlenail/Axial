@@ -1,15 +1,13 @@
 
 bar plot:
 
-your own gene list
-
-search for pathways with a gene in them
-
 Verify that transitions between gene sets which contain the same genes work
 
 multi-bar legends
 
 ---
+
+search for pathways with a gene in them
 
 
 volcano axis font size should be editable
