@@ -111,19 +111,17 @@ Object.keys(names_and_differentials).forEach((name, i) => $("#sort_by").append(
     </div>`
 ));
 
-single_color = false;
+var single_color = false;
+var colors;
 reset_color_palette();
 
 /////////////////////////////////////////////////////////////////////////////
                      ///////    Colors   ///////
 /////////////////////////////////////////////////////////////////////////////
 
-
 function reset_color_palette() {
 
     if (single_color) { colors = ordinal_colors() } else { colors = reds_and_blues(); }
-
-    console.log(colors);
 
     $("#dataset_colors").empty();
     Object.keys(names_and_differentials).forEach(name => $("#dataset_colors").append(
@@ -135,6 +133,17 @@ function reset_color_palette() {
 
     bar.style({'colors_':colors});
 
+    $("input[type='color']").change(function () {
+
+        if (single_color) {
+            colors[$(this).attr('name')]['low'] = this.value;
+            colors[$(this).attr('name')]['high'] = this.value;
+        } else {
+            colors[$(this).attr('name')][this.id] = this.value;
+        }
+
+        bar.style({'colors_': colors});
+     });
 }
 
 function ordinal_colors() {
@@ -190,24 +199,9 @@ chooseGenes.on('input', manual_gene_list_edit_debounced);
 
 $("#q_threshold").change(         function () { bar.restart({'q_threshold_': parseFloat(this.value)}) });
 $("#fc_threshold").change(        function () { bar.restart({'fc_threshold_': parseFloat(this.value)}) });
-
 $("input[name='data']").change(   function () { bar.restart({'selected_datasets_': $("input[name='data']:checked").map( function () { return $(this).val(); }).get()});});
-
 $("#sort_by input:radio").change( function () { bar.restart({'sort_by_': this.value}); });
-
-$("input[type='color']").change(  function () {
-
-    colors[$(this).attr('name')][this.id] = this.value;
-
-    if (single_color) {
-        colors[$(this).attr('name')]['low'] = this.value;
-        colors[$(this).attr('name')]['high'] = this.value;
-    }
-
-    bar.style({'colors_': colors});
- });
-
-$("#single_color").change( function () {  single_color = this.checked; reset_color_palette(); });
+$("#single_color").change(        function () {  single_color = this.checked; reset_color_palette(); });
 
 
 /////////////////////////////////////////////////////////////////////////////
