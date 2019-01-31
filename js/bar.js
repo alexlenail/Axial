@@ -12,7 +12,7 @@ function Bar(names_and_differentials) {
     var h = $('#graph-container').innerHeight() - (margin.top + margin.bottom);
 
     var row_thickness = 24;
-    var margin_between_bars = 4;
+    var margin_between_bars = 1;
     var margin_between_rows = 10;
     var offset_from_top = 10;
 
@@ -21,13 +21,21 @@ function Bar(names_and_differentials) {
     var minLogFC = -6;
     var maxLogFC = 6;
 
-    var low_color = 'blue';
-    var center_color = 'white'
-    var high_color = 'red';
-    // var color = d3.scaleLinear().domain([minLogFC, 0, maxLogFC])
-    //                             .range([low_color, center_color, high_color]);
-    let color = (logFC) => logFC < 0 ? low_color : high_color;
+    var colors = _(names_and_differentials).mapObject(vals => {
+        // var blues = [175, 250];
+        // var reds = [330, 45];
+        var random_h = Math.random();
+        var random_s = Math.random();
+        var random_l = Math.random();
+        return {
+            'low':  d3.hsl((random_h * 75 + 175),         random_s * 0.5 + 0.5, random_l * 0.4 + 0.4).hex(),
+            'high': d3.hsl(((random_h * 75 + 330) % 360), random_s * 0.5 + 0.5, random_l * 0.4 + 0.4).hex(),
+        };
+    });
 
+    var color = Object.keys(names_and_differentials).map(name => {
+        return (d) => d.logFC < 0 ? colors[name].low : colors[name].high
+    });
 
     var fc_threshold = 0;
     var q_threshold = 0;
@@ -88,10 +96,11 @@ function Bar(names_and_differentials) {
         q_threshold = q_threshold_;
         fc_threshold = fc_threshold_;
 
-
-        data = selected_genes.map(selected_gene => {return {'id':selected_gene, 'levels': selected_datasets.map(name => names_and_differentials[name][selected_gene])}})
+        data = selected_genes.map(selected_gene => {return {'id':selected_gene, 'levels': selected_datasets.map(dataset_name => Object.assign({'dataset':dataset_name}, names_and_differentials[dataset_name][selected_gene])).filter(d => d.logFC)}})
                              .filter(selected_gene_and_levels => Object.values(selected_gene_and_levels.levels).some(is_differential))
-                             .sort((a,b) => b.levels[index_of_sort_by_dataset].logFC - a.levels[index_of_sort_by_dataset].logFC);
+                             .sort((a,b) => (b.levels[index_of_sort_by_dataset] ? (a.levels[index_of_sort_by_dataset] ? (b.levels[index_of_sort_by_dataset].logFC - a.levels[index_of_sort_by_dataset].logFC) : 1) : -1));
+
+        console.log(data);
 
         title.text(selected_gene_set_name)
 
@@ -102,7 +111,6 @@ function Bar(names_and_differentials) {
         var indexer = _.object(data.map((gene, i) => [gene.id, i]));
 
         var bar_thickness = (row_thickness - ((selected_datasets.length-1) * margin_between_bars)) / selected_datasets.length;
-
         var y_max = (data.length * (row_thickness + margin_between_rows)) + margin.top;
 
         let y = (id) => indexer[id] * (row_thickness + margin_between_rows) + offset_from_top;
@@ -112,14 +120,9 @@ function Bar(names_and_differentials) {
 
         rows.exit().remove();
 
-        // rows.exit().selectAll('.bar')
-        //    .transition(t)
-        //    .attr('x', (d) => x_start_before_animation(d.logFC) )
-        //    .attr('width', 0)
-        //    .remove();
-
         rows.transition(t).attr('transform', d => `translate(0,${y(d.id)})`)
-        rows.enter()
+
+        var bars = rows.enter()
             .append('g')
             .attr('class', 'row')
             .attr('id', d => d.id)
@@ -137,17 +140,31 @@ function Bar(names_and_differentials) {
                     .attr('dy', '1em')
                 .select(function() { return this.parentNode; })
             .select(function() { return this.parentNode; })
-            .selectAll('.bar').data(gene_and_levels => gene_and_levels.levels).enter()
-                .append('rect')
-                .attr('class', 'bar')
-                .attr('y', (d, i) => (bar_thickness + margin_between_bars) * i )
-                .attr('height', bar_thickness)
-                .attr('x', d => x_start_before_animation(d.logFC) )
-                .attr('width', 0)
-                .style('fill', d => color(d.logFC))
-                .transition(t)
-                    .attr('x', d => x_start(d.logFC) )
-                    .attr('width', d => x_width(d.logFC) );
+            .merge(rows)
+            .selectAll('.bar').data(gene_and_levels => gene_and_levels.levels, level => level.id)
+
+        bars.exit()
+            .transition(t)
+            .attr('x', (d) => x_start_before_animation(d.logFC) )
+            .attr('width', 0)
+            .attr('height', 0)
+            .remove();
+
+        bars.transition(t)
+            .attr('y', (d, i) => (bar_thickness + margin_between_bars) * i)
+            .attr('height', bar_thickness);
+
+        bars.enter()
+            .append('rect')
+            .attr('class', 'bar')
+            .attr('y', (d, i) => (bar_thickness + margin_between_bars) * i)
+            .attr('height', bar_thickness)
+            .attr('x', d => d ? x_start_before_animation(d.logFC) : 0)
+            .attr('width', 0)
+            .style('fill', (d, i) => d ? color[i](d) : 'white')
+            .transition(t)
+                .attr('x', d => d ? x_start(d.logFC) : 0)
+                .attr('width', d => d ? x_width(d.logFC) : 0);
 
         // grid lines
         neg_grid = neg_grid.tickSize(-y_max);
@@ -157,6 +174,19 @@ function Bar(names_and_differentials) {
         grid_right.remove();
         grid_left = g.append('g').attr('class', 'grid').style('stroke', '#ddd').style('opacity', 0.1).call(neg_grid);
         grid_right = g.append('g').attr('class', 'grid').style('stroke', '#ddd').style('opacity', 0.1).call(pos_grid);
+
+    }
+
+    function style({colors_=colors}={}) {
+
+        colors = colors_;
+
+        color = Object.keys(names_and_differentials).map(name => {
+            return (d) => d.logFC < 0 ? colors[name].low : colors[name].high
+        });
+
+        g.selectAll('.bar')
+         .style('fill', (d, i) => d ? color[i](d) : 'white')
 
     }
 
@@ -201,6 +231,8 @@ function Bar(names_and_differentials) {
         DEgenes  : () => _(data.filter(is_differential)).pluck('id'),
 
         get_sorted_gene_list : () => _(data.filter(is_differential)).pluck('id'),  // TODO
+
+        colors: () => _.clone(colors),
 
     }
 

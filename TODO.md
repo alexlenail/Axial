@@ -1,12 +1,25 @@
 
 
+
 bar plot:
 
-multiple datasets
+
+show correct datasets
+
+
+----
+
+
+
+things aren't exiting properly
+
+sort by multiple datasets
 
 your own gene list
 
-search for a gene
+search for pathways with a gene in them
+
+Verify that transitions between gene sets which contain the same genes work
 
 
 ---
@@ -19,6 +32,10 @@ window.location.hash in all vizzies
 factor out scrolling of all vizzies
 
 heatmap continuous metadata attributes
+
+
+logger is misconfigured
+
 
 ---
 

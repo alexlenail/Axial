@@ -41,6 +41,15 @@
                         <div class="form-group" id="datasets"></div>
                     </div></div>
 
+                    <br>
+
+                    <div class="row"><div class="col">
+                        <div><b><label>Sort By</label></b></div>
+                        <div class="form-group" id="sort_by"></div>
+                    </div></div>
+
+                    <br>
+
                     <div class="row">
                         <div class="form-group col-6">
                             <label for="q_threshold">-log₁₀ q-value threshold:</label>
@@ -54,6 +63,17 @@
                 </div>
 
                 <div class="tab-pane card-body fade" id="style" role="tabpanel">
+
+                    <div><input type="checkbox" id="single_color" value="single_color"><label for="single_color">Single color (up and down) for each dataset.</label></div>
+
+                    <div><input type="checkbox" id="single_color" value="single_color"><label for="single_color">Color by Q-Value</label></div>
+
+                    <br>
+
+                    <div class="row"><div class="col">
+                        <div><b><label>Bar Colors</label></b></div>
+                        <table><tbody id="dataset_colors"></tbody></table>
+                    </div></div>
 
                 </div>
 
@@ -77,13 +97,32 @@
 
 <script type="text/javascript">
 
-Object.keys(names_and_differentials).forEach(name => $("#datasets").append(`<label><input type="checkbox" name="data" value="${name}" id="${name}" checked>${name}</label>`));
-
-
 var bar = Bar(names_and_differentials);
 
+colors = bar.colors();
+
+Object.keys(names_and_differentials).forEach(name => $("#datasets").append(
+    `<div class="form-check">
+        <input class="form-check-input" type="checkbox" name="data" value="${name}" id="${name}" checked>
+        <label for="${name}">${name}</label>
+    </div>`
+));
+
+Object.keys(names_and_differentials).forEach((name, i) => $("#sort_by").append(
+    `<div class="form-check">
+        <input class="form-check-input" type="radio" name="sort_by" value="${name}" id="${name}" ${i === 0 ? 'checked' : ''}>
+        <label for="${name}">${name}</label>
+    </div>`
+));
+
+Object.keys(names_and_differentials).forEach(name => $("#dataset_colors").append(
+    `<tr><td><label style="display:block;">${name}</label></td>
+    <td><input type="color" value="${colors[name].low}" id="negative_color"></td>
+    <td><input type="color" value="${colors[name].high}" id="positive_color"></td><tr>`
+));
+
 /////////////////////////////////////////////////////////////////////////////
-             ///////    Select Gene Set / Thresholds   ///////
+                     ///////    Controls   ///////
 /////////////////////////////////////////////////////////////////////////////
 
 var chooseGeneSet = document.getElementById("chooseGeneSet");
@@ -103,7 +142,6 @@ chooseGeneSet.addEventListener('awesomplete-selectcomplete', function(e) {
     refresh_genes();
 });
 
-
 function manual_gene_list_edit(e) {
     new_list = $(this).text().split(/[\s,;\t\n]+/).filter(n => n);
     if (!equal(new_list, bar.get_sorted_gene_list())) {
@@ -118,6 +156,9 @@ $("#q_threshold").change(  function () { bar.restart({'q_threshold_': parseFloat
 $("#fc_threshold").change( function () { bar.restart({'fc_threshold_': parseFloat(this.value)}) });
 
 $("input[name='data']").change( function () { bar.restart({'selected_datasets_': $("input[name='data']:checked").map(function() { return $(this).val(); }).get()}); });
+
+
+
 
 /////////////////////////////////////////////////////////////////////////////
                  ///////    Download SVG    ///////
