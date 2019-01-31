@@ -3,8 +3,16 @@
 
 bar plot:
 
+change the colors
 
-sort by multiple datasets
+Single color (up and down) for each dataset.
+
+Color by Q-Value
+
+
+
+---
+
 
 your own gene list
 

@@ -99,18 +99,14 @@ function Bar(names_and_differentials) {
         data = selected_genes.map(selected_gene => {return {'id':selected_gene, 'levels': selected_datasets.map(dataset_name => Object.assign({'dataset':dataset_name}, names_and_differentials[dataset_name][selected_gene])).filter(d => d.logFC)}})
                              .filter(selected_gene_and_levels => Object.values(selected_gene_and_levels.levels).some(is_differential))
                              .sort((a,b) => {
-                                a_ = _(a.levels).findWhere({'dataset':sort_by});
-                                b_ = _(b.levels).findWhere({'dataset':sort_by});
+                                a_ = names_and_differentials[sort_by][a.id];
+                                b_ = names_and_differentials[sort_by][b.id];
                                 return a_ ? (b_ ? (b_.logFC - a_.logFC) : -1) : 1;
                              });
-
-        console.log(data);
 
         title.text(selected_gene_set_name)
 
         var indexer = _.object(data.map((gene, i) => [gene.id, i]));
-
-        console.log(indexer);
 
         var bar_thickness = (row_thickness - ((selected_datasets.length-1) * margin_between_bars)) / selected_datasets.length;
         var y_max = (data.length * (row_thickness + margin_between_rows)) + margin.top;
