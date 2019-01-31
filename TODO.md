@@ -1,14 +1,5 @@
 
-
-
 bar plot:
-
-Single color (up and down) for each dataset.
-
-Color by Q-Value
-
----
-
 
 your own gene list
 

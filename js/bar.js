@@ -21,21 +21,8 @@ function Bar(names_and_differentials) {
     var minLogFC = -6;
     var maxLogFC = 6;
 
-    var colors = _(names_and_differentials).mapObject(vals => {
-        // var blues = [175, 250];
-        // var reds = [330, 45];
-        var random_h = Math.random();
-        var random_s = Math.random();
-        var random_l = Math.random();
-        return {
-            'low':  d3.hsl((random_h * 75 + 175),         random_s * 0.5 + 0.5, random_l * 0.4 + 0.4).hex(),
-            'high': d3.hsl(((random_h * 75 + 330) % 360), random_s * 0.5 + 0.5, random_l * 0.4 + 0.4).hex(),
-        };
-    });
-
-    var color = _(names_and_differentials).mapObject((val, name) => {
-        return (d) => d.logFC < 0 ? colors[name].low : colors[name].high
-    });
+    var colors;
+    var color;
 
     var fc_threshold = 0;
     var q_threshold = 0;
@@ -191,7 +178,6 @@ function Bar(names_and_differentials) {
          .style('fill', d => d ? color[d.dataset](d) : 'white')
 
     }
-
 
     /////////////////////////////////////////////////////////////////////////////
                           ///////   Zoom & Resize    ///////

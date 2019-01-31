@@ -64,16 +64,14 @@
 
                 <div class="tab-pane card-body fade" id="style" role="tabpanel">
 
-                    <div><input type="checkbox" id="single_color" value="single_color"><label for="single_color">Single color (up and down) for each dataset.</label></div>
-
-                    <div><input type="checkbox" id="single_color" value="single_color"><label for="single_color">Color by Q-Value</label></div>
-
-                    <br>
-
                     <div class="row"><div class="col">
                         <div><b><label>Bar Colors</label></b></div>
                         <table><tbody id="dataset_colors"></tbody></table>
                     </div></div>
+
+                    <br>
+
+                    <div><input type="checkbox" id="single_color" value="single_color"><label for="single_color">Single color (up and down) for each dataset.</label></div>
 
                 </div>
 
@@ -99,8 +97,6 @@
 
 var bar = Bar(names_and_differentials);
 
-colors = bar.colors();
-
 Object.keys(names_and_differentials).forEach(name => $("#datasets").append(
     `<div class="form-check">
         <input class="form-check-input" type="checkbox" name="data" value="${name}" id="${name}" checked>
@@ -115,11 +111,51 @@ Object.keys(names_and_differentials).forEach((name, i) => $("#sort_by").append(
     </div>`
 ));
 
-Object.keys(names_and_differentials).forEach(name => $("#dataset_colors").append(
-    `<tr><td><label style="display:block;">${name}</label></td>
-    <td><input type="color" value="${colors[name].low}" name="${name}" id="low"></td>
-    <td><input type="color" value="${colors[name].high}" name="${name}" id="high"></td><tr>`
-));
+single_color = false;
+reset_color_palette();
+
+/////////////////////////////////////////////////////////////////////////////
+                     ///////    Colors   ///////
+/////////////////////////////////////////////////////////////////////////////
+
+
+function reset_color_palette() {
+
+    if (single_color) { colors = ordinal_colors() } else { colors = reds_and_blues(); }
+
+    console.log(colors);
+
+    $("#dataset_colors").empty();
+    Object.keys(names_and_differentials).forEach(name => $("#dataset_colors").append(
+        `<tr><td><label style="display:block;">${name}</label></td>
+        <td><input type="color" value="${colors[name].low}" name="${name}" id="low"></td>
+        ${ single_color ? '' : `<td><input type="color" value="${colors[name].high}" name="${name}" id="high"></td>` }
+        <tr>`
+    ));
+
+    bar.style({'colors_':colors});
+
+}
+
+function ordinal_colors() {
+
+    return _.object(Object.keys(names_and_differentials).map((key, i) => { return [key, {'low': d3.schemeCategory10[i%10], 'high': d3.schemeCategory10[i%10]}]}));
+}
+
+function reds_and_blues() {
+
+    return _(names_and_differentials).mapObject(vals => {
+        // var blues = [175, 250];
+        // var reds = [330, 45];
+        var random_h = Math.random();
+        var random_s = Math.random();
+        var random_l = Math.random();
+        return {
+            'low':  d3.hsl((random_h * 75 + 175),         random_s * 0.5 + 0.5, random_l * 0.4 + 0.4).hex(),
+            'high': d3.hsl(((random_h * 75 + 330) % 360), random_s * 0.5 + 0.5, random_l * 0.4 + 0.4).hex(),
+        };
+    });
+}
 
 /////////////////////////////////////////////////////////////////////////////
                      ///////    Controls   ///////
@@ -162,9 +198,16 @@ $("#sort_by input:radio").change( function () { bar.restart({'sort_by_': this.va
 $("input[type='color']").change(  function () {
 
     colors[$(this).attr('name')][this.id] = this.value;
+
+    if (single_color) {
+        colors[$(this).attr('name')]['low'] = this.value;
+        colors[$(this).attr('name')]['high'] = this.value;
+    }
+
     bar.style({'colors_': colors});
  });
 
+$("#single_color").change( function () {  single_color = this.checked; reset_color_palette(); });
 
 
 /////////////////////////////////////////////////////////////////////////////
