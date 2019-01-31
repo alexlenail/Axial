@@ -33,7 +33,7 @@ function Bar(names_and_differentials) {
         };
     });
 
-    var color = Object.keys(names_and_differentials).map(name => {
+    var color = _(names_and_differentials).mapObject((val, name) => {
         return (d) => d.logFC < 0 ? colors[name].low : colors[name].high
     });
 
@@ -72,10 +72,8 @@ function Bar(names_and_differentials) {
                  .attr('y', 0)
                  .attr('dy', '-3em');
 
-    var logFCs = [];
-
     var selected_datasets = Object.keys(names_and_differentials);
-    var index_of_sort_by_dataset = 0;
+    var sort_by = selected_datasets[0];
     var selected_gene_set_name = '';
     var selected_genes = [];
 
@@ -87,28 +85,32 @@ function Bar(names_and_differentials) {
     function restart({selected_datasets_=selected_datasets,
                       selected_gene_set_name_=selected_gene_set_name,
                       selected_genes_=selected_genes,
+                      sort_by_=sort_by,
                       q_threshold_=q_threshold,
                       fc_threshold_=fc_threshold}={}) {
 
         selected_datasets = selected_datasets_;
         selected_gene_set_name = selected_gene_set_name_;
         selected_genes = selected_genes_;
+        sort_by = sort_by_;
         q_threshold = q_threshold_;
         fc_threshold = fc_threshold_;
 
         data = selected_genes.map(selected_gene => {return {'id':selected_gene, 'levels': selected_datasets.map(dataset_name => Object.assign({'dataset':dataset_name}, names_and_differentials[dataset_name][selected_gene])).filter(d => d.logFC)}})
                              .filter(selected_gene_and_levels => Object.values(selected_gene_and_levels.levels).some(is_differential))
-                             .sort((a,b) => (b.levels[index_of_sort_by_dataset] ? (a.levels[index_of_sort_by_dataset] ? (b.levels[index_of_sort_by_dataset].logFC - a.levels[index_of_sort_by_dataset].logFC) : 1) : -1));
+                             .sort((a,b) => {
+                                a_ = _(a.levels).findWhere({'dataset':sort_by});
+                                b_ = _(b.levels).findWhere({'dataset':sort_by});
+                                return a_ ? (b_ ? (b_.logFC - a_.logFC) : -1) : 1;
+                             });
 
         console.log(data);
 
         title.text(selected_gene_set_name)
 
-        var t = d3.transition().duration(animation_duration);
-
-        var rows = g.selectAll('.row').data(data, d => d.id);
-
         var indexer = _.object(data.map((gene, i) => [gene.id, i]));
+
+        console.log(indexer);
 
         var bar_thickness = (row_thickness - ((selected_datasets.length-1) * margin_between_bars)) / selected_datasets.length;
         var y_max = (data.length * (row_thickness + margin_between_rows)) + margin.top;
@@ -117,6 +119,10 @@ function Bar(names_and_differentials) {
         let x_start = (x) => x > 0 ? x_pos(0) : x_neg(x);
         let x_width = (x) => x > 0 ? x_pos(x)-x_pos(0) : x_neg(0)-x_neg(x);
         let x_start_before_animation = (x) => x > 0 ? x_pos(0) : x_neg(0);
+
+
+        var rows = g.selectAll('.row').data(data, d => d.id);
+        var t = d3.transition().duration(animation_duration);
 
         rows.exit().remove();
 
@@ -141,7 +147,7 @@ function Bar(names_and_differentials) {
                 .select(function() { return this.parentNode; })
             .select(function() { return this.parentNode; })
             .merge(rows)
-            .selectAll('.bar').data(gene_and_levels => gene_and_levels.levels, level => level.id)
+            .selectAll('.bar').data(gene_and_levels => gene_and_levels.levels, level => level.dataset)
 
         bars.exit()
             .transition(t)
@@ -161,7 +167,7 @@ function Bar(names_and_differentials) {
             .attr('height', bar_thickness)
             .attr('x', d => d ? x_start_before_animation(d.logFC) : 0)
             .attr('width', 0)
-            .style('fill', (d, i) => d ? color[i](d) : 'white')
+            .style('fill', d => d ? color[d.dataset](d) : 'white')
             .transition(t)
                 .attr('x', d => d ? x_start(d.logFC) : 0)
                 .attr('width', d => d ? x_width(d.logFC) : 0);
@@ -181,12 +187,12 @@ function Bar(names_and_differentials) {
 
         colors = colors_;
 
-        color = Object.keys(names_and_differentials).map(name => {
+        color = _(names_and_differentials).mapObject((val, name) => {
             return (d) => d.logFC < 0 ? colors[name].low : colors[name].high
         });
 
         g.selectAll('.bar')
-         .style('fill', (d, i) => d ? color[i](d) : 'white')
+         .style('fill', d => d ? color[d.dataset](d) : 'white')
 
     }
 

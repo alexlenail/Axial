@@ -152,10 +152,13 @@ manual_gene_list_edit_debounced = _.debounce(manual_gene_list_edit, 1000)
 chooseGenes.on('input', manual_gene_list_edit_debounced);
 
 
-$("#q_threshold").change(  function () { bar.restart({'q_threshold_': parseFloat(this.value)}) });
-$("#fc_threshold").change( function () { bar.restart({'fc_threshold_': parseFloat(this.value)}) });
+$("#q_threshold").change(       function () { bar.restart({'q_threshold_': parseFloat(this.value)}) });
+$("#fc_threshold").change(      function () { bar.restart({'fc_threshold_': parseFloat(this.value)}) });
 
-$("input[name='data']").change( function () { bar.restart({'selected_datasets_': $("input[name='data']:checked").map(function() { return $(this).val(); }).get()}); });
+$("input[name='data']").change( function () { bar.restart({'selected_datasets_': $("input[name='data']:checked").map( function () { return $(this).val(); }).get()}); });
+
+$("#sort_by").change(           function () { bar.restart({'sort_by_': this.checked}); });
+
 
 
 

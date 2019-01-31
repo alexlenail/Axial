@@ -4,15 +4,6 @@
 bar plot:
 
 
-show correct datasets
-
-
-----
-
-
-
-things aren't exiting properly
-
 sort by multiple datasets
 
 your own gene list
