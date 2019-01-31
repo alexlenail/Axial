@@ -117,8 +117,8 @@ Object.keys(names_and_differentials).forEach((name, i) => $("#sort_by").append(
 
 Object.keys(names_and_differentials).forEach(name => $("#dataset_colors").append(
     `<tr><td><label style="display:block;">${name}</label></td>
-    <td><input type="color" value="${colors[name].low}" name="${name}" id="negative_color"></td>
-    <td><input type="color" value="${colors[name].high}" name="${name}" id="positive_color"></td><tr>`
+    <td><input type="color" value="${colors[name].low}" name="${name}" id="low"></td>
+    <td><input type="color" value="${colors[name].high}" name="${name}" id="high"></td><tr>`
 ));
 
 /////////////////////////////////////////////////////////////////////////////
@@ -159,7 +159,11 @@ $("input[name='data']").change(   function () { bar.restart({'selected_datasets_
 
 $("#sort_by input:radio").change( function () { bar.restart({'sort_by_': this.value}); });
 
-// $("input[type='color']").change(  function () { $(this).name, $(this).id });
+$("input[type='color']").change(  function () {
+
+    colors[$(this).attr('name')][this.id] = this.value;
+    bar.style({'colors_': colors});
+ });
 
 
 

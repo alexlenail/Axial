@@ -3,13 +3,9 @@
 
 bar plot:
 
-change the colors
-
 Single color (up and down) for each dataset.
 
 Color by Q-Value
-
-
 
 ---
 
@@ -20,6 +16,7 @@ search for pathways with a gene in them
 
 Verify that transitions between gene sets which contain the same genes work
 
+multi-bar legends
 
 ---
 

@@ -229,6 +229,7 @@ function Bar(names_and_differentials) {
 
     return {
         'restart': restart,
+        'style'  : style,
 
         DEgenes  : () => _(data.filter(is_differential)).pluck('id'),
 
