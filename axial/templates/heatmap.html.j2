@@ -27,6 +27,10 @@
             <div class="tab-content">
                 <div class="tab-pane card-body fade show active" id="geneset" role="tabpanel">
                     <textarea class="form-control" id="chooseGeneSets" placeholder="Choose Gene Sets..."></textarea>
+                    <br>
+                    <hr>
+                    <br>
+                    <input class="form-control" id="findGeneSet" placeholder="Search for Gene Sets by Gene..." />
                 </div>
 
 
@@ -276,14 +280,29 @@ var chooseGeneSetsform = new Awesomplete(chooseGeneSets, {
 
 });
 
-chooseGeneSets.addEventListener('awesomplete-selectcomplete', function(e) {
+var findGeneSet = document.getElementById("findGeneSet");
+var findGeneSetform = new Awesomplete(findGeneSet, {
+    list: Object.entries(gene_sets),
+    maxItems: 1000,
+    replace: function (text) { this.input.value = text.label; },
+    filter: function (text, input) { return text.value.includes(input) || text.value.includes(input.toUpperCase()); }
+});
+
+function complete_selection(e) {
     var selected_gene_set_name = e.text.label;
     var selected_genes = e.text.value;
     var selected_gene_set = {'gene_set_name':selected_gene_set_name, 'genes':selected_genes};
     selected_gene_sets.push(selected_gene_set);
     heatmap.restart({'selected_gene_sets_':selected_gene_sets});
+
+    chooseGeneSets.value = chooseGeneSets.value + selected_gene_set_name + ', '; findGeneSet.value = '';
     // window.location.hash = selected_gene_sets.map(gs => gs.gene_set_name).join(',')
-});
+};
+
+chooseGeneSets.addEventListener('awesomplete-selectcomplete', complete_selection);
+findGeneSet.addEventListener('awesomplete-selectcomplete', complete_selection);
+
+
 
 function gene_set_list_change(e) {
     var keys = this.value.split(',').map(s => s.trim()).filter(s => s);

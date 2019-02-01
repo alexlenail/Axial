@@ -1,6 +1,11 @@
 
 
-heatmap search for gene set by gene
+graph:
+arrows on directed edges
+relabel nodes by another attr
+
+---
+
 
 volcano axis font size should be editable
 
