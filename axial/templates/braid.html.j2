@@ -28,6 +28,10 @@
             <div class="tab-content">
                 <div class="tab-pane card-body fade show active" id="geneset" role="tabpanel">
                     <input class="form-control" id="chooseGeneSet" placeholder="Choose a Gene Set..." />
+                    <br>
+                    <hr>
+                    <br>
+                    <input class="form-control" id="findGeneSet" placeholder="Search for Gene Sets by Gene..." />
                 </div>
 
 
@@ -201,16 +205,28 @@ var chooseGeneSetform = new Awesomplete(chooseGeneSet, {
     replace: function (text) { this.input.value = text.label; }
 });
 
-chooseGenes = $('#chooseGenes');
-function refresh_genes() { chooseGenes.text(braid.get_sorted_gene_list().join(", ")); }
+var findGeneSet = document.getElementById("findGeneSet");
+var findGeneSetform = new Awesomplete(findGeneSet, {
+    list: Object.entries(gene_sets),
+    maxItems: 1000,
+    replace: function (text) { this.input.value = text.label; },
+    filter: function (text, input) { return text.value.includes(input) || text.value.includes(input.toUpperCase()); }
+});
 
-chooseGeneSet.addEventListener('awesomplete-selectcomplete', function(e) {
+function complete_selection(e) {
     selected_gene_set_name = e.text.label;
     selected_genes = e.text.value;
     braid.restart({'selected_gene_set_name':selected_gene_set_name, 'selected_genes':selected_genes});
     refresh_genes();
-});
+    chooseGeneSet.value = selected_gene_set_name; findGeneSet.value = selected_gene_set_name;
+};
 
+chooseGeneSet.addEventListener('awesomplete-selectcomplete', complete_selection);
+findGeneSet.addEventListener('awesomplete-selectcomplete', complete_selection);
+
+
+chooseGenes = $('#chooseGenes');
+function refresh_genes() { chooseGenes.text(braid.get_sorted_gene_list().join(", ")); }
 
 function manual_gene_list_edit(e) {
     new_list = $(this).text().split(/[\s,;\t\n]+/).filter(n => n);

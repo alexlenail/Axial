@@ -1,10 +1,6 @@
 
-bar plot:
 
-search for pathways with a gene in them
-
----
-
+heatmap search for gene set by gene
 
 volcano axis font size should be editable
 

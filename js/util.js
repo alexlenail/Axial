@@ -10,5 +10,7 @@ Array.prototype.last = function() { return this[this.length - 1]; };
 Array.prototype.move = function(from, to) { this.splice(to, 0, this.splice(from, 1)[0]); };
 Array.prototype.insert = function(index, item) { this.splice( index, 0, item ); return this; };
 
+String.prototype.trim = function () { return this.replace(/^\s+|\s+$/g, ''); };
+
 let round_to_power_of_10 = v => Math.pow(10, Math.ceil(Math.log10(Math.abs(v)))) * Math.pow(-1, v < 0);
 let powerOfTen = (d) => d / Math.pow(10, Math.ceil(Math.log(d) / Math.LN10 - 1e-12)) === 1;
