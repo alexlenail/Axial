@@ -1,12 +1,17 @@
 
 
-volcano font size should be editable
+heatmap search for gene set by gene
+
+volcano axis font size should be editable
 
 window.location.hash in all vizzies
 
 factor out scrolling of all vizzies
 
 heatmap continuous metadata attributes
+
+logger is misconfigured
+
 
 ---
 
