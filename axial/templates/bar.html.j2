@@ -50,6 +50,7 @@
 
                     <br>
 
+                    <b><label>Filter by</label></b>
                     <div class="row">
                         <div class="form-group col-6">
                             <label for="q_threshold">-log₁₀ q-value threshold:</label>
@@ -65,13 +66,34 @@
                 <div class="tab-pane card-body fade" id="style" role="tabpanel">
 
                     <div class="row"><div class="col">
-                        <div><b><label>Bar Colors</label></b></div>
+                        <div><b><label>Colors</label></b></div>
                         <table><tbody id="dataset_colors"></tbody></table>
                     </div></div>
 
                     <br>
 
                     <div><input type="checkbox" id="single_color" value="single_color"><label for="single_color">Single color (up and down) for each dataset.</label></div>
+
+                    <br>
+
+                    <b><label>Legends</label></b>
+                    <div><input type="checkbox" id="show_legends" value="show_legends"><label> Show legends </label></div>
+
+                    <br>
+
+                    <b><label>Spacing</label></b>
+                    <div>
+                        <label for="row_thickness">Row Thickness</label>
+                        <input type="range" id="row_thickness" name="row_thickness" min="10" max="72" step="1" value="24" style="position: relative; top: 3px; display: inline">
+                    </div>
+                    <div>
+                        <label for="margin_between_bars">Margin Between Bars</label>
+                        <input type="range" id="margin_between_bars" name="margin_between_bars" min="0" max="8" step="0.01" value="1" style="position: relative; top: 3px; display: inline">
+                    </div>
+                    <div>
+                        <label for="margin_between_rows">Margin Between Rows</label>
+                        <input type="range" id="margin_between_rows" name="margin_between_rows" min="2" max="30" step="0.1" value="10" style="position: relative; top: 3px; display: inline">
+                    </div>
 
                 </div>
 
@@ -201,7 +223,12 @@ $("#q_threshold").change(         function () { bar.restart({'q_threshold_': par
 $("#fc_threshold").change(        function () { bar.restart({'fc_threshold_': parseFloat(this.value)}) });
 $("input[name='data']").change(   function () { bar.restart({'selected_datasets_': $("input[name='data']:checked").map( function () { return $(this).val(); }).get()});});
 $("#sort_by input:radio").change( function () { bar.restart({'sort_by_': this.value}); });
-$("#single_color").change(        function () {  single_color = this.checked; reset_color_palette(); });
+$("#single_color").change(        function () { single_color = this.checked; reset_color_palette(); });
+$("#show_legends").change(        function () { bar.style({'show_legends_': this.checked}); });
+
+$("#row_thickness").change(        function () { bar.render({'row_thickness_': parseFloat(this.value)}); });
+$("#margin_between_bars").change(  function () { bar.render({'margin_between_bars_': parseFloat(this.value)}); });
+$("#margin_between_rows").change(  function () { bar.render({'margin_between_rows_': parseFloat(this.value)}); });
 
 
 /////////////////////////////////////////////////////////////////////////////

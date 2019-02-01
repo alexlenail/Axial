@@ -1,8 +1,6 @@
 
 bar plot:
 
-multi-bar legends
-
 search for pathways with a gene in them
 
 ---

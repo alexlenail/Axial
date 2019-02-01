@@ -13,15 +13,15 @@ function Bar(names_and_differentials) {
     var row_thickness = 24;
     var margin_between_bars = 1;
     var margin_between_rows = 10;
-    var offset_from_top = 10;
 
-    var animation_duration = 1000;
+    var animation_duration = 700;
 
     var minLogFC = -6;
     var maxLogFC = 6;
 
     var colors;
     var color;
+    var show_legends = false;
 
     var fc_threshold = 0;
     var q_threshold = 0;
@@ -58,6 +58,16 @@ function Bar(names_and_differentials) {
                  .attr('y', 0)
                  .attr('dy', '-3em');
 
+
+    var legends = g.append('g').attr('class', 'legends');
+
+    var color_legend = legends.append('g')
+                              .attr('class', 'legend')
+                              .style('font-family', 'sans-serif')
+                              .style('cursor', 'pointer')
+                              .style('text-anchor', 'start')
+                              .call(d3.drag().on('drag', function () {d3.select(this).attr('transform', 'translate('+d3.event.x+','+d3.event.y+')')}));
+
     var selected_datasets = Object.keys(names_and_differentials);
     var sort_by = selected_datasets[0];
     var selected_gene_set_name = '';
@@ -66,7 +76,7 @@ function Bar(names_and_differentials) {
 
 
     /////////////////////////////////////////////////////////////////////////////
-                          ///////    Re-Draw Chart    ///////
+                          ///////    Methods    ///////
     /////////////////////////////////////////////////////////////////////////////
 
     function restart({selected_datasets_=selected_datasets,
@@ -93,18 +103,29 @@ function Bar(names_and_differentials) {
                                 return a_ ? (b_ ? (b_.logFC - a_.logFC) : -1) : 1;
                              });
 
-        title.text(selected_gene_set_name)
+        render();
+
+    }
+
+    function render({row_thickness_=row_thickness,
+                     margin_between_bars_=margin_between_bars,
+                     margin_between_rows_=margin_between_rows}={}) {
+
+        row_thickness = row_thickness_;
+        margin_between_bars = margin_between_bars_;
+        margin_between_rows = margin_between_rows_;
 
         var indexer = _.object(data.map((gene, i) => [gene.id, i]));
 
         var bar_thickness = (row_thickness - ((selected_datasets.length-1) * margin_between_bars)) / selected_datasets.length;
         var y_max = (data.length * (row_thickness + margin_between_rows)) + margin.top;
 
-        let y = (id) => indexer[id] * (row_thickness + margin_between_rows) + offset_from_top;
+        let y = (id) => indexer[id] * (row_thickness + margin_between_rows) + margin_between_rows;
         let x_start = (x) => x > 0 ? x_pos(0) : x_neg(x);
         let x_width = (x) => x > 0 ? x_pos(x)-x_pos(0) : x_neg(0)-x_neg(x);
         let x_start_before_animation = (x) => x > 0 ? x_pos(0) : x_neg(0);
 
+        title.text(selected_gene_set_name)
 
         var rows = g.selectAll('.row').data(data, d => d.id);
         var t = d3.transition().duration(animation_duration);
@@ -168,16 +189,28 @@ function Bar(names_and_differentials) {
 
     }
 
-    function style({colors_=colors}={}) {
+    function style({colors_=colors,
+                    show_legends_=show_legends}={}) {
 
         colors = colors_;
+        show_legends = show_legends_;
 
         color = _(names_and_differentials).mapObject((val, name) => {
             return (d) => d.logFC < 0 ? colors[name].low : colors[name].high
         });
 
-        g.selectAll('.bar')
-         .style('fill', d => d ? color[d.dataset](d) : 'white')
+        // Legends
+        if (show_legends) { configure_legends(); }
+        else { color_legend.selectAll('*').remove(); }
+
+    }
+
+    function configure_legends() {
+
+        color_legend.call(d3.legendColor().scale(d3.scaleOrdinal(
+            flatten(Object.keys(colors).map(system => [`${system} down`, `${system} up`])),
+            flatten(Object.values(colors).map(colors => [colors['low'], colors['high']]))
+        )).title('Colors')).attr('transform', 'translate(0,20)');
 
     }
 
@@ -217,6 +250,7 @@ function Bar(names_and_differentials) {
 
     return {
         'restart': restart,
+        'render' : render,
         'style'  : style,
 
         get_sorted_gene_list : () => data.map(d => d.id),
