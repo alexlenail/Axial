@@ -1,13 +1,11 @@
 
 bar plot:
 
-Verify that transitions between gene sets which contain the same genes work
-
 multi-bar legends
 
----
-
 search for pathways with a gene in them
+
+---
 
 
 volcano axis font size should be editable
@@ -17,7 +15,6 @@ window.location.hash in all vizzies
 factor out scrolling of all vizzies
 
 heatmap continuous metadata attributes
-
 
 logger is misconfigured
 

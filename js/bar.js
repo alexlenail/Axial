@@ -83,6 +83,8 @@ function Bar(names_and_differentials) {
         q_threshold = q_threshold_;
         fc_threshold = fc_threshold_;
 
+        selected_genes = _.uniq(selected_genes);
+
         data = selected_genes.map(selected_gene => {return {'id':selected_gene, 'levels': selected_datasets.map(dataset_name => Object.assign({'dataset':dataset_name}, names_and_differentials[dataset_name][selected_gene])).filter(d => d.logFC)}})
                              .filter(selected_gene_and_levels => Object.values(selected_gene_and_levels.levels).some(is_differential))
                              .sort((a,b) => {
