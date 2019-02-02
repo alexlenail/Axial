@@ -1,11 +1,22 @@
 
 
 graph:
-arrows on directed edges
+arrows on directed edges for DiGraphs
 relabel nodes by another attr
+
+volcano should render multiple different differential datasets
+
+volcano scrolling is broken
 
 ---
 
+clean up axial css A LOT so that it could feasibly be included on pages using other styles
+
+move axial volcano to rely on goenri.ch
+
+volcano click should hide tooltip
+
+volano tooltip should be styled better
 
 volcano axis font size should be editable
 
@@ -16,6 +27,7 @@ factor out scrolling of all vizzies
 heatmap continuous metadata attributes
 
 logger is misconfigured
+
 
 
 ---

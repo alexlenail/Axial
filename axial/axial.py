@@ -158,12 +158,12 @@ def _quote(string): return '\"'+string+'\"'
 ###############################################################################
 ##   Public  Methods
 
-def volcano(differential_df, title='Axial Volcano Plot', scripts_mode="CDN", data_mode="directory",
+def volcano(differential_dfs, title='Axial Volcano Plot', scripts_mode="CDN", data_mode="directory",
             organism="human", q_value_column_name="q", log2FC_column_name="logFC",
             output_dir=".", filename="volcano.html", version=this_version):
     """
     Arguments:
-        differential_df (pandas.DataFrame): a dataframe indexed by gene symbols which must have columns named log2FC and qval.
+        differential_dfs (dict or pandas.DataFrame): python dict of names to pandas dataframes, or a single dataframe, indexed by gene symbols which must have columns named log2FC and qval.
         title (str): The title of the plot (to be embedded in the html).
         scripts_mode (str): Choose from [`"CDN"`, `"directory"`, `"inline"`]:
 
@@ -196,15 +196,22 @@ def volcano(differential_df, title='Axial Volcano Plot', scripts_mode="CDN", dat
 
     # Data   =======================
 
-    df = differential_df[[q_value_column_name, log2FC_column_name]]
-    df.columns = ['q', 'logFC']
-    _verify_differential_df(df)
-    df = df.round(2)
-    # TODO drop all zero rows
+    if isinstance(differential_dfs, pd.DataFrame):
+        differential_dfs = {'differential': differential_dfs}
 
-    differential = f"var differential = {df.to_json(orient='index')};"
+    for name, df in differential_dfs.items():
+        df = df[[q_value_column_name, log2FC_column_name]]
+        df.columns = ['q', 'logFC']
+        df = df.round(2)
+        # TODO drop all zero rows
+        _verify_differential_df(df)
 
-    data_block = _data_block(data_mode, [('differential', differential)], output_dir, include_gene_sets=False, organism=organism)
+        del differential_dfs[name]
+        differential_dfs[_sanitize(name)] = df
+
+    names_and_differentials = f"var names_and_differentials = { '{'+ ','.join([_quote(name)+': '+df.to_json(orient='index') for name, df in differential_dfs.items()]) +'}' };"
+
+    data_block = _data_block(data_mode, [('names_and_differentials', names_and_differentials)], output_dir, include_gene_sets=False, organism=organism)
 
     # Scripts =======================
 

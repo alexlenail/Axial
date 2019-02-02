@@ -1,5 +1,5 @@
 
-function Volcano(differential) {
+function Volcano(names_and_differentials) {
 
     /////////////////////////////////////////////////////////////////////////////
                           ///////    Variables    ///////
@@ -32,55 +32,70 @@ function Volcano(differential) {
     var threshold_line_width = "1";
     var threshold_line_dashes = "5, 3";
 
+    var dataset = Object.keys(names_and_differentials)[0];
+    var data;
+
+    /////////////////////////////////////////////////////////////////////////////
+                          ///////    Set Up Chart    ///////
+    /////////////////////////////////////////////////////////////////////////////
+
     var svg = d3.select("#graph-container").append("svg").attr("xmlns", "http://www.w3.org/2000/svg").attr("xmlns:xlink", "http://www.w3.org/1999/xlink");
     var g = svg.append("g");
     svg.style("cursor", "move");
 
-    var data = Object.entries(differential).map(entry => Object.assign({'id':entry[0]}, entry[1]))
-                                           .filter(entry => entry['logFC'] != null && entry['q'] != null);
+    // Axes and Grid
+    var minLogFC = d3.min(data, entry => entry.logFC);
+    var maxLogFC = d3.max(data, entry => entry.logFC);
+    var x_bound  = Math.max(Math.abs(minLogFC), Math.abs(maxLogFC));
+
+    var min_q = 0;
+    var max_q = d3.max(data, entry => entry.q);
+
+    x = d3.scaleLinear().domain([-x_bound, x_bound]).rangeRound([0, w]).nice().clamp(true);
+    y = d3.scaleLinear().domain([min_q, max_q]).rangeRound([h, 0]).nice().clamp(true);
+
+
+    var logFC_axis = d3.axisBottom(x);
+    var logFC_axis_svg = g.append("g").attr("class", "axis axis--x").attr('transform', 'translate(0,'+h+')').call(logFC_axis);
+
+    var logFC_grid = d3.axisBottom(x).tickFormat("").tickSize(-h);
+    var logFC_grid_svg = g.append("g").attr("class", "grid").style("stroke", "#ddd").style("opacity", 0.1).attr('transform', 'translate(0,'+h+')').call(logFC_grid);
+
+
+    var qVal_axis = d3.axisLeft(y);
+    var qVal_axis_svg = g.append("g").attr("class", "axis axis--y").call(qVal_axis);
+
+    var qVal_grid = d3.axisLeft(y).tickFormat("").tickSize(-w);
+    var qVal_grid_svg = g.append("g").attr("class", "grid").style("stroke", "#ddd").style("opacity", 0.1).call(qVal_grid);
+
+    g.append('text')
+        .attr('class', 'label')
+        .attr('transform', 'translate('+w/2+','+(h+margin.bottom/2)+')')
+        .attr('text-anchor', 'middle')
+        .html(xLabel);
+
+    g.append('text')
+        .attr('class', 'label')
+        .attr('transform', 'translate('+(0-margin.left/2)+','+(h/2)+')rotate(-90)')
+        .style('text-anchor', 'middle')
+        .html(yLabel);
 
     /////////////////////////////////////////////////////////////////////////////
-                          ///////    Re-Draw Figure    ///////
+                          ///////    Methods    ///////
     /////////////////////////////////////////////////////////////////////////////
 
-    function restart() {
+    function restart({dataset_=dataset}={}) {
 
-        // Axes and Grid
-        var minLogFC = d3.min(data, entry => entry.logFC);
-        var maxLogFC = d3.max(data, entry => entry.logFC);
-        var x_bound  = Math.max(Math.abs(minLogFC), Math.abs(maxLogFC));
-
-        var min_q = 0;
-        var max_q = d3.max(data, entry => entry.q);
-
-        x = d3.scaleLinear().domain([-x_bound, x_bound]).rangeRound([0, w]).nice().clamp(true);
-        y = d3.scaleLinear().domain([min_q, max_q]).rangeRound([h, 0]).nice().clamp(true);
+        data = Object.entries(names_and_differentials[dataset]).map(entry => Object.assign({'id':entry[0]}, entry[1]))
+                                                               .filter(entry => entry['logFC'] != null && entry['q'] != null);
 
 
-        var logFC_axis = d3.axisBottom(x);
-        var logFC_axis_svg = g.append("g").attr("class", "axis axis--x").attr('transform', 'translate(0,'+h+')').call(logFC_axis);
+        render();
 
-        var logFC_grid = d3.axisBottom(x).tickFormat("").tickSize(-h);
-        var logFC_grid_svg = g.append("g").attr("class", "grid").style("stroke", "#ddd").style("opacity", 0.1).attr('transform', 'translate(0,'+h+')').call(logFC_grid);
+    }
 
+    function render() {
 
-        var qVal_axis = d3.axisLeft(y);
-        var qVal_axis_svg = g.append("g").attr("class", "axis axis--y").call(qVal_axis);
-
-        var qVal_grid = d3.axisLeft(y).tickFormat("").tickSize(-w);
-        var qVal_grid_svg = g.append("g").attr("class", "grid").style("stroke", "#ddd").style("opacity", 0.1).call(qVal_grid);
-
-        g.append('text')
-            .attr('class', 'label')
-            .attr('transform', 'translate('+w/2+','+(h+margin.bottom/2)+')')
-            .attr('text-anchor', 'middle')
-            .html(xLabel);
-
-        g.append('text')
-            .attr('class', 'label')
-            .attr('transform', 'translate('+(0-margin.left/2)+','+(h/2)+')rotate(-90)')
-            .style('text-anchor', 'middle')
-            .html(yLabel);
 
 
         // Dots
