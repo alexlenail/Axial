@@ -10,6 +10,10 @@ volcano scrolling is broken
 
 ---
 
+graph visualization is slow -- can it be optimized?
+
+volcano animation -- points start at origin and move to their position at page load would be cool
+
 clean up axial css A LOT so that it could feasibly be included on pages using other styles
 
 move axial volcano to rely on goenri.ch
