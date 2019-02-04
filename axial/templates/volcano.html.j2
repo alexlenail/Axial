@@ -48,6 +48,7 @@
                         <div class="form-group" id="datasets"></div>
                     </div></div>
 
+                    <hr>
                     <label for="point_size">Point Size</label>
                     <input type="range" id="point_size" name="" min="0.5" max="4" step="0.1" value="2.0" style="position: relative; top: 3px;">
                     <br>
@@ -123,7 +124,7 @@ $("#datasets input:radio").change(           function () { volcano.restart({'dat
 
 var input = document.getElementById("chooseGene");
 var form = new Awesomplete(input, {
-    list: _(volcano.data).pluck('id'),
+    list: volcano.genes(),
     maxItems: 30,
 });
 document.addEventListener('awesomplete-selectcomplete', function(e) { volcano.showTipOn(e.text.value) });

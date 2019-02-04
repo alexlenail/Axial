@@ -1,12 +1,10 @@
 
 
-graph:
-arrows on directed edges for DiGraphs
-relabel nodes by another attr
 
-volcano should render multiple different differential datasets
+volcano search for a gene is broken
 
-volcano scrolling is broken
+
+graph relabel nodes by another attr
 
 ---
 
