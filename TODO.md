@@ -1,8 +1,16 @@
 
 
-heatmap search for gene set by gene
+graph
+- visualization is slow -- can it be optimized?
+- provide center text option
 
-volcano axis font size should be editable
+clean up axial css A LOT so that it could feasibly be included on pages using other styles
+
+volano
+- tooltip should be styled better
+- axis font size should be editable
+- animation -- points start at origin and move to their position at page load would be cool
+- move to rely on goenri.ch
 
 window.location.hash in all vizzies
 
@@ -11,6 +19,7 @@ factor out scrolling of all vizzies
 heatmap continuous metadata attributes
 
 logger is misconfigured
+
 
 
 ---

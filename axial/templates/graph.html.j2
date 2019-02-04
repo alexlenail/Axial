@@ -33,6 +33,7 @@
                 <table class="table table-borderless table-sm pl-0" style="margin-left: -5px;">
                   <tbody>
                     <tr><th>Nodes</th></tr>
+                    <tr><td>Label nodes by</td><td><select id="label_nodes_by"><option value="id" selected>ID</option></select></td></tr>
                     <tr><td>Group nodes by</td><td><select id="group_nodes_by"><option value="" selected>None</option></select></td></tr>
                     <tr><td>Shape nodes by</td><td><select id="shape_nodes_by"><option value="" selected>None</option></select></td></tr>
                     <tr><td>Size nodes by</td><td><select id="size_nodes_by"><option value="" selected>None</option></select></td></tr>
@@ -76,6 +77,8 @@ g.style();
 continuous_node_attributes = g.continuous_node_attributes();
 categorical_node_attributes = g.categorical_node_attributes();
 
+$("#label_nodes_by").append(Object.keys(continuous_node_attributes).map(attr => `<option value="${attr}">${attr}</option>`)
+                    .concat(Object.keys(categorical_node_attributes).map(attr => `<option value="${attr}">${attr}</option>`)));
 $("#color_nodes_by").append(Object.keys(continuous_node_attributes).map(attr => `<option value="${attr}">${attr}</option>`)
                     .concat(Object.keys(categorical_node_attributes).map(attr => `<option value="${attr}">${attr}</option>`)));
 $("#shape_nodes_by").append(Object.keys(categorical_node_attributes).map(attr => `<option value="${attr}">${attr}</option>`));
@@ -100,6 +103,7 @@ $("#only_show_edges").append(Object.keys(boolean_edge_attributes).map(attr => `<
 $("#search_for_node").on('input',  function() { g.set_focus_by_id(this.value) });
 $("#fix_nodes").change(            function() { g.render({'fix_nodes_': this.checked}); });
 $("#repulsion_strength").change(   function() { g.render({'repulsion_strength_': this.value}); });
+$("#label_nodes_by").change(       function() { g.style({'label_nodes_by_': this.value}); });
 $("#group_nodes_by").change(       function() { g.render({'group_nodes_by_': this.value}); g.style(); $("#fix_nodes").attr('disabled', this.value ? true : false); });
 $("#shape_nodes_by").change(       function() { g.style({'shape_nodes_by_': this.value}); });
 $("#color_nodes_by").change(       function() { g.style({'color_nodes_by_': this.value}); });
