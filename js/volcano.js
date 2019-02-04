@@ -31,6 +31,7 @@ function Volcano(names_and_differentials) {
     var threshold_color = "#ff0000";
     var threshold_line_width = "1";
     var threshold_line_dashes = "5, 3";
+    var tooltip_shown = false;
 
     var dataset = Object.keys(names_and_differentials)[0];
     var data;
@@ -43,6 +44,7 @@ function Volcano(names_and_differentials) {
     var svg = d3.select("#graph-container").append("svg").attr("xmlns", "http://www.w3.org/2000/svg").attr("xmlns:xlink", "http://www.w3.org/1999/xlink");
     var g = svg.append("g");
     svg.style("cursor", "move");
+    svg.on('click', function() { if (d3.event.target.localName === 'svg') { tipExit(); } });
 
     g.append('text').attr('class', 'label').attr('transform', 'translate('+w/2+','+(h+margin.bottom/2)+')').attr('text-anchor', 'middle').html(xLabel);
     g.append('text').attr('class', 'label').attr('transform', 'translate('+(0-margin.left/2)+','+(h/2)+')rotate(-90)').style('text-anchor', 'middle').html(yLabel);
@@ -84,6 +86,7 @@ function Volcano(names_and_differentials) {
         g.selectAll(".dot").data(data).enter()
             .append('circle')
             .attr('class', 'dot')
+            .attr('id', d => d.id)
             .attr('r', point_size)
             .attr('cx', d => x(d.logFC) )
             .attr('cy', d => y(d.q) )
@@ -277,6 +280,7 @@ function Volcano(names_and_differentials) {
 
 
     function tipEnter(d) {
+        tooltip_shown = true;
         d3.select(".tooltip").style('visibility', 'visible')
                              .html(
                                 '<strong>' + d.id + '</strong><br/>' +
@@ -292,6 +296,7 @@ function Volcano(names_and_differentials) {
 
     function tipExit() {
         d3.select(".tooltip").style('visibility', 'hidden');
+        tooltip_shown = false;
     }
 
     function showTipOn(gene) {
@@ -306,7 +311,6 @@ function Volcano(names_and_differentials) {
                           ///////   Zoom & Resize    ///////
     /////////////////////////////////////////////////////////////////////////////
 
-
     svg.call(d3.zoom().on('zoom', zoomed));
 
     var transform = d3.zoomTransform(g);
@@ -314,7 +318,10 @@ function Volcano(names_and_differentials) {
     transform.y += margin.top;
     g.attr('transform', transform);
 
-    function zoomed() { g.attr("transform", d3.event.transform); }
+    function zoomed() {
+        if (tooltip_shown) { tipExit(); }
+        g.attr("transform", d3.event.transform);
+    }
 
     function resize() {
         svg.attr('width', $('#graph-container').innerWidth()).attr('height', $('#graph-container').innerHeight());
