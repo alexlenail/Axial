@@ -48,6 +48,7 @@ function Graph(graph, nested_groups) {
     var fix_nodes = false;
     var repulsion_strength = 20;
     var only_show_edges = "";
+    var label_nodes_by = 'id';
 
     var text_center = false;
     var text_styles = {
@@ -267,7 +268,7 @@ function Graph(graph, nested_groups) {
             .append('text')
             .attr('dy', '.35em')
             .styles(text_styles)
-            .text(d => (text_center ? d.id : '\u2002' + d.id))
+            .text(d => (text_center ? d[label_nodes_by] : '\u2002' + d[label_nodes_by]))
             .style('text-anchor', d => (text_center ? 'middle' : 'inherit') )
             .attr('dx', d => (text_center ? 0 : Math.sqrt(node_size[size_nodes_by] ? node_size[size_nodes_by](d[size_nodes_by]) : default_node_size))/2 )
             .merge(text);
@@ -393,6 +394,7 @@ function Graph(graph, nested_groups) {
                     node_color_scheme_=node_color_scheme,
                     outline_color_scheme_=outline_color_scheme,
                     shape_nodes_by_=shape_nodes_by,
+                    label_nodes_by_=label_nodes_by,
                     edge_opacity_=edge_opacity,
                     color_edges_by_=color_edges_by,
                     edge_color_scheme_=edge_color_scheme,
@@ -404,6 +406,7 @@ function Graph(graph, nested_groups) {
         node_color_scheme = node_color_scheme_;
         outline_color_scheme = outline_color_scheme_;
         shape_nodes_by = shape_nodes_by_;
+        label_nodes_by = label_nodes_by_;
         edge_opacity = edge_opacity_;
         color_edges_by = color_edges_by_;
         edge_color_scheme = edge_color_scheme_;
@@ -418,7 +421,8 @@ function Graph(graph, nested_groups) {
             .style('stroke', (d) => d[color_edges_by] ? edge_color[color_edges_by](d[color_edges_by]) : default_edge_color)
             .style('stroke-width', (d) => d[size_edges_by] ? edge_width[size_edges_by](d[size_edges_by]) : default_edge_size);
 
-        text.attr('dx', d => (text_center ? 0 : Math.sqrt(node_size[size_nodes_by] ? node_size[size_nodes_by](d[size_nodes_by]) : default_node_size))/2 );
+        text.attr('dx', d => (text_center ? 0 : Math.sqrt(node_size[size_nodes_by] ? node_size[size_nodes_by](d[size_nodes_by]) : default_node_size))/2 )
+            .text(d => (text_center ? d[label_nodes_by] : '\u2002' + d[label_nodes_by]))
 
         link.attr('marker-end', graph["directed"] ? "url(#arrow)" : '');
 

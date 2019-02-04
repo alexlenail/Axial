@@ -1,12 +1,8 @@
 
 
-
-graph relabel nodes by another attr
-
----
-
-graph visualization is slow -- can it be optimized?
-
+graph
+- visualization is slow -- can it be optimized?
+- provide center text option
 
 clean up axial css A LOT so that it could feasibly be included on pages using other styles
 

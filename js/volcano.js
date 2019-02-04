@@ -61,7 +61,6 @@ function Volcano(names_and_differentials) {
         data = Object.entries(names_and_differentials[dataset]).map(entry => Object.assign({'id':entry[0]}, entry[1]))
                                                                .filter(entry => entry['logFC'] != null && entry['q'] != null);
 
-
         g.selectAll('.axis,.grid,.dot,.threshold').remove();
 
         // Axes and Grid
