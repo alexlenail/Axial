@@ -833,7 +833,7 @@ function Heatmap(samples_by_genes_matrix, gene_sets, classes, separate_zscore_by
         g.selectAll('.rect,.ytre,.xtre,.xcat,.ycat').transition(transition).style('opacity', 0).remove();
         g.selectAll('.legend').selectAll('*').transition(transition).style('opacity', 0).remove();
         selected_gene_sets = {}; genes = {}; samples = {};
-        refresh_genes_cb();
+        // refresh_genes_cb();
     }
 
     ///////////////////////////////////////////////////////////////////////////

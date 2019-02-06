@@ -199,6 +199,8 @@ function Bar(names_and_differentials) {
             return (d) => d.logFC < 0 ? colors[name].low : colors[name].high
         });
 
+        g.selectAll('.bar').style('fill', d => d ? color[d.dataset](d) : 'white');
+
         // Legends
         if (show_legends) { configure_legends(); }
         else { color_legend.selectAll('*').remove(); }
