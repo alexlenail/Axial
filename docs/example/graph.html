@@ -59,6 +59,7 @@
                     <tr><td>Edge opacity</td><td><input type="range" id="edge_opacity" min="0" max="1" step="0.01" value="0.6"></td></tr>
                     <tr><td>Color edges by</td><td><select id="color_edges_by"><option value="" selected>None</option></select></td></tr>
                     <tr><td>Size edges by</td><td><select id="size_edges_by"><option value="" selected>None</option></select></td></tr>
+                    <tr><td>Orient edges by</td><td><select id="orient_edges_by"><option value="" selected>None</option></select></td></tr>
                     <tr><td>Only Show Edges</td><td><select id="only_show_edges"><option value="" selected>Show All Edges</option></select></td></tr>
                   </tbody>
                 </table>
@@ -124,6 +125,7 @@ boolean_edge_attributes = g.boolean_edge_attributes();
 $("#color_edges_by").append(Object.keys(continuous_edge_attributes).map(attr => `<option value="${attr}">${attr}</option>`)
                     .concat(Object.keys(categorical_edge_attributes).map(attr => `<option value="${attr}">${attr}</option>`)));
 $("#size_edges_by").append(Object.keys(continuous_edge_attributes).map(attr => `<option value="${attr}">${attr}</option>`));
+$("#orient_edges_by").append(Object.keys(continuous_edge_attributes).map(attr => `<option value="${attr}">${attr}</option>`));
 $("#only_show_edges").append(Object.keys(boolean_edge_attributes).map(attr => `<option value="${attr}">${attr}</option>`));
 
 
@@ -143,6 +145,7 @@ $("#size_nodes_by").change(        function() { g.style({'size_nodes_by_': this.
 $("#edge_opacity").change(         function() { g.style({'edge_opacity_': this.value}); });
 $("#color_edges_by").change(       function() { g.style({'color_edges_by_': this.value}); });
 $("#size_edges_by").change(        function() { g.style({'size_edges_by_': this.value}); });
+$("#orient_edges_by").change(      function() { g.render({'orient_edges_by_': this.value}); });
 $("#only_show_edges").change(      function() { g.render({'only_show_edges_': this.value}); });
 
 /////////////////////////////////////////////////////////////////////////////

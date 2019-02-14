@@ -23,6 +23,7 @@ function Graph(graph, nested_groups) {
         Object.entries(edge).forEach(([key, val]) => { edge_attributes[key] = edge_attributes[key] || []; edge_attributes[key].push(val) })
         Object.assign(edge, {'source_name': edge.source, 'target_name': edge.target, 'source': edge_indices.get(edge.source), 'target': edge_indices.get(edge.target), 'id':_([edge.source, edge.target]).sortBy().join('--')})
     });
+    graph.links = _(graph.links).uniq(edge => edge.id);
 
     var blacklist = ['source', 'target', 'source_name', 'target_name', 'protein1', 'protein2', 'id'];
     blacklist.forEach(attr => { delete edge_attributes[attr] });
@@ -90,6 +91,7 @@ function Graph(graph, nested_groups) {
     var shape_nodes_by = null;
     var size_nodes_by = null;
     var color_edges_by = null;
+    var orient_edges_by = null;
     var size_edges_by = null;
 
     var default_node_color = '#ccc';
@@ -212,12 +214,14 @@ function Graph(graph, nested_groups) {
     function render({fix_nodes_=fix_nodes,
                      repulsion_strength_=repulsion_strength,
                      only_show_edges_=only_show_edges,
+                     orient_edges_by_=orient_edges_by,
                      group_nodes_by_=group_nodes_by}={}) {
 
 
         fix_nodes = fix_nodes_;
         repulsion_strength = repulsion_strength_;
         only_show_edges = only_show_edges_;
+        orient_edges_by = orient_edges_by_,
         group_nodes_by = group_nodes_by_;
 
         groups = group_nodes_by ? clone(groupings[group_nodes_by]) : [];
@@ -276,6 +280,7 @@ function Graph(graph, nested_groups) {
         link = link.enter()
            .insert('path', '.node')
            .attr('class', 'link')
+           .attr('marker-end', d => graph["directed"] || (orient_edges_by && d.hasOwnProperty(orient_edges_by) && d[orient_edges_by]) ? "url(#arrow)" : '')
            .merge(link);
 
         group = group.enter()
@@ -331,18 +336,26 @@ function Graph(graph, nested_groups) {
 
         link.attr("d", (d) => "M" + d.source.x + "," + d.source.y + ", " + d.target.x + "," + d.target.y);
 
-        if (graph['directed']) {
+        if (graph['directed'] || orient_edges_by) {
+
+            link.attr("d", (d) => d.hasOwnProperty(orient_edges_by) && d[orient_edges_by] < 0
+                ? "M" + d.target.x + "," + d.target.y + ", " + d.source.x + "," + d.source.y
+                : "M" + d.source.x + "," + d.source.y + ", " + d.target.x + "," + d.target.y);
+
             // recalculate and back off the distance
             link.attr("d", function(d) {
+
+                var source = 'source'; var target = 'target';
+                if (d.hasOwnProperty(orient_edges_by) && d[orient_edges_by] < 0) { source = 'target'; target = 'source'; }
 
                 // length of current path
                 var pl = this.getTotalLength();
                 // radius of circle plus marker head
-                var r = Math.sqrt(node_size[size_nodes_by] ? node_size[size_nodes_by](d.target[size_nodes_by]) : default_node_size) + 4;
+                var r = Math.sqrt(node_size[size_nodes_by] ? node_size[size_nodes_by](d[target][size_nodes_by]) : default_node_size) + 4;
                 // position close to where path intercepts circle
                 var m = this.getPointAtLength(pl - r);
 
-                return "M" + d.source.x + "," + d.source.y + ", " + m.x + "," + m.y;
+                return "M" + d[source].x + "," + d[source].y + ", " + m.x + "," + m.y;
             });
         }
 
@@ -398,7 +411,7 @@ function Graph(graph, nested_groups) {
                     edge_opacity_=edge_opacity,
                     color_edges_by_=color_edges_by,
                     edge_color_scheme_=edge_color_scheme,
-                    size_edges_by_=size_edges_by,}={}) {
+                    size_edges_by_=size_edges_by}={}) {
 
         color_nodes_by = color_nodes_by_;
         outline_nodes_by = outline_nodes_by_;
@@ -423,8 +436,6 @@ function Graph(graph, nested_groups) {
 
         text.attr('dx', d => (text_center ? 0 : Math.sqrt(node_size[size_nodes_by] ? node_size[size_nodes_by](d[size_nodes_by]) : default_node_size))/2 )
             .text(d => (text_center ? d[label_nodes_by] : '\u2002' + d[label_nodes_by]))
-
-        link.attr('marker-end', graph["directed"] ? "url(#arrow)" : '');
 
         show_legends();
 
