@@ -280,8 +280,8 @@ function Graph(graph, nested_groups) {
         link = link.enter()
            .insert('path', '.node')
            .attr('class', 'link')
-           .attr('marker-end', d => graph["directed"] || (orient_edges_by && d.hasOwnProperty(orient_edges_by) && d[orient_edges_by]) ? "url(#arrow)" : '')
-           .merge(link);
+           .merge(link)
+           .attr('marker-end', d => graph["directed"] || (orient_edges_by && d.hasOwnProperty(orient_edges_by)) ? "url(#arrow)" : '');
 
         group = group.enter()
              .insert('rect', '.link')

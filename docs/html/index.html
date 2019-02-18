@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Axial &mdash; Axial 0.1.10 documentation</title>
+  <title>Axial &mdash; Axial 0.2.3 documentation</title>
   
 
   
@@ -56,7 +56,7 @@
             
             
               <div class="version">
-                0.1.10
+                0.2.3
               </div>
             
           
@@ -153,13 +153,13 @@
 please see the <a class="reference external" href="https://github.com/zfrenchee/Axial">Readme</a>. To report an issue, please refer to the <a class="reference external" href="https://github.com/zfrenchee/Axial/issues">Issues</a>.</p>
 <span class="target" id="module-axial"></span><dl class="function">
 <dt id="axial.volcano">
-<code class="descclassname">axial.</code><code class="descname">volcano</code><span class="sig-paren">(</span><em>differential_df</em>, <em>title='Axial Volcano Plot'</em>, <em>scripts_mode='CDN'</em>, <em>data_mode='directory'</em>, <em>organism='human'</em>, <em>q_value_column_name='q'</em>, <em>log2FC_column_name='logFC'</em>, <em>output_dir='.'</em>, <em>filename='volcano.html'</em>, <em>version='0.1.10'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/axial.html#volcano"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#axial.volcano" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">axial.</code><code class="descname">volcano</code><span class="sig-paren">(</span><em>differential_dfs</em>, <em>title='Axial Volcano Plot'</em>, <em>scripts_mode='CDN'</em>, <em>data_mode='directory'</em>, <em>organism='human'</em>, <em>q_value_column_name='q'</em>, <em>log2FC_column_name='logFC'</em>, <em>output_dir='.'</em>, <em>filename='volcano.html'</em>, <em>version='0.2.2'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/axial.html#volcano"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#axial.volcano" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>differential_df</strong> (<em>pandas.DataFrame</em>) – a dataframe indexed by gene symbols which must have columns named log2FC and qval.</li>
+<li><strong>differential_dfs</strong> (<em>dict</em><em> or </em><em>pandas.DataFrame</em>) – python dict of names to pandas dataframes, or a single dataframe, indexed by gene symbols which must have columns named log2FC and qval.</li>
 <li><strong>title</strong> (<em>str</em>) – The title of the plot (to be embedded in the html).</li>
 <li><strong>scripts_mode</strong> (<em>str</em>) – <p>Choose from [<cite>“CDN”</cite>, <cite>“directory”</cite>, <cite>“inline”</cite>]:</p>
 <ul>
@@ -197,13 +197,13 @@ or choose part of the version string to get minor updates.</li>
 
 <dl class="function">
 <dt id="axial.bar">
-<code class="descclassname">axial.</code><code class="descname">bar</code><span class="sig-paren">(</span><em>differential_df</em>, <em>title='Axial Pathway Bar Plot'</em>, <em>scripts_mode='CDN'</em>, <em>data_mode='directory'</em>, <em>organism='human'</em>, <em>q_value_column_name='q'</em>, <em>log2FC_column_name='logFC'</em>, <em>output_dir='.'</em>, <em>filename='bar.html'</em>, <em>version='0.1.10'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/axial.html#bar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#axial.bar" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">axial.</code><code class="descname">bar</code><span class="sig-paren">(</span><em>differential_dfs</em>, <em>title='Axial Pathway Bar Plot'</em>, <em>scripts_mode='CDN'</em>, <em>data_mode='directory'</em>, <em>organism='human'</em>, <em>q_value_column_name='q'</em>, <em>log2FC_column_name='logFC'</em>, <em>output_dir='.'</em>, <em>filename='bar.html'</em>, <em>version='0.2.2'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/axial.html#bar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#axial.bar" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>differential_df</strong> (<em>pandas.DataFrame</em>) – a dataframe indexed by gene symbols which must have columns named log2FC and qval.</li>
+<li><strong>differential_dfs</strong> (<em>dict</em><em> or </em><em>pandas.DataFrame</em>) – python dict of names to pandas dataframes, or a single dataframe, indexed by gene symbols which must have columns named log2FC and qval.</li>
 <li><strong>title</strong> (<em>str</em>) – The title of the plot (to be embedded in the html).</li>
 <li><strong>scripts_mode</strong> (<em>str</em>) – <p>Choose from [<cite>“CDN”</cite>, <cite>“directory”</cite>, <cite>“inline”</cite>]:</p>
 <ul>
@@ -241,7 +241,7 @@ or choose part of the version string to get minor updates.</li>
 
 <dl class="function">
 <dt id="axial.braid">
-<code class="descclassname">axial.</code><code class="descname">braid</code><span class="sig-paren">(</span><em>genes_by_samples_matrix</em>, <em>sample_attributes</em>, <em>title='Axial Braid Plot'</em>, <em>scripts_mode='CDN'</em>, <em>data_mode='directory'</em>, <em>organism='human'</em>, <em>output_dir='.'</em>, <em>filename='braid.html'</em>, <em>version='0.1.10'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/axial.html#braid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#axial.braid" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">axial.</code><code class="descname">braid</code><span class="sig-paren">(</span><em>genes_by_samples_matrix</em>, <em>sample_attributes</em>, <em>title='Axial Braid Plot'</em>, <em>scripts_mode='CDN'</em>, <em>data_mode='directory'</em>, <em>organism='human'</em>, <em>output_dir='.'</em>, <em>filename='braid.html'</em>, <em>version='0.2.2'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/axial.html#braid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#axial.braid" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -284,7 +284,7 @@ or choose part of the version string to get minor updates.</li>
 
 <dl class="function">
 <dt id="axial.heatmap">
-<code class="descclassname">axial.</code><code class="descname">heatmap</code><span class="sig-paren">(</span><em>genes_by_samples_matrix, sample_attributes, title='Axial Heatmap', scripts_mode='CDN', data_mode='directory', organism='human', separate_zscore_by=['system'], output_dir='.', filename='heatmap.html', version='0.1.10'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/axial.html#heatmap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#axial.heatmap" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">axial.</code><code class="descname">heatmap</code><span class="sig-paren">(</span><em>genes_by_samples_matrix, sample_attributes, title='Axial Heatmap', scripts_mode='CDN', data_mode='directory', organism='human', separate_zscore_by=['system'], output_dir='.', filename='heatmap.html', version='0.2.2'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/axial.html#heatmap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#axial.heatmap" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -328,7 +328,7 @@ or choose part of the version string to get minor updates.</li>
 
 <dl class="function">
 <dt id="axial.graph">
-<code class="descclassname">axial.</code><code class="descname">graph</code><span class="sig-paren">(</span><em>networkx_graph</em>, <em>title='Axial Graph Visualization'</em>, <em>scripts_mode='CDN'</em>, <em>data_mode='directory'</em>, <em>output_dir='.'</em>, <em>filename='graph.html'</em>, <em>version='0.1.10'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/axial.html#graph"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#axial.graph" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">axial.</code><code class="descname">graph</code><span class="sig-paren">(</span><em>networkx_graph</em>, <em>title='Axial Graph Visualization'</em>, <em>scripts_mode='CDN'</em>, <em>data_mode='directory'</em>, <em>output_dir='.'</em>, <em>filename='graph.html'</em>, <em>version='0.2.2'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/axial.html#graph"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#axial.graph" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />

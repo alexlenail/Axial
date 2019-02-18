@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>axial &mdash; Axial 0.1.10 documentation</title>
+  <title>axial &mdash; Axial 0.2.3 documentation</title>
   
 
   
@@ -56,7 +56,7 @@
             
             
               <div class="version">
-                0.1.10
+                0.2.3
               </div>
             
           
@@ -296,16 +296,19 @@
 
 <span class="k">def</span> <span class="nf">_flatten</span><span class="p">(</span><span class="n">list_of_lists</span><span class="p">):</span> <span class="k">return</span> <span class="p">[</span><span class="n">item</span> <span class="k">for</span> <span class="n">sublist</span> <span class="ow">in</span> <span class="n">list_of_lists</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">sublist</span><span class="p">]</span>
 
+<span class="k">def</span> <span class="nf">_sanitize</span><span class="p">(</span><span class="n">string</span><span class="p">):</span> <span class="k">return</span> <span class="n">string</span>  <span class="c1">## TODO</span>
+
+<span class="k">def</span> <span class="nf">_quote</span><span class="p">(</span><span class="n">string</span><span class="p">):</span> <span class="k">return</span> <span class="s1">&#39;</span><span class="se">\&quot;</span><span class="s1">&#39;</span><span class="o">+</span><span class="n">string</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\&quot;</span><span class="s1">&#39;</span>
 
 <span class="c1">###############################################################################</span>
 <span class="c1">##   Public  Methods</span>
 
-<div class="viewcode-block" id="volcano"><a class="viewcode-back" href="../index.html#axial.volcano">[docs]</a><span class="k">def</span> <span class="nf">volcano</span><span class="p">(</span><span class="n">differential_df</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Axial Volcano Plot&#39;</span><span class="p">,</span> <span class="n">scripts_mode</span><span class="o">=</span><span class="s2">&quot;CDN&quot;</span><span class="p">,</span> <span class="n">data_mode</span><span class="o">=</span><span class="s2">&quot;directory&quot;</span><span class="p">,</span>
+<div class="viewcode-block" id="volcano"><a class="viewcode-back" href="../index.html#axial.volcano">[docs]</a><span class="k">def</span> <span class="nf">volcano</span><span class="p">(</span><span class="n">differential_dfs</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Axial Volcano Plot&#39;</span><span class="p">,</span> <span class="n">scripts_mode</span><span class="o">=</span><span class="s2">&quot;CDN&quot;</span><span class="p">,</span> <span class="n">data_mode</span><span class="o">=</span><span class="s2">&quot;directory&quot;</span><span class="p">,</span>
             <span class="n">organism</span><span class="o">=</span><span class="s2">&quot;human&quot;</span><span class="p">,</span> <span class="n">q_value_column_name</span><span class="o">=</span><span class="s2">&quot;q&quot;</span><span class="p">,</span> <span class="n">log2FC_column_name</span><span class="o">=</span><span class="s2">&quot;logFC&quot;</span><span class="p">,</span>
             <span class="n">output_dir</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;volcano.html&quot;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">this_version</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Arguments:</span>
-<span class="sd">        differential_df (pandas.DataFrame): a dataframe indexed by gene symbols which must have columns named log2FC and qval.</span>
+<span class="sd">        differential_dfs (dict or pandas.DataFrame): python dict of names to pandas dataframes, or a single dataframe, indexed by gene symbols which must have columns named log2FC and qval.</span>
 <span class="sd">        title (str): The title of the plot (to be embedded in the html).</span>
 <span class="sd">        scripts_mode (str): Choose from [`&quot;CDN&quot;`, `&quot;directory&quot;`, `&quot;inline&quot;`]:</span>
 
@@ -338,19 +341,26 @@
 
     <span class="c1"># Data   =======================</span>
 
-    <span class="n">df</span> <span class="o">=</span> <span class="n">differential_df</span><span class="p">[[</span><span class="n">q_value_column_name</span><span class="p">,</span> <span class="n">log2FC_column_name</span><span class="p">]]</span>
-    <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;q&#39;</span><span class="p">,</span> <span class="s1">&#39;logFC&#39;</span><span class="p">]</span>
-    <span class="n">_verify_differential_df</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
-    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-    <span class="c1"># TODO drop all zero rows</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">differential_dfs</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+        <span class="n">differential_dfs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;differential&#39;</span><span class="p">:</span> <span class="n">differential_dfs</span><span class="p">}</span>
 
-    <span class="n">differential</span> <span class="o">=</span> <span class="n">f</span><span class="s2">&quot;var differential = {df.to_json(orient=&#39;index&#39;)};&quot;</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">df</span> <span class="ow">in</span> <span class="n">differential_dfs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[[</span><span class="n">q_value_column_name</span><span class="p">,</span> <span class="n">log2FC_column_name</span><span class="p">]]</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;q&#39;</span><span class="p">,</span> <span class="s1">&#39;logFC&#39;</span><span class="p">]</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="c1"># TODO drop all zero rows</span>
+        <span class="n">_verify_differential_df</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
 
-    <span class="n">data_block</span> <span class="o">=</span> <span class="n">_data_block</span><span class="p">(</span><span class="n">data_mode</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;differential&#39;</span><span class="p">,</span> <span class="n">differential</span><span class="p">)],</span> <span class="n">output_dir</span><span class="p">,</span> <span class="n">include_gene_sets</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">organism</span><span class="o">=</span><span class="n">organism</span><span class="p">)</span>
+        <span class="k">del</span> <span class="n">differential_dfs</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+        <span class="n">differential_dfs</span><span class="p">[</span><span class="n">_sanitize</span><span class="p">(</span><span class="n">name</span><span class="p">)]</span> <span class="o">=</span> <span class="n">df</span>
+
+    <span class="n">names_and_differentials</span> <span class="o">=</span> <span class="n">f</span><span class="s2">&quot;var names_and_differentials = { &#39;{&#39;+ &#39;,&#39;.join([_quote(name)+&#39;: &#39;+df.to_json(orient=&#39;index&#39;) for name, df in differential_dfs.items()]) +&#39;}&#39; };&quot;</span>
+
+    <span class="n">data_block</span> <span class="o">=</span> <span class="n">_data_block</span><span class="p">(</span><span class="n">data_mode</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;names_and_differentials&#39;</span><span class="p">,</span> <span class="n">names_and_differentials</span><span class="p">)],</span> <span class="n">output_dir</span><span class="p">,</span> <span class="n">include_gene_sets</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">organism</span><span class="o">=</span><span class="n">organism</span><span class="p">)</span>
 
     <span class="c1"># Scripts =======================</span>
 
-    <span class="n">scripts</span> <span class="o">=</span> <span class="n">third_party_scripts</span> <span class="o">+</span> <span class="p">[</span><span class="n">CDN_url</span><span class="p">(</span><span class="n">version</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;js/volcano.js&quot;</span><span class="p">,</span> <span class="n">CDN_url</span><span class="p">(</span><span class="n">version</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;js/util.js&quot;</span><span class="p">,</span> <span class="n">CDN_url</span><span class="p">(</span><span class="n">version</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;js/GOrilla.js&quot;</span><span class="p">]</span>
+    <span class="n">scripts</span> <span class="o">=</span> <span class="n">third_party_scripts</span> <span class="o">+</span> <span class="p">[</span><span class="n">CDN_url</span><span class="p">(</span><span class="n">version</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;js/util.js&quot;</span><span class="p">,</span> <span class="n">CDN_url</span><span class="p">(</span><span class="n">version</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;js/GOrilla.js&quot;</span><span class="p">,</span> <span class="n">CDN_url</span><span class="p">(</span><span class="n">version</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;js/volcano.js&quot;</span><span class="p">]</span>
 
     <span class="n">scripts_block</span> <span class="o">=</span> <span class="n">_scripts_block</span><span class="p">(</span><span class="n">scripts</span><span class="p">,</span> <span class="n">scripts_mode</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">)</span>
 
@@ -364,13 +374,12 @@
 
 
 
-
-<div class="viewcode-block" id="bar"><a class="viewcode-back" href="../index.html#axial.bar">[docs]</a><span class="k">def</span> <span class="nf">bar</span><span class="p">(</span><span class="n">differential_df</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Axial Pathway Bar Plot&#39;</span><span class="p">,</span> <span class="n">scripts_mode</span><span class="o">=</span><span class="s2">&quot;CDN&quot;</span><span class="p">,</span> <span class="n">data_mode</span><span class="o">=</span><span class="s2">&quot;directory&quot;</span><span class="p">,</span>
+<div class="viewcode-block" id="bar"><a class="viewcode-back" href="../index.html#axial.bar">[docs]</a><span class="k">def</span> <span class="nf">bar</span><span class="p">(</span><span class="n">differential_dfs</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Axial Pathway Bar Plot&#39;</span><span class="p">,</span> <span class="n">scripts_mode</span><span class="o">=</span><span class="s2">&quot;CDN&quot;</span><span class="p">,</span> <span class="n">data_mode</span><span class="o">=</span><span class="s2">&quot;directory&quot;</span><span class="p">,</span>
         <span class="n">organism</span><span class="o">=</span><span class="s2">&quot;human&quot;</span><span class="p">,</span> <span class="n">q_value_column_name</span><span class="o">=</span><span class="s2">&quot;q&quot;</span><span class="p">,</span> <span class="n">log2FC_column_name</span><span class="o">=</span><span class="s2">&quot;logFC&quot;</span><span class="p">,</span>
         <span class="n">output_dir</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;bar.html&quot;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">this_version</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Arguments:</span>
-<span class="sd">        differential_df (pandas.DataFrame): a dataframe indexed by gene symbols which must have columns named log2FC and qval.</span>
+<span class="sd">        differential_dfs (dict or pandas.DataFrame): python dict of names to pandas dataframes, or a single dataframe, indexed by gene symbols which must have columns named log2FC and qval.</span>
 <span class="sd">        title (str): The title of the plot (to be embedded in the html).</span>
 <span class="sd">        scripts_mode (str): Choose from [`&quot;CDN&quot;`, `&quot;directory&quot;`, `&quot;inline&quot;`]:</span>
 
@@ -403,19 +412,26 @@
 
     <span class="c1"># Data   =======================</span>
 
-    <span class="n">df</span> <span class="o">=</span> <span class="n">differential_df</span><span class="p">[[</span><span class="n">q_value_column_name</span><span class="p">,</span> <span class="n">log2FC_column_name</span><span class="p">]]</span>
-    <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;q&#39;</span><span class="p">,</span> <span class="s1">&#39;logFC&#39;</span><span class="p">]</span>
-    <span class="n">_verify_differential_df</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
-    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-    <span class="c1"># TODO drop all zero rows</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">differential_dfs</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+        <span class="n">differential_dfs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;differential&#39;</span><span class="p">:</span> <span class="n">differential_dfs</span><span class="p">}</span>
 
-    <span class="n">differential</span> <span class="o">=</span> <span class="n">f</span><span class="s2">&quot;var differential = {df.to_json(orient=&#39;index&#39;)};&quot;</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">df</span> <span class="ow">in</span> <span class="n">differential_dfs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[[</span><span class="n">q_value_column_name</span><span class="p">,</span> <span class="n">log2FC_column_name</span><span class="p">]]</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;q&#39;</span><span class="p">,</span> <span class="s1">&#39;logFC&#39;</span><span class="p">]</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="c1"># TODO drop all zero rows</span>
+        <span class="n">_verify_differential_df</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
 
-    <span class="n">data_block</span> <span class="o">=</span> <span class="n">_data_block</span><span class="p">(</span><span class="n">data_mode</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;differential&#39;</span><span class="p">,</span> <span class="n">differential</span><span class="p">)],</span> <span class="n">output_dir</span><span class="p">,</span> <span class="n">organism</span><span class="o">=</span><span class="n">organism</span><span class="p">)</span>
+        <span class="k">del</span> <span class="n">differential_dfs</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+        <span class="n">differential_dfs</span><span class="p">[</span><span class="n">_sanitize</span><span class="p">(</span><span class="n">name</span><span class="p">)]</span> <span class="o">=</span> <span class="n">df</span>
+
+    <span class="n">names_and_differentials</span> <span class="o">=</span> <span class="n">f</span><span class="s2">&quot;var names_and_differentials = { &#39;{&#39;+ &#39;,&#39;.join([_quote(name)+&#39;: &#39;+df.to_json(orient=&#39;index&#39;) for name, df in differential_dfs.items()]) +&#39;}&#39; };&quot;</span>
+
+    <span class="n">data_block</span> <span class="o">=</span> <span class="n">_data_block</span><span class="p">(</span><span class="n">data_mode</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;names_and_differentials&#39;</span><span class="p">,</span> <span class="n">names_and_differentials</span><span class="p">)],</span> <span class="n">output_dir</span><span class="p">,</span> <span class="n">organism</span><span class="o">=</span><span class="n">organism</span><span class="p">)</span>
 
     <span class="c1"># Scripts =======================</span>
 
-    <span class="n">scripts</span> <span class="o">=</span> <span class="n">third_party_scripts</span> <span class="o">+</span> <span class="p">[</span><span class="n">CDN_url</span><span class="p">(</span><span class="n">version</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;js/bar.js&quot;</span><span class="p">]</span>
+    <span class="n">scripts</span> <span class="o">=</span> <span class="n">third_party_scripts</span> <span class="o">+</span> <span class="p">[</span> <span class="n">CDN_url</span><span class="p">(</span><span class="n">version</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;js/util.js&quot;</span><span class="p">,</span> <span class="n">CDN_url</span><span class="p">(</span><span class="n">version</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;js/bar.js&quot;</span><span class="p">]</span>
 
     <span class="n">scripts_block</span> <span class="o">=</span> <span class="n">_scripts_block</span><span class="p">(</span><span class="n">scripts</span><span class="p">,</span> <span class="n">scripts_mode</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">)</span>
 
