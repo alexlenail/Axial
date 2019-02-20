@@ -1,35 +1,47 @@
-{% extends 'base.html.j2' %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <!-- meta -->
+        <meta name="description" content="">
+        <meta name="author" content="">
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+        <!-- styles -->
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/awesomplete/1.1.3/awesomplete.min.css" />
 
-{% block head %}
-<style type="text/css">
-    .tooltip {
-        position: absolute;
-        z-index: 10;
-        background-color: #000;
-        color: #fff;
-        padding: 2px 7px;
-        visibility: hidden;
-        opacity: 0.75;
-        border-radius: 3px;
-    }
+        <link rel="stylesheet" href="https://unpkg.com/axialjs@latest/css/axial.css">
 
-    .tooltip::after {
-        content: " ";
-        position: absolute;
-        top: 14%;
-        right: 100%; /* To the left of the tooltip */
-        margin-top: -5px;
-        border-width: 5px;
-        border-style: solid;
-        border-color: transparent #000 transparent transparent;
-    }
+        <style type="text/css">
+            .tooltip {
+                position: absolute;
+                z-index: 10;
+                background-color: #000;
+                color: #fff;
+                padding: 2px 7px;
+                visibility: hidden;
+                opacity: 0.75;
+                border-radius: 3px;
+            }
 
-</style>
+            .tooltip::after {
+                content: " ";
+                position: absolute;
+                top: 14%;
+                right: 100%; /* To the left of the tooltip */
+                margin-top: -5px;
+                border-width: 5px;
+                border-style: solid;
+                border-color: transparent #000 transparent transparent;
+            }
 
-<title>{{ title }}</title>
-{% endblock %}
+        </style>
 
-{% block content %}
+        <title>{{title}}</title>
+    </head>
+    <body>
+        <div class="container-fluid">
 
 <div class="row flex-nowrap">
     <div class="col-md-4 col-12 menu">
@@ -80,11 +92,11 @@
 
 </div>
 
-{% endblock %}
 
-{% block scripts %}
+        </div>
 
-{{ scripts_block }}
+
+{{scripts_block}}
 
 <script type="text/javascript">
 
@@ -145,5 +157,6 @@ $("#degenes").click(function() { d3.select(this).attr("href", 'data:application/
 </script>
 
 
-{% endblock %}
 
+    </body>
+</html>

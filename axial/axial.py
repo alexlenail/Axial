@@ -20,7 +20,7 @@ import pandas as pd
 import networkx as nx
 from networkx.readwrite import json_graph as nx_json
 
-import jinja2
+import pystache
 
 
 logger = logging.getLogger(__name__)
@@ -53,12 +53,11 @@ third_party_scripts = [
     "https://unpkg.com/clone@2.1.2/clone.js",
 ]
 
-templateEnv = jinja2.Environment(loader=jinja2.PackageLoader('axial', 'templates'))
+renderer = pystache.Renderer(search_dirs=pkg_resources.resource_filename('axial', 'templates'), file_extension='.j2', partials=None)
 
 
 ###############################################################################
 ##   Private Helper Methods
-
 
 def _scripts_block(scripts, mode, output_dir):
     """
@@ -117,7 +116,6 @@ def _data_block(mode, names_and_jsons, output_dir, include_gene_sets=True, organ
     return data_block
 
 
-
 def _verify_differential_df(df):
     """
     """
@@ -154,6 +152,7 @@ def _flatten(list_of_lists): return [item for sublist in list_of_lists for item 
 def _sanitize(string): return string  ## TODO
 
 def _quote(string): return '\"'+string+'\"'
+
 
 ###############################################################################
 ##   Public  Methods
@@ -361,6 +360,7 @@ def braid(genes_by_samples_matrix, sample_attributes, title='Axial Braid Plot', 
     return (output_dir / filename).resolve()
 
 
+
 def heatmap(genes_by_samples_matrix, sample_attributes, title='Axial Heatmap', scripts_mode="CDN", data_mode="directory",
             organism="human", separate_zscore_by=["system"],
             output_dir=".", filename="heatmap.html", version=this_version):
@@ -423,7 +423,6 @@ def heatmap(genes_by_samples_matrix, sample_attributes, title='Axial Heatmap', s
 
 
     return (output_dir / filename).resolve()
-
 
 
 
