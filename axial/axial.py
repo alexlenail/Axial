@@ -53,7 +53,7 @@ third_party_scripts = [
     "https://unpkg.com/clone@2.1.2/clone.js",
 ]
 
-renderer = pystache.Renderer(search_dirs=pkg_resources.resource_filename('axial', 'templates'), file_extension='.j2', partials=None)
+renderer = pystache.Renderer(search_dirs=pkg_resources.resource_filename('axial', 'templates'), file_extension='html', partials=None)
 
 
 ###############################################################################
