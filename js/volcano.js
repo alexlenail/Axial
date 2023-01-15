@@ -195,6 +195,7 @@ function Volcano(names_and_differentials) {
             .attr('class', 'tooltip')
             .style('font-size', '11px');
 
+
     }
 
     function style({bad_logFC_bad_q_color_=bad_logFC_bad_q_color,
@@ -338,7 +339,7 @@ function Volcano(names_and_differentials) {
         'style'      : style,
 
         genes        : () => _(data).pluck('id'),
-        DEgenes      : () => _(data.filter(is_differential)).pluck('id'),
+        DEgenes      : () => _(data.filter(is_differential)).chain().sortBy('q').reverse().pluck('id').value(),
         'showTipOn'  : showTipOn,
     }
 

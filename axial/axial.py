@@ -23,12 +23,20 @@ from networkx.readwrite import json_graph as nx_json
 import jinja2
 
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
-handler = logging.StreamHandler()
-handler.setLevel(logging.INFO)
-handler.setFormatter(logging.Formatter('%(asctime)s - Axial: %(levelname)s - %(message)s', "%I:%M:%S"))
-logger.addHandler(handler)
+def get_logger():
+
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.INFO)
+    logger.propagate = False
+    if not logger.hasHandlers():
+        handler = logging.StreamHandler()
+        handler.setLevel(logging.INFO)
+        handler.setFormatter(logging.Formatter('%(asctime)s - Axial: %(levelname)s - %(message)s', "%I:%M:%S"))
+        logger.addHandler(handler)
+
+    return logger
+
+logger = get_logger()
 
 this_version = pkg_resources.get_distribution('axial').version
 
@@ -117,20 +125,30 @@ def _data_block(mode, names_and_jsons, output_dir, include_gene_sets=True, organ
     return data_block
 
 
+def prepare_differential_df(df, q_value_column_name, log2FC_column_name):
+    df = df[[q_value_column_name, log2FC_column_name]].fillna(0).round(2)
+    df.columns = ['q', 'logFC']
 
-def _verify_differential_df(df):
-    """
-    """
     if any(df.q < 0): logger.critical('Negative q-values not allowed')
-    assert all(df.q >= 0)
-    if all(df.q < 1): logger.critical('Q-values must be -log\'d -- raw q-values not accepted')
-    assert any(df.q > 1)
+    if all(df.q < 1): logger.critical("Q-values must be -log'd -- raw q-values not accepted")
     if any(abs(df.logFC) > 10): logger.info('some logFC exceed 10 -- please make sure log transform was appropriately taken.')
 
+    return df
+
+def dfs_to_js(names_and_dfs, q_value_column_name, log2FC_column_name):
+
+    dfs = {}
+    for name, df in names_and_dfs.items():
+        logger.info(f'checking {name}')
+        dfs[_sanitize(name)] = prepare_differential_df(df, q_value_column_name, log2FC_column_name)
+
+    js_obj = f"var names_and_differentials = { '{'+ ','.join([_quote(name)+': '+df.to_json(orient='index') for name, df in dfs.items()]) +'}' };"
+    return js_obj
 
 def _verify_sample_by_genes_matrix(df):
     """
     """
+    # TODO verify columns are unique
     if any([df[col].dtype.kind not in 'bifc' for col in df.columns]): logger.critical('All values in sample by genes matrix must be numeric')
     assert all([df[col].dtype.kind in 'bifc' for col in df.columns])
 
@@ -154,6 +172,8 @@ def _flatten(list_of_lists): return [item for sublist in list_of_lists for item 
 def _sanitize(string): return string  ## TODO
 
 def _quote(string): return '\"'+string+'\"'
+
+
 
 ###############################################################################
 ##   Public  Methods
@@ -199,17 +219,7 @@ def volcano(differential_dfs, title='Axial Volcano Plot', scripts_mode="CDN", da
     if isinstance(differential_dfs, pd.DataFrame):
         differential_dfs = {'differential': differential_dfs}
 
-    for name, df in differential_dfs.items():
-        df = df[[q_value_column_name, log2FC_column_name]]
-        df.columns = ['q', 'logFC']
-        df = df.round(2)
-        # TODO drop all zero rows
-        _verify_differential_df(df)
-
-        del differential_dfs[name]
-        differential_dfs[_sanitize(name)] = df
-
-    names_and_differentials = f"var names_and_differentials = { '{'+ ','.join([_quote(name)+': '+df.to_json(orient='index') for name, df in differential_dfs.items()]) +'}' };"
+    names_and_differentials = dfs_to_js(differential_dfs, q_value_column_name, log2FC_column_name)
 
     data_block = _data_block(data_mode, [('names_and_differentials', names_and_differentials)], output_dir, include_gene_sets=False, organism=organism)
 
@@ -219,8 +229,9 @@ def volcano(differential_dfs, title='Axial Volcano Plot', scripts_mode="CDN", da
 
     scripts_block = _scripts_block(scripts, scripts_mode, output_dir)
 
+    organism = {'human': "HOMO_SAPIENS", 'mouse': 'MUS_MUSCULUS'}[organism]
 
-    html = templateEnv.get_template('volcano.html.j2').render(title=title, scripts_block=scripts_block+'\n'+data_block, organism="HOMO_SAPIENS")
+    html = templateEnv.get_template('volcano.html.j2').render(title=title, scripts_block=scripts_block+'\n'+data_block, organism=organism)
 
     (output_dir / filename).write_text(html)
 
@@ -270,17 +281,7 @@ def bar(differential_dfs, title='Axial Pathway Bar Plot', scripts_mode="CDN", da
     if isinstance(differential_dfs, pd.DataFrame):
         differential_dfs = {'differential': differential_dfs}
 
-    for name, df in differential_dfs.items():
-        df = df[[q_value_column_name, log2FC_column_name]]
-        df.columns = ['q', 'logFC']
-        df = df.round(2)
-        # TODO drop all zero rows
-        _verify_differential_df(df)
-
-        del differential_dfs[name]
-        differential_dfs[_sanitize(name)] = df
-
-    names_and_differentials = f"var names_and_differentials = { '{'+ ','.join([_quote(name)+': '+df.to_json(orient='index') for name, df in differential_dfs.items()]) +'}' };"
+    names_and_differentials = dfs_to_js(differential_dfs, q_value_column_name, log2FC_column_name)
 
     data_block = _data_block(data_mode, [('names_and_differentials', names_and_differentials)], output_dir, organism=organism)
 
